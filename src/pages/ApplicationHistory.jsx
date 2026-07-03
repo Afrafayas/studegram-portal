@@ -1,34 +1,7 @@
 import React, { useState } from 'react';
 
-export default function ApplicationHistory({ onAddApplicationClick }) {
+export default function ApplicationHistory({ onAddApplicationClick, applications = [], duplicateAlert, setDuplicateAlert }) {
   const [searchQuery, setSearchQuery] = useState('');
-
-  const applications = [
-    {
-      camsId: 'CAMS10204',
-      studentName: 'Shanto Shaju',
-      passportNo: 'T1029482',
-      universityName: 'University of Surrey',
-      courseName: 'International Hotel Management MSc',
-      intake: 'September 2026',
-      primaryStatus: 'Processed', // green
-      secondaryStatus: 'Offer Issued', // blue
-      dateAdded: '10 Jun 2026',
-      modifiedDate: '20 Jun 2026'
-    },
-    {
-      camsId: 'CAMS10492',
-      studentName: 'Aneesha Anil',
-      passportNo: 'T9381048',
-      universityName: 'University of Surrey',
-      courseName: 'Human Resources Management MSc',
-      intake: 'January 2027',
-      primaryStatus: 'Processed', // green
-      secondaryStatus: 'Pending', // amber
-      dateAdded: '15 Jun 2026',
-      modifiedDate: '22 Jun 2026'
-    }
-  ];
 
   const filteredApps = applications.filter((app) => {
     return (
@@ -45,6 +18,24 @@ export default function ApplicationHistory({ onAddApplicationClick }) {
         <h1 className="text-22px font-bold tracking-tight text-[#0F172A]">Application History</h1>
         <span className="text-xs text-[#64748B] font-semibold">803 total · 36 processed</span>
       </div>
+
+      {/* Duplicate Alert Banner */}
+      {duplicateAlert && (
+        <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl flex items-center justify-between gap-3 text-xs shadow-sm">
+          <div className="flex gap-2">
+            <span className="text-red-500 shrink-0">⚠️</span>
+            <p className="font-semibold">
+              Duplicate Alert: This passport number ({duplicateAlert}) has already been submitted by another agent. Please verify before proceeding.
+            </p>
+          </div>
+          <button 
+            onClick={() => setDuplicateAlert(null)} 
+            className="text-red-800 hover:text-red-950 font-bold px-2 py-1 rounded hover:bg-red-100 transition-colors"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
 
       {/* Action Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

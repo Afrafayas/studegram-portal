@@ -78,6 +78,31 @@ export default function Login({ onNavigate, onLoginSuccess }) {
             Manage student records, track university deadlines, search thousands of academic courses, and file applications in one unified dashboard.
           </p>
 
+          {/* Cute Elephant SVG */}
+          <div className="py-2">
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Back Legs */}
+              <rect x="22" y="52" width="8" height="16" rx="4" fill="#64748B" />
+              <rect x="42" y="52" width="8" height="16" rx="4" fill="#64748B" />
+              {/* Body */}
+              <circle cx="35" cy="42" r="20" fill="#94A3B8" />
+              {/* Head */}
+              <circle cx="52" cy="38" r="14" fill="#94A3B8" />
+              {/* Front Legs */}
+              <rect x="28" y="52" width="8" height="16" rx="4" fill="#94A3B8" />
+              <rect x="48" y="52" width="8" height="16" rx="4" fill="#94A3B8" />
+              {/* Ear */}
+              <circle cx="46" cy="34" r="6" fill="#F1F5F9" />
+              <circle cx="46" cy="34" r="4" fill="#F472B6" />
+              {/* Eye */}
+              <circle cx="56" cy="34" r="1.5" fill="#0F172A" />
+              {/* Trunk curling right */}
+              <path d="M 64 42 C 72 42 76 46 76 50 C 76 54 72 54 70 51" stroke="#94A3B8" strokeWidth="5" strokeLinecap="round" fill="none" />
+              {/* Tail */}
+              <path d="M 16 42 Q 10 40 12 46" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" fill="none" />
+            </svg>
+          </div>
+
           {/* 3 Feature Points with checkmarks */}
           <div className="space-y-3.5 pt-6 text-xs font-semibold">
             <div className="flex items-center gap-3">

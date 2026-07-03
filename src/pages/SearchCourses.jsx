@@ -7,6 +7,15 @@ export default function SearchCourses() {
   const [courseType, setCourseType] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
+  const [showManualModal, setShowManualModal] = useState(false);
+  const [manualCourse, setManualCourse] = useState({
+    courseUrl: '',
+    universityName: '',
+    courseName: '',
+    intake: 'September 2026'
+  });
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
   const courses = [
     { id: 1, title: 'MSc in Computer Science (Artificial Intelligence)', university: 'Anglia Ruskin University', duration: '12 - 15 Months', intake: 'September 2026', fee: '£16,700/yr', gradient: 'from-[#6366F1] to-[#06B6D4]' },
     { id: 2, title: 'MBA with Professional Placement', university: 'Coventry University', duration: '24 Months', intake: 'September 2026', fee: '£19,850/yr', gradient: 'from-teal-500 to-emerald-500' },
@@ -182,6 +191,159 @@ export default function SearchCourses() {
           </div>
         ))}
       </div>
+
+      {/* Add Course Manually Card */}
+      <div className="bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
+        <div className="space-y-1 text-center sm:text-left">
+          <h3 className="text-sm font-bold text-[#0F172A]">Can't find the course you're looking for?</h3>
+          <p className="text-xs text-[#64748B] font-semibold">Request a new university course to be added manually to our portal database.</p>
+        </div>
+        <button
+          onClick={() => {
+            setIsSubmitted(false);
+            setShowManualModal(true);
+          }}
+          className="bg-[#6366F1] hover:bg-[#5053e3] text-white font-bold px-5 py-2.5 rounded-xl text-xs transition-all duration-150 hover:scale-[1.02] shadow-md shrink-0 uppercase tracking-wider"
+        >
+          Add Course Manually
+        </button>
+      </div>
+
+      {/* Manual Course Request Modal */}
+      {showManualModal && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" 
+          onClick={() => {
+            setShowManualModal(false);
+            setIsSubmitted(false);
+          }}
+        >
+          <div 
+            className="bg-white rounded-2xl w-full max-w-md shadow-2xl relative flex flex-col p-6 space-y-4" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
+                {isSubmitted ? "Request Submitted" : "Add Course Manually"}
+              </h3>
+              <button
+                onClick={() => {
+                  setShowManualModal(false);
+                  setIsSubmitted(false);
+                }}
+                className="p-1.5 hover:bg-slate-100 rounded-full text-[#64748B] hover:text-[#0F172A] transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {isSubmitted ? (
+              <div className="flex flex-col items-center text-center py-6 space-y-3">
+                <div className="w-12 h-12 bg-emerald-50 text-[#10B981] rounded-full flex items-center justify-center shadow-inner">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-xs font-extrabold text-[#10B981] uppercase tracking-wider">Success!</p>
+                <p className="text-xs text-[#64748B] font-semibold leading-relaxed">
+                  Course request submitted successfully!
+                </p>
+                <button
+                  onClick={() => {
+                    setShowManualModal(false);
+                    setIsSubmitted(false);
+                  }}
+                  className="mt-4 bg-[#6366F1] hover:bg-[#5053e3] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all duration-150 shadow-md uppercase tracking-wider"
+                >
+                  Done
+                </button>
+              </div>
+            ) : (
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setIsSubmitted(true);
+                  setManualCourse({
+                    courseUrl: '',
+                    universityName: '',
+                    courseName: '',
+                    intake: 'September 2026'
+                  });
+                }} 
+                className="space-y-4"
+              >
+                {/* Course URL */}
+                <div>
+                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Course URL</label>
+                  <input
+                    required
+                    type="url"
+                    placeholder="Paste university course link here"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white"
+                    value={manualCourse.courseUrl}
+                    onChange={(e) => setManualCourse({...manualCourse, courseUrl: e.target.value})}
+                  />
+                </div>
+                {/* University Name */}
+                <div>
+                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">University Name</label>
+                  <input
+                    required
+                    type="text"
+                    placeholder="Enter university name"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white"
+                    value={manualCourse.universityName}
+                    onChange={(e) => setManualCourse({...manualCourse, universityName: e.target.value})}
+                  />
+                </div>
+                {/* Course Name */}
+                <div>
+                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Course Name</label>
+                  <input
+                    required
+                    type="text"
+                    placeholder="Enter course name"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white"
+                    value={manualCourse.courseName}
+                    onChange={(e) => setManualCourse({...manualCourse, courseName: e.target.value})}
+                  />
+                </div>
+                {/* Intake Select */}
+                <div>
+                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Intake</label>
+                  <div className="relative">
+                    <select
+                      required
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] cursor-pointer appearance-none pr-8 font-semibold"
+                      value={manualCourse.intake}
+                      onChange={(e) => setManualCourse({...manualCourse, intake: e.target.value})}
+                    >
+                      <option value="September 2026">September 2026</option>
+                      <option value="January 2027">January 2027</option>
+                      <option value="September 2027">September 2027</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
+                      <svg className="w-3.5 h-3.5 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  className="w-full bg-[#6366F1] hover:bg-[#5053e3] text-white font-bold py-2 rounded-xl text-xs transition-all duration-150 hover:scale-[1.02] shadow-md uppercase tracking-wider mt-4"
+                >
+                  Submit Request
+                </button>
+              </form>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

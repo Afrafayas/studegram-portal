@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function AddApplicationModal({ isOpen, onClose }) {
+export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
   if (!isOpen) return null;
 
   const [stepNumber, setStepNumber] = useState(1);
@@ -44,11 +44,42 @@ export default function AddApplicationModal({ isOpen, onClose }) {
     setStepNumber((prev) => prev + 1);
   };
 
+  const handleResetAndClose = () => {
+    setStepNumber(1);
+    setFormData({
+      university: 'Anglia Ruskin University',
+      passportCountry: 'India',
+      intake: 'September/October 2026',
+      firstName: '',
+      lastName: '',
+      passportExpiry: '',
+      passportIssue: '',
+      dob: '',
+      gender: 'Male',
+      state: '',
+      city: '',
+      whatsappCode: '+91',
+      whatsappNumber: '',
+      addressLine1: '',
+      addressLine2: '',
+      pincode: '',
+      country: 'India',
+      passportNo: '',
+      email: '',
+      previousRefusal: 'No',
+      handlerEmail: '',
+      handlerContactCode: '+91',
+      handlerContact: ''
+    });
+    onClose();
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert('Application submitted successfully to Studegram!');
-    setStepNumber(1);
-    onClose();
+    if (onSubmit) {
+      onSubmit(formData);
+    }
+    setStepNumber(4);
   };
 
   const currentCourseName = 'MSc in Computer Science (Artificial Intelligence)';
@@ -56,7 +87,7 @@ export default function AddApplicationModal({ isOpen, onClose }) {
 
   return (
     <div
-      onClick={onClose}
+      onClick={handleResetAndClose}
       className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
     >
       {/* Modal Container: max-w-lg, p-8 (padding 32px) */}
@@ -70,7 +101,7 @@ export default function AddApplicationModal({ isOpen, onClose }) {
             Add New Application
           </h2>
           <button
-            onClick={onClose}
+            onClick={handleResetAndClose}
             className="p-1.5 hover:bg-slate-100 rounded-full text-[#64748B] hover:text-[#0F172A] transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -509,6 +540,45 @@ export default function AddApplicationModal({ isOpen, onClose }) {
                 Submit Application
               </button>
             </form>
+          )}
+
+          {/* STEP 4: Success Screen */}
+          {stepNumber === 4 && (
+            <div className="flex flex-col items-center text-center py-8 space-y-4">
+              {/* Cute Elephant SVG */}
+              <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
+                {/* Back Legs */}
+                <rect x="22" y="52" width="8" height="16" rx="4" fill="#64748B" />
+                <rect x="42" y="52" width="8" height="16" rx="4" fill="#64748B" />
+                {/* Body */}
+                <circle cx="35" cy="42" r="20" fill="#94A3B8" />
+                {/* Head */}
+                <circle cx="52" cy="38" r="14" fill="#94A3B8" />
+                {/* Front Legs */}
+                <rect x="28" y="52" width="8" height="16" rx="4" fill="#94A3B8" />
+                <rect x="48" y="52" width="8" height="16" rx="4" fill="#94A3B8" />
+                {/* Ear */}
+                <circle cx="46" cy="34" r="6" fill="#F1F5F9" />
+                <circle cx="46" cy="34" r="4" fill="#F472B6" />
+                {/* Eye */}
+                <circle cx="56" cy="34" r="1.5" fill="#0F172A" />
+                {/* Trunk curling right */}
+                <path d="M 64 42 C 72 42 76 46 76 50 C 76 54 72 54 70 51" stroke="#94A3B8" strokeWidth="5" strokeLinecap="round" fill="none" />
+                {/* Tail */}
+                <path d="M 16 42 Q 10 40 12 46" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" fill="none" />
+              </svg>
+              <h3 className="text-base font-bold text-[#10B981] mt-2">🎉 Application Submitted!</h3>
+              <p className="text-xs text-[#64748B] font-semibold max-w-xs leading-relaxed">
+                Your application has been logged in the Studegram system. Our handlers will verify the information.
+              </p>
+              <button
+                type="button"
+                onClick={handleResetAndClose}
+                className="bg-[#6366F1] hover:bg-[#5053e3] text-white font-bold py-2.5 px-6 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider mt-4"
+              >
+                Close
+              </button>
+            </div>
           )}
         </div>
       </div>

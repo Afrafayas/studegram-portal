@@ -20,12 +20,72 @@ export default function App() {
   const [showModal, setShowModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  const [applications, setApplications] = useState([
+    {
+      camsId: 'CAMS10204',
+      studentName: 'Shanto Shaju',
+      passportNo: 'T1029482',
+      universityName: 'University of Surrey',
+      courseName: 'International Hotel Management MSc',
+      intake: 'September 2026',
+      primaryStatus: 'Processed', // green
+      secondaryStatus: 'Offer Issued', // blue
+      dateAdded: '10 Jun 2026',
+      modifiedDate: '20 Jun 2026'
+    },
+    {
+      camsId: 'CAMS10492',
+      studentName: 'Aneesha Anil',
+      passportNo: 'T9381048',
+      universityName: 'University of Surrey',
+      courseName: 'Human Resources Management MSc',
+      intake: 'January 2027',
+      primaryStatus: 'Processed', // green
+      secondaryStatus: 'Pending', // amber
+      dateAdded: '15 Jun 2026',
+      modifiedDate: '22 Jun 2026'
+    }
+  ]);
+  const [duplicateAlert, setDuplicateAlert] = useState(null);
+
+  const handleAddApplicationSubmit = (newApp) => {
+    const isDuplicate = applications.some(
+      (app) => app.passportNo.trim().toLowerCase() === newApp.passportNo.trim().toLowerCase()
+    );
+    if (isDuplicate) {
+      setDuplicateAlert(newApp.passportNo);
+    } else {
+      setDuplicateAlert(null);
+      const newCamsId = `CAMS${Math.floor(10000 + Math.random() * 90000)}`;
+      const addedApp = {
+        camsId: newCamsId,
+        studentName: `${newApp.firstName} ${newApp.lastName}`,
+        passportNo: newApp.passportNo,
+        universityName: newApp.university,
+        courseName: 'MSc in Computer Science (Artificial Intelligence)',
+        intake: newApp.intake,
+        primaryStatus: 'Processed',
+        secondaryStatus: 'Pending',
+        dateAdded: '03 Jul 2026',
+        modifiedDate: '03 Jul 2026'
+      };
+      setApplications((prev) => [addedApp, ...prev]);
+    }
+  };
+
   const renderActivePage = () => {
     switch (activePage) {
       case 'Dashboard':
         return <Dashboard />;
       case 'ApplicationHistory':
-        return <ApplicationHistory onAddApplicationClick={() => setShowModal(true)} />;
+        return (
+          <ApplicationHistory 
+            onAddApplicationClick={() => setShowModal(true)} 
+            applications={applications}
+            duplicateAlert={duplicateAlert}
+            setDuplicateAlert={setDuplicateAlert}
+          />
+        );
       case 'SearchCourses':
         return <SearchCourses />;
       case 'Notice':
@@ -102,7 +162,11 @@ export default function App() {
       </div>
 
       {/* Add Application Multi-step Modal */}
-      <AddApplicationModal isOpen={showModal} onClose={() => setShowModal(false)} />
+      <AddApplicationModal 
+        isOpen={showModal} 
+        onClose={() => setShowModal(false)} 
+        onSubmit={handleAddApplicationSubmit}
+      />
     </div>
   );
 }

@@ -45,6 +45,17 @@ export default function Dashboard() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
         </svg>
       )
+    },
+    {
+      label: 'Offer Issued',
+      value: '28',
+      color: 'text-[#10B981]',
+      bgColor: 'bg-emerald-50',
+      icon: (
+        <svg className="w-5 h-5 text-[#10B981]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v5m-3-3h6m-3-10a3 3 0 110-6 3 3 0 010 6zm0 0a7 7 0 100 14 7 7 0 000-14z" />
+        </svg>
+      )
     }
   ];
 
@@ -78,13 +89,37 @@ export default function Dashboard() {
   return (
     <div className="flex-1 p-8 space-y-8 bg-[#F0F2F5]">
       {/* Header */}
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Good morning, Agent 👋</h1>
-        <p className="text-xs text-[#64748B] font-medium">Tuesday, 23 June 2026</p>
+      <div className="flex items-center gap-4">
+        {/* Cute Elephant SVG */}
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
+          {/* Back Legs */}
+          <rect x="22" y="52" width="8" height="16" rx="4" fill="#64748B" />
+          <rect x="42" y="52" width="8" height="16" rx="4" fill="#64748B" />
+          {/* Body */}
+          <circle cx="35" cy="42" r="20" fill="#94A3B8" />
+          {/* Head */}
+          <circle cx="52" cy="38" r="14" fill="#94A3B8" />
+          {/* Front Legs */}
+          <rect x="28" y="52" width="8" height="16" rx="4" fill="#94A3B8" />
+          <rect x="48" y="52" width="8" height="16" rx="4" fill="#94A3B8" />
+          {/* Ear */}
+          <circle cx="46" cy="34" r="6" fill="#F1F5F9" />
+          <circle cx="46" cy="34" r="4" fill="#F472B6" />
+          {/* Eye */}
+          <circle cx="56" cy="34" r="1.5" fill="#0F172A" />
+          {/* Trunk curling right */}
+          <path d="M 64 42 C 72 42 76 46 76 50 C 76 54 72 54 70 51" stroke="#94A3B8" strokeWidth="5" strokeLinecap="round" fill="none" />
+          {/* Tail */}
+          <path d="M 16 42 Q 10 40 12 46" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" fill="none" />
+        </svg>
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Good morning, Partner 👋</h1>
+          <p className="text-xs text-[#64748B] font-medium">Tuesday, 23 June 2026</p>
+        </div>
       </div>
 
-      {/* 4 Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* 5 Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         {stats.map((stat, idx) => (
           <div key={idx} className="bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-200 flex items-center justify-between group">
             <div className="flex items-center gap-4">
