@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import AddApplicationModal from './components/AddApplicationModal';
+import NotificationPopup from './components/NotificationPopup';
 
 // Auth Pages
 import Login from './pages/Login';
@@ -167,6 +168,9 @@ export default function App() {
         onClose={() => setShowModal(false)} 
         onSubmit={handleAddApplicationSubmit}
       />
+
+      {/* Persistent Notification Popups */}
+      <NotificationPopup />
     </div>
   );
 }

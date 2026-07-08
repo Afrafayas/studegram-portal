@@ -26,3 +26,34 @@ body {
   color: #0F172A;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
+
+/* Animations for top-center notification popups */
+@keyframes slideInTop {
+  from {
+    transform: translate(-50%, -80px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutTop {
+  from {
+    transform: translate(-50%, 0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translate(-50%, -80px) scale(0.95);
+    opacity: 0;
+  }
+}
+
+.animate-slide-in-top {
+  animation: slideInTop 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-out-top {
+  animation: slideOutTop 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
