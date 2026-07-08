@@ -114,7 +114,7 @@ export default function NotificationPopup() {
 
   return (
     <div
-      className={`fixed top-6 left-1/2 z-50 max-w-sm w-full p-5 rounded-2xl border transition-all duration-300
+      className={`fixed top-20 left-1/2 z-50 max-w-sm w-full p-5 rounded-2xl border transition-all duration-300
         backdrop-blur-md bg-white/80 border-slate-200/50 shadow-xl shadow-slate-200/40
         ${isClosing ? 'animate-slide-out-top' : 'animate-slide-in-top'}
       `}

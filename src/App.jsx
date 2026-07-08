@@ -74,6 +74,12 @@ export default function App() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('studegram_closed_notifications');
+    localStorage.removeItem('studegram_read_notifications');
+    setCurrentPage('login');
+  };
+
   const renderActivePage = () => {
     switch (activePage) {
       case 'Dashboard':
@@ -141,7 +147,7 @@ export default function App() {
       {/* Top Navbar */}
       <Navbar 
         onNewApplicationClick={() => setShowModal(true)} 
-        onLogout={() => setCurrentPage('login')} 
+        onLogout={handleLogout} 
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
       />
 
@@ -151,7 +157,7 @@ export default function App() {
         <Sidebar 
           activePage={activePage} 
           setActivePage={setActivePage} 
-          onLogout={() => setCurrentPage('login')} 
+          onLogout={handleLogout} 
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
         />
