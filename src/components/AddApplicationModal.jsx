@@ -117,7 +117,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
             <div className="absolute top-1/2 left-0 w-full h-0.5 bg-slate-200 -translate-y-1/2 z-0"></div>
             <div
               className="absolute top-1/2 left-0 h-0.5 bg-[#6366F1] -translate-y-1/2 transition-all duration-300 z-0"
-              style={{ width: `${((stepNumber - 1) / 2) * 100}%` }}
+              style={{ width: `${Math.min(100, ((stepNumber - 1) / 2) * 100)}%` }}
             ></div>
 
             {/* Step 1 */}
