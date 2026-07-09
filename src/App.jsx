@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import AddApplicationModal from './components/AddApplicationModal';
+import ApplicationDetailsModal from './components/ApplicationDetailsModal';
 import NotificationPopup from './components/NotificationPopup';
 
 // Auth Pages
@@ -20,6 +21,7 @@ export default function App() {
   const [activePage, setActivePage] = useState('Dashboard');
   const [showModal, setShowModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedAppForDetails, setSelectedAppForDetails] = useState(null);
 
   const [applications, setApplications] = useState([
     {
@@ -91,6 +93,7 @@ export default function App() {
             applications={applications}
             duplicateAlert={duplicateAlert}
             setDuplicateAlert={setDuplicateAlert}
+            onViewDetails={(app) => setSelectedAppForDetails(app)}
           />
         );
       case 'SearchCourses':
@@ -173,6 +176,13 @@ export default function App() {
         isOpen={showModal} 
         onClose={() => setShowModal(false)} 
         onSubmit={handleAddApplicationSubmit}
+      />
+
+      {/* Application Details Modal */}
+      <ApplicationDetailsModal
+        isOpen={!!selectedAppForDetails}
+        onClose={() => setSelectedAppForDetails(null)}
+        application={selectedAppForDetails}
       />
 
       {/* Persistent Notification Popups */}

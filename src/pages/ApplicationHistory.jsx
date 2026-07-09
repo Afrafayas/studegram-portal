@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function ApplicationHistory({ onAddApplicationClick, applications = [], duplicateAlert, setDuplicateAlert }) {
+export default function ApplicationHistory({ onAddApplicationClick, applications = [], duplicateAlert, setDuplicateAlert, onViewDetails }) {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredApps = applications.filter((app) => {
@@ -104,7 +104,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
                 filteredApps.map((app, index) => (
                   <tr key={index} className="hover:bg-slate-50 transition-colors duration-150">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <a href="#" className="text-[#6366F1] font-bold hover:underline text-xs">{app.camsId}</a>
+                      <a href="#" onClick={(e) => { e.preventDefault(); onViewDetails && onViewDetails(app); }} className="text-[#6366F1] font-bold hover:underline text-xs">{app.camsId}</a>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-xs font-bold text-[#0F172A]">{app.studentName}</div>
@@ -134,7 +134,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-xs text-[#64748B] font-semibold">{app.dateAdded}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <button className="p-1.5 hover:bg-slate-100 rounded-lg text-[#64748B] hover:text-[#0F172A] transition-all duration-150 inline-flex items-center justify-center">
+                      <button onClick={() => onViewDetails && onViewDetails(app)} className="p-1.5 hover:bg-slate-100 rounded-lg text-[#64748B] hover:text-[#0F172A] transition-all duration-150 inline-flex items-center justify-center">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
