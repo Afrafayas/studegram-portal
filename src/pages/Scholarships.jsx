@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import ScholarshipDetailsModal from '../components/ScholarshipDetailsModal';
 
 export default function Scholarships({ setActivePage }) {
   const [selectedCountry, setSelectedCountry] = useState('All');
   const [selectedUniversity, setSelectedUniversity] = useState('All');
   const [selectedType, setSelectedType] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedScholarshipForDetails, setSelectedScholarshipForDetails] = useState(null);
 
   const scholarshipData = [
     // UK
@@ -425,7 +427,7 @@ export default function Scholarships({ setActivePage }) {
 
                   <div className="flex gap-2">
                     <button
-                      onClick={() => alert(`Application checklist for ${s.name} has been synchronized to your student files.`)}
+                      onClick={() => setSelectedScholarshipForDetails(s)}
                       className="flex-1 bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:text-[#6366F1] text-xs font-bold text-[#475569] py-2 rounded-xl text-center transition-all duration-150"
                     >
                       Check Criteria
@@ -453,7 +455,7 @@ export default function Scholarships({ setActivePage }) {
           <div className="space-y-1">
             <h3 className="text-sm font-bold text-[#0F172A]">No Scholarships Found</h3>
             <p className="text-xs text-[#64748B] font-semibold leading-relaxed">
-              We couldn\'t find any scholarships matching your search query or filters.
+              We couldn't find any scholarships matching your search query or filters.
             </p>
           </div>
           <button
@@ -469,6 +471,13 @@ export default function Scholarships({ setActivePage }) {
           </button>
         </div>
       )}
+
+      {/* Scholarship Details Modal */}
+      <ScholarshipDetailsModal
+        isOpen={!!selectedScholarshipForDetails}
+        onClose={() => setSelectedScholarshipForDetails(null)}
+        scholarship={selectedScholarshipForDetails}
+      />
     </div>
   );
 }
