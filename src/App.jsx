@@ -15,6 +15,7 @@ import ApplicationHistory from './pages/ApplicationHistory';
 import SearchCourses from './pages/SearchCourses';
 import Notice from './pages/Notice';
 import UniversityDeadline from './pages/UniversityDeadline';
+import Universities from './pages/Universities';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('login'); // Starts as 'login'
@@ -102,6 +103,8 @@ export default function App() {
         return <Notice />;
       case 'UniversityDeadline':
         return <UniversityDeadline />;
+      case 'Universities':
+        return <Universities setActivePage={setActivePage} />;
       default:
         return (
           <div className="flex-1 p-8 flex items-center justify-center min-h-[calc(100vh-100px)] bg-[#F0F2F5]">
