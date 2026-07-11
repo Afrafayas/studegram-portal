@@ -16,14 +16,64 @@ export default function SearchCourses() {
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const courses = [
-    { id: 1, title: 'MSc in Computer Science (Artificial Intelligence)', university: 'Anglia Ruskin University', duration: '12 - 15 Months', intake: 'September 2026', fee: '£16,700/yr', gradient: 'from-[#6366F1] to-[#06B6D4]' },
-    { id: 2, title: 'MBA with Professional Placement', university: 'Coventry University', duration: '24 Months', intake: 'September 2026', fee: '£19,850/yr', gradient: 'from-teal-500 to-emerald-500' },
-    { id: 3, title: 'BSc (Hons) Software Engineering', university: 'University of Surrey', duration: '3 Years', intake: 'September 2026', fee: '£22,400/yr', gradient: 'from-purple-500 to-pink-500' },
-    { id: 4, title: 'MSc Data Science and Analytics', university: 'University of Hertfordshire', duration: '1 Year', intake: 'September 2026', fee: '£15,450/yr', gradient: 'from-[#6366F1] to-[#06B6D4]' },
-    { id: 5, title: 'MA International Relations', university: 'Nottingham Trent University', duration: '12 Months', intake: 'January 2027', fee: '£16,000/yr', gradient: 'from-teal-500 to-emerald-500' },
-    { id: 6, title: 'BEng (Hons) Mechanical Engineering', university: 'Coventry University', duration: '3 Years', intake: 'September 2026', fee: '£18,250/yr', gradient: 'from-purple-500 to-pink-500' }
+  const allCourses = [
+    // United Kingdom
+    { id: 1, title: 'MSc in Computer Science (Artificial Intelligence)', university: 'Anglia Ruskin University', country: 'United Kingdom', level: 'Postgraduate', duration: '12 - 15 Months', intake: 'September 2026', fee: '£16,700/yr', gradient: 'from-[#6366F1] to-[#06B6D4]' },
+    { id: 2, title: 'MBA with Professional Placement', university: 'Coventry University', country: 'United Kingdom', level: 'Postgraduate', duration: '24 Months', intake: 'September 2026', fee: '£19,850/yr', gradient: 'from-teal-500 to-emerald-500' },
+    { id: 3, title: 'BSc (Hons) Software Engineering', university: 'University of Surrey', country: 'United Kingdom', level: 'Undergraduate', duration: '3 Years', intake: 'September 2026', fee: '£22,400/yr', gradient: 'from-purple-500 to-pink-500' },
+    { id: 4, title: 'MSc Data Science and Analytics', university: 'University of Hertfordshire', country: 'United Kingdom', level: 'Postgraduate', duration: '1 Year', intake: 'September 2026', fee: '£15,450/yr', gradient: 'from-[#6366F1] to-[#06B6D4]' },
+    { id: 5, title: 'MA International Relations', university: 'Nottingham Trent University', country: 'United Kingdom', level: 'Postgraduate', duration: '12 Months', intake: 'January 2027', fee: '£16,000/yr', gradient: 'from-teal-500 to-emerald-500' },
+    { id: 6, title: 'BEng (Hons) Mechanical Engineering', university: 'Coventry University', country: 'United Kingdom', level: 'Undergraduate', duration: '3 Years', intake: 'September 2026', fee: '£18,250/yr', gradient: 'from-purple-500 to-pink-500' },
+    { id: 7, title: 'International Foundation in Science', university: 'Anglia Ruskin University', country: 'United Kingdom', level: 'Foundation', duration: '9 Months', intake: 'September 2026', fee: '£12,200/yr', gradient: 'from-blue-500 to-indigo-600' },
+
+    // Canada
+    { id: 8, title: 'Master of Applied Computing (MScAC)', university: 'University of Toronto', country: 'Canada', level: 'Postgraduate', duration: '16 Months', intake: 'September 2026', fee: '$45,000 CAD/yr', gradient: 'from-[#6366F1] to-[#06B6D4]' },
+    { id: 9, title: 'Master of Management in Finance', university: 'McGill University', country: 'Canada', level: 'Postgraduate', duration: '12 Months', intake: 'September 2026', fee: '$38,000 CAD/yr', gradient: 'from-teal-500 to-emerald-500' },
+    { id: 10, title: 'Bachelor of Computer Science (BCS)', university: 'University of British Columbia', country: 'Canada', level: 'Undergraduate', duration: '4 Years', intake: 'September 2026', fee: '$42,000 CAD/yr', gradient: 'from-purple-500 to-pink-500' },
+    { id: 11, title: 'Master of Data Science', university: 'University of British Columbia', country: 'Canada', level: 'Postgraduate', duration: '10 Months', intake: 'September 2026', fee: '$48,000 CAD/yr', gradient: 'from-[#6366F1] to-[#06B6D4]' },
+
+    // United States
+    { id: 12, title: 'MS in Computer Science', university: 'New York University', country: 'United States', level: 'Postgraduate', duration: '2 Years', intake: 'September 2026', fee: '$58,000/yr', gradient: 'from-[#6366F1] to-[#06B6D4]' },
+    { id: 13, title: 'MS in Information Systems', university: 'Northeastern University', country: 'United States', level: 'Postgraduate', duration: '18 - 24 Months', intake: 'September 2026', fee: '$52,000/yr', gradient: 'from-teal-500 to-emerald-500' },
+    { id: 14, title: 'BS in Economics', university: 'Boston University', country: 'United States', level: 'Undergraduate', duration: '4 Years', intake: 'September 2026', fee: '$55,000/yr', gradient: 'from-purple-500 to-pink-500' },
+
+    // Australia
+    { id: 15, title: 'Master of Information Technology', university: 'University of Melbourne', country: 'Australia', level: 'Postgraduate', duration: '2 Years', intake: 'February 2027', fee: '$44,000 AUD/yr', gradient: 'from-[#6366F1] to-[#06B6D4]' },
+    { id: 16, title: 'Master of Commerce', university: 'University of Sydney', country: 'Australia', level: 'Postgraduate', duration: '18 Months', intake: 'February 2027', fee: '$46,000 AUD/yr', gradient: 'from-teal-500 to-emerald-500' },
+    { id: 17, title: 'Bachelor of Engineering (Hons)', university: 'Monash University', country: 'Australia', level: 'Undergraduate', duration: '4 Years', intake: 'July 2026', fee: '$41,000 AUD/yr', gradient: 'from-purple-500 to-pink-500' }
   ];
+
+  // Dynamically populate available universities for the selected country
+  const availableUniversities = [
+    'All',
+    ...new Set(
+      allCourses
+        .filter((c) => c.country === country)
+        .map((c) => c.university)
+    )
+  ];
+
+  // Filtering logic
+  const filteredCourses = allCourses.filter((c) => {
+    // Country filter
+    if (c.country !== country) return false;
+
+    // University filter
+    if (university !== 'All' && c.university !== university) return false;
+
+    // Course level filter
+    if (courseType !== 'All' && c.level !== courseType) return false;
+
+    // Search query filter (matches title, university, or duration/fees/intake)
+    if (searchQuery.trim() !== '') {
+      const q = searchQuery.toLowerCase();
+      const matchesTitle = c.title.toLowerCase().includes(q);
+      const matchesUni = c.university.toLowerCase().includes(q);
+      return matchesTitle || matchesUni;
+    }
+
+    return true;
+  });
 
   return (
     <div className="flex-1 p-8 space-y-6 bg-[#F0F2F5]">
@@ -55,7 +105,10 @@ export default function SearchCourses() {
               <select
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
                 value={country}
-                onChange={(e) => setCountry(e.target.value)}
+                onChange={(e) => {
+                  setCountry(e.target.value);
+                  setUniversity('All');
+                }}
               >
                 <option value="United Kingdom">United Kingdom</option>
                 <option value="Canada">Canada</option>
@@ -101,10 +154,11 @@ export default function SearchCourses() {
                 value={university}
                 onChange={(e) => setUniversity(e.target.value)}
               >
-                <option value="All">All Universities</option>
-                <option value="Anglia Ruskin University">Anglia Ruskin University</option>
-                <option value="Coventry University">Coventry University</option>
-                <option value="University of Surrey">University of Surrey</option>
+                {availableUniversities.map((uniName) => (
+                  <option key={uniName} value={uniName}>
+                    {uniName === 'All' ? 'All Universities' : uniName}
+                  </option>
+                ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                 <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,57 +194,84 @@ export default function SearchCourses() {
 
       {/* Result Metrics */}
       <div className="flex items-center justify-between text-xs text-[#64748B] font-semibold px-1">
-        <span>103,462 courses found</span>
+        <span>{filteredCourses.length} courses found</span>
         <span>Showing results for {country}</span>
       </div>
 
       {/* Course Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {courses.map((course) => (
-          <div key={course.id} className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden flex flex-col group hover:shadow-lg transition-all duration-200">
-            {/* Top banner gradient */}
-            <div className={`relative bg-gradient-to-r ${course.gradient} h-36 flex items-center justify-center overflow-hidden`}>
-              {/* Grid overlay */}
-              <div className="absolute inset-0 opacity-10 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:16px_16px]"></div>
+      {filteredCourses.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredCourses.map((course) => (
+            <div key={course.id} className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden flex flex-col group hover:shadow-lg transition-all duration-200">
+              {/* Top banner gradient */}
+              <div className={`relative bg-gradient-to-r ${course.gradient} h-36 flex items-center justify-center overflow-hidden`}>
+                {/* Grid overlay */}
+                <div className="absolute inset-0 opacity-10 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:16px_16px]"></div>
 
-              {/* Play button overlay circle */}
-              <button className="relative w-11 h-11 bg-white/20 hover:bg-[#6366F1] hover:scale-110 text-white rounded-full flex items-center justify-center border border-white/20 transition-all duration-150 backdrop-blur-sm shadow-md">
-                <svg className="w-4 h-4 fill-current ml-0.5" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </button>
+                {/* Play button overlay circle */}
+                <button className="relative w-11 h-11 bg-white/20 hover:bg-[#6366F1] hover:scale-110 text-white rounded-full flex items-center justify-center border border-white/20 transition-all duration-150 backdrop-blur-sm shadow-md">
+                  <svg className="w-4 h-4 fill-current ml-0.5" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </button>
 
-              {/* Top Right Intake Chip */}
-              <span className="absolute top-3 right-3 bg-white/95 text-[#0F172A] text-[9px] font-extrabold px-2.5 py-0.5 rounded-full shadow-sm select-none">
-                {course.intake}
-              </span>
-            </div>
-
-            {/* Course Info */}
-            <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-              <div>
-                <p className="text-[10px] font-extrabold text-[#64748B] tracking-wider uppercase mb-1">{course.university}</p>
-                <h3 className="text-xs font-bold text-[#0F172A] leading-snug group-hover:text-[#6366F1] transition-colors">{course.title}</h3>
+                {/* Top Right Intake Chip */}
+                <span className="absolute top-3 right-3 bg-white/95 text-[#0F172A] text-[9px] font-extrabold px-2.5 py-0.5 rounded-full shadow-sm select-none">
+                  {course.intake}
+                </span>
               </div>
 
-              {/* specs & Apply Now action on hover */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between text-[10px] text-[#64748B] font-semibold border-t border-slate-50 pt-3">
-                  <span>Duration: {course.duration}</span>
-                  <span className="text-[#0F172A]">{course.fee}</span>
+              {/* Course Info */}
+              <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                <div>
+                  <p className="text-[10px] font-extrabold text-[#64748B] tracking-wider uppercase mb-1">{course.university}</p>
+                  <h3 className="text-xs font-bold text-[#0F172A] leading-snug group-hover:text-[#6366F1] transition-colors">{course.title}</h3>
                 </div>
 
-                {/* Apply Now button showing/transitioning on card hover */}
-                <div className="h-9 relative overflow-hidden">
-                  <button className="w-full bg-[#6366F1] hover:bg-[#5053e3] hover:scale-[1.02] text-white text-xs font-bold py-2 rounded-xl transition-all duration-150 opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 shadow-sm">
-                    Apply Now
-                  </button>
+                {/* specs & Apply Now action on hover */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-[10px] text-[#64748B] font-semibold border-t border-slate-50 pt-3">
+                    <span>Duration: {course.duration}</span>
+                    <span className="text-[#0F172A]">{course.fee}</span>
+                  </div>
+
+                  {/* Apply Now button showing/transitioning on card hover */}
+                  <div className="h-9 relative overflow-hidden">
+                    <button className="w-full bg-[#6366F1] hover:bg-[#5053e3] hover:scale-[1.02] text-white text-xs font-bold py-2 rounded-xl transition-all duration-150 opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 shadow-sm">
+                      Apply Now
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
+          ))}
+        </div>
+      ) : (
+        /* Empty State */
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl p-12 text-center max-w-md mx-auto shadow-sm space-y-4">
+          <div className="w-16 h-16 bg-slate-50 text-[#64748B] rounded-full flex items-center justify-center mx-auto shadow-inner">
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
           </div>
-        ))}
-      </div>
+          <div className="space-y-1">
+            <h3 className="text-sm font-bold text-[#0F172A]">No Courses Found</h3>
+            <p className="text-xs text-[#64748B] font-semibold leading-relaxed">
+              We couldn't find any courses matching your criteria. Try adjusting the filters or search keywords.
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              setUniversity('All');
+              setCourseType('All');
+              setSearchQuery('');
+            }}
+            className="bg-[#6366F1] hover:bg-[#5053e3] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all duration-150 shadow-md inline-flex items-center gap-1.5"
+          >
+            Reset Filters
+          </button>
+        </div>
+      )}
 
       {/* Add Course Manually Card */}
       <div className="bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
