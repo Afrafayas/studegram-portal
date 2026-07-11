@@ -17,6 +17,7 @@ import Notice from './pages/Notice';
 import UniversityDeadline from './pages/UniversityDeadline';
 import Universities from './pages/Universities';
 import KnowledgeHub from './pages/KnowledgeHub';
+import Scholarships from './pages/Scholarships';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('login'); // Starts as 'login'
@@ -108,6 +109,8 @@ export default function App() {
         return <Universities setActivePage={setActivePage} />;
       case 'KnowledgeHub':
         return <KnowledgeHub />;
+      case 'Scholarships':
+        return <Scholarships setActivePage={setActivePage} />;
       default:
         return (
           <div className="flex-1 p-8 flex items-center justify-center min-h-[calc(100vh-100px)] bg-[#F0F2F5]">
