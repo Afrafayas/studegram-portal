@@ -56,7 +56,7 @@ export default function ScholarshipDetailsModal({ isOpen, onClose, scholarship }
                 Scholarship Information Directory
               </h2>
               <p className="text-[10px] text-[#64748B] font-semibold mt-0.5">
-                Details for: <span className="text-[#6366F1] font-bold">{scholarship.name}</span>
+                Details for: <span className="text-[#D99A1C] font-bold">{scholarship.name}</span>
               </p>
             </div>
           </div>
@@ -130,7 +130,7 @@ export default function ScholarshipDetailsModal({ isOpen, onClose, scholarship }
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex-1 text-center py-3.5 text-xs font-bold border-b-2 select-none transition-all ${
                       isActive
-                        ? 'border-[#6366F1] text-[#6366F1] bg-white'
+                        ? 'border-[#D99A1C] text-[#D99A1C] bg-white'
                         : 'border-transparent text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50/70'
                     }`}
                   >
@@ -179,7 +179,7 @@ export default function ScholarshipDetailsModal({ isOpen, onClose, scholarship }
                   <div className="space-y-3">
                     {requiredDocs.map((doc, idx) => (
                       <div key={idx} className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex gap-3 text-xs font-semibold">
-                        <div className="w-8 h-8 rounded-lg bg-indigo-50 text-[#6366F1] flex items-center justify-center font-bold text-[10px] shrink-0 uppercase">
+                        <div className="w-8 h-8 rounded-lg bg-indigo-50 text-[#D99A1C] flex items-center justify-center font-bold text-[10px] shrink-0 uppercase">
                           {doc.type}
                         </div>
                         <div className="space-y-0.5 text-left">
@@ -210,7 +210,7 @@ export default function ScholarshipDetailsModal({ isOpen, onClose, scholarship }
                       <div key={idx} className="relative flex gap-4 text-left text-xs font-semibold">
                         <span className="absolute -left-[20.5px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-indigo-600 bg-white z-10" />
                         <div className="space-y-0.5">
-                          <span className="text-[9px] text-[#6366F1] font-extrabold uppercase tracking-wider">{s.step}</span>
+                          <span className="text-[9px] text-[#D99A1C] font-extrabold uppercase tracking-wider">{s.step}</span>
                           <h5 className="text-[#0F172A] font-bold leading-tight">{s.title}</h5>
                           <p className="text-[10px] text-[#64748B] leading-relaxed font-semibold">{s.desc}</p>
                         </div>

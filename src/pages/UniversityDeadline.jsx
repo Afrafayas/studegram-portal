@@ -54,7 +54,7 @@ export default function UniversityDeadline() {
           <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Select Country</label>
           <div className="relative">
             <select
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
               value={selectCountry}
               onChange={(e) => setSelectCountry(e.target.value)}
             >
@@ -76,7 +76,7 @@ export default function UniversityDeadline() {
           <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">University Country</label>
           <div className="relative">
             <select
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
               value={univCountry}
               onChange={(e) => setUnivCountry(e.target.value)}
             >
@@ -98,7 +98,7 @@ export default function UniversityDeadline() {
           <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">University Name</label>
           <div className="relative">
             <select
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
               value={univName}
               onChange={(e) => setUnivName(e.target.value)}
             >
@@ -126,7 +126,7 @@ export default function UniversityDeadline() {
               onClick={() => setActivePill(pill.label)}
               className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-150 shadow-sm hover:scale-[1.02] ${
                 isActive
-                  ? 'bg-[#6366F1] text-white'
+                  ? 'bg-[#D99A1C] text-white'
                   : 'bg-white text-[#64748B] border border-[#E2E8F0] hover:bg-slate-50 hover:text-[#0F172A]'
               }`}
             >

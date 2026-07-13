@@ -25,14 +25,14 @@ export default function Sidebar({ activePage, setActivePage, onLogout, isOpen, o
           setActivePage(item.id);
           if (onClose) onClose();
         }}
-        className={`w-[calc(100%-16px)] flex items-center gap-3 px-4 py-2.5 rounded-xl mx-2 my-0.5 text-left text-xs font-semibold select-none transition-all duration-150 ${
+        className={`w-[calc(100%-16px)] flex items-center gap-3 px-4 py-2.5 rounded-xl mx-2 my-0.5 text-left text-xs font-bold select-none transition-all duration-150 ${
           isActive
-            ? 'bg-gradient-to-r from-[#6366F1] to-[#06B6D4] text-white shadow-md'
+            ? 'bg-gradient-to-r from-[#D99A1C] to-[#F5B025] text-black shadow-md'
             : 'text-[#94A3B8] hover:bg-[#1A1A2E] hover:text-white'
         }`}
       >
         <svg
-          className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-white' : 'text-[#94A3B8]'}`}
+          className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-black' : 'text-[#94A3B8]'}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -60,14 +60,6 @@ export default function Sidebar({ activePage, setActivePage, onLogout, isOpen, o
       } md:translate-x-0 transition-transform duration-200 ease-in-out`}>
         
         <div className="flex flex-col gap-6">
-          {/* Brand/App Title inside Sidebar top */}
-          <div className="px-6 pb-2 border-b border-white/5 flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-gradient-to-tr from-[#6366F1] to-[#06B6D4] flex items-center justify-center font-bold text-white text-xs">
-              S
-            </div>
-            <span className="font-extrabold text-sm tracking-wider uppercase text-white">Studegram</span>
-          </div>
-
           {/* MAIN section */}
           <div>
             <span className="px-6 block text-[9px] font-extrabold text-[#475569] uppercase tracking-wider mb-2">MAIN</span>
@@ -90,7 +82,7 @@ export default function Sidebar({ activePage, setActivePage, onLogout, isOpen, o
           {/* Bottom Agent Section */}
           <div className="px-4 py-3 flex items-center justify-between bg-white/5 rounded-xl">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#6366F1] to-[#06B6D4] flex items-center justify-center font-bold text-white text-xs shrink-0">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#D99A1C] to-[#F5B025] flex items-center justify-center font-bold text-black text-xs shrink-0">
                 JD
               </div>
               <div className="text-left max-w-[100px]">
@@ -126,7 +118,7 @@ export default function Sidebar({ activePage, setActivePage, onLogout, isOpen, o
             <div className="flex flex-col gap-0.5">
               <span className="text-xs font-bold text-white">Sarah Johnson</span>
               <div className="flex items-center gap-1.5 text-[10px] text-[#94A3B8]">
-                <svg className="w-3.5 h-3.5 text-[#6366F1] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 text-[#D99A1C] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
                 <span className="font-semibold">+44 20 7946 0958</span>

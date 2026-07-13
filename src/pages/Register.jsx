@@ -71,15 +71,19 @@ export default function Register({ onNavigate }) {
   return (
     <div className="min-h-screen bg-[#F0F2F5] flex items-stretch select-none">
       
-      {/* Left side (50%): Brand detail gradient panel */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-tr from-[#6366F1] to-[#06B6D4] text-white p-16 flex-col justify-between relative overflow-hidden">
-        {/* Decorative Grid */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full blur-2xl -translate-y-1/3 translate-x-1/3"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full blur-3xl translate-y-1/3 -translate-x-1/3"></div>
+      {/* Left side (50%): Brand detail graphic panel */}
+      <div className="hidden lg:flex lg:w-1/2 bg-[#D99A1C] text-white p-16 flex-col justify-between relative overflow-hidden">
+        {/* Transparent Icon Pattern Background with custom opacity */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center opacity-25 mix-blend-multiply"
+          style={{ backgroundImage: 'url(/assets/login_hero_pattern.png)' }}
+        ></div>
+        {/* Soft layout overlay */}
+        <div className="absolute inset-0 bg-black/5"></div>
 
         {/* Logo Brand */}
         <div className="flex items-center gap-3 relative z-10">
-          <div className="w-10 h-10 rounded-xl bg-white text-[#6366F1] flex items-center justify-center font-extrabold text-xl shadow-lg">
+          <div className="w-10 h-10 rounded-xl bg-white text-[#D99A1C] flex items-center justify-center font-extrabold text-xl shadow-lg">
             S
           </div>
           <span className="font-extrabold text-2xl tracking-wider uppercase">Studegram</span>
@@ -152,7 +156,7 @@ export default function Register({ onNavigate }) {
                 <input
                   type="text"
                   className={`w-full bg-slate-50 border rounded-xl pl-10 pr-4 py-2 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
-                    errors.fullName ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#6366F1]'
+                    errors.fullName ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
                   }`}
                   placeholder="John Doe"
                   value={fullName}
@@ -179,7 +183,7 @@ export default function Register({ onNavigate }) {
                   type="email"
                   autoComplete="username"
                   className={`w-full bg-slate-50 border rounded-xl pl-10 pr-4 py-2 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
-                    errors.email ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#6366F1]'
+                    errors.email ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
                   }`}
                   placeholder="name@agency.com"
                   value={email}
@@ -209,7 +213,7 @@ export default function Register({ onNavigate }) {
                   <input
                     type="tel"
                     className={`w-full bg-slate-50 border rounded-xl pl-10 pr-4 py-2 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
-                      errors.phoneNumber ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#6366F1]'
+                      errors.phoneNumber ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
                     }`}
                     placeholder="98765 43210"
                     value={phoneNumber}
@@ -236,7 +240,7 @@ export default function Register({ onNavigate }) {
                 <input
                   type="text"
                   className={`w-full bg-slate-50 border rounded-xl pl-10 pr-4 py-2 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
-                    errors.agencyName ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#6366F1]'
+                    errors.agencyName ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
                   }`}
                   placeholder="Global Careers Ltd"
                   value={agencyName}
@@ -263,7 +267,7 @@ export default function Register({ onNavigate }) {
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   className={`w-full bg-slate-50 border rounded-xl pl-10 pr-10 py-2 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
-                    errors.password ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#6366F1]'
+                    errors.password ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
                   }`}
                   placeholder="••••••••"
                   value={password}
@@ -307,7 +311,7 @@ export default function Register({ onNavigate }) {
                   type={showConfirmPassword ? 'text' : 'password'}
                   autoComplete="new-password"
                   className={`w-full bg-slate-50 border rounded-xl pl-10 pr-10 py-2 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
-                    errors.confirmPassword ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#6366F1]'
+                    errors.confirmPassword ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
                   }`}
                   placeholder="••••••••"
                   value={confirmPassword}
@@ -343,7 +347,7 @@ export default function Register({ onNavigate }) {
               <label className="flex items-start gap-2.5 cursor-pointer text-xs font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors leading-tight">
                 <input
                   type="checkbox"
-                  className="w-4 h-4 rounded text-[#6366F1] border-slate-300 focus:ring-[#6366F1] mt-0.5 shrink-0"
+                  className="w-4 h-4 rounded text-[#D99A1C] border-slate-300 focus:ring-[#D99A1C] mt-0.5 shrink-0"
                   checked={agreeTerms}
                   onChange={(e) => {
                     setAgreeTerms(e.target.checked);
@@ -359,7 +363,7 @@ export default function Register({ onNavigate }) {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-[#6366F1] to-[#06B6D4] hover:scale-[1.02] text-white font-bold py-2.5 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.02] text-white font-bold py-2.5 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -381,7 +385,7 @@ export default function Register({ onNavigate }) {
             Already have an account?{' '}
             <button
               onClick={() => onNavigate('login')}
-              className="text-[#6366F1] font-bold hover:underline"
+              className="text-[#D99A1C] font-bold hover:underline"
               disabled={isLoading}
             >
               Sign in

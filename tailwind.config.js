@@ -4,7 +4,9 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#E85D2F",
+        primary: "#D99A1C", // mustard yellow
+        accent: "#F5B025",
+        black: "#111111",
       },
     },
   },

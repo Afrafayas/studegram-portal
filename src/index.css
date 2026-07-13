@@ -22,9 +22,14 @@
 }
 
 body {
-  background-color: #F0F2F5;
+  background-color: #FAFAFA;
   color: #0F172A;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+::selection {
+  background-color: #F5B025;
+  color: #111111;
 }
 
 /* Animations for top-center notification popups */

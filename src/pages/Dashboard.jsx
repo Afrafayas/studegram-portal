@@ -5,10 +5,10 @@ export default function Dashboard() {
     {
       label: 'Total Applications',
       value: '803',
-      color: 'text-[#6366F1]',
+      color: 'text-[#D99A1C]',
       bgColor: 'bg-indigo-50',
       icon: (
-        <svg className="w-5 h-5 text-[#6366F1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5 text-[#D99A1C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
       )
@@ -142,7 +142,7 @@ export default function Dashboard() {
           <div>
             <div className="px-6 py-4 border-b border-[#E2E8F0] flex justify-between items-center">
               <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">Recent Applications</h2>
-              <button className="text-xs text-[#6366F1] font-semibold hover:underline">View History</button>
+              <button className="text-xs text-[#D99A1C] font-semibold hover:underline">View History</button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
@@ -157,7 +157,7 @@ export default function Dashboard() {
                   {recentApps.map((student, index) => (
                     <tr key={index} className="hover:bg-slate-50 transition-colors duration-150">
                       <td className="px-6 py-3.5 flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#6366F1] to-[#06B6D4] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#D99A1C] to-[#F5B025] text-white flex items-center justify-center font-bold text-xs shrink-0">
                           {student.initials}
                         </div>
                         <div>
@@ -183,7 +183,7 @@ export default function Dashboard() {
         <div className="lg:col-span-2 bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden flex flex-col">
           <div className="px-6 py-4 border-b border-[#E2E8F0] flex justify-between items-center">
             <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">Upcoming Deadlines</h2>
-            <button className="text-xs text-[#6366F1] font-semibold hover:underline">View All</button>
+            <button className="text-xs text-[#D99A1C] font-semibold hover:underline">View All</button>
           </div>
           <div className="p-4 flex-1 space-y-3.5">
             {upcomingDeadlines.map((item, idx) => (

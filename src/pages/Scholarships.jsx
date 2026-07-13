@@ -30,7 +30,7 @@ export default function Scholarships({ setActivePage }) {
       amount: '£5,000',
       eligibility: 'First-class Honours equivalent in previous academic qualifications.',
       deadline: '2027-06-30',
-      gradient: 'from-[#06B6D4] to-[#0891B2]'
+      gradient: 'from-[#F5B025] to-[#0891B2]'
     },
     {
       id: 3,
@@ -86,7 +86,7 @@ export default function Scholarships({ setActivePage }) {
       amount: '$10,000 CAD/yr (Renewable)',
       eligibility: 'High academic achievers with strong extracurricular profile.',
       deadline: '2027-01-15',
-      gradient: 'from-[#6366F1] to-[#0ea5e9]'
+      gradient: 'from-[#D99A1C] to-[#0ea5e9]'
     },
     // USA
     {
@@ -275,7 +275,7 @@ export default function Scholarships({ setActivePage }) {
         <div className="relative max-w-xs w-full">
           <input
             type="text"
-            className="w-full bg-white border border-[#E2E8F0] rounded-xl pl-9 pr-4 py-2 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:ring-1 focus:ring-[#6366F1] shadow-xs font-medium"
+            className="w-full bg-white border border-[#E2E8F0] rounded-xl pl-9 pr-4 py-2 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] shadow-xs font-medium"
             placeholder="Search name, university, eligibility..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -296,7 +296,7 @@ export default function Scholarships({ setActivePage }) {
             <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Destination Country</label>
             <div className="relative">
               <select
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
                 value={selectedCountry}
                 onChange={(e) => {
                   setSelectedCountry(e.target.value);
@@ -323,7 +323,7 @@ export default function Scholarships({ setActivePage }) {
             <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Partner University</label>
             <div className="relative">
               <select
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
                 value={selectedUniversity}
                 onChange={(e) => setSelectedUniversity(e.target.value)}
               >
@@ -346,7 +346,7 @@ export default function Scholarships({ setActivePage }) {
             <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Scholarship Category</label>
             <div className="relative">
               <select
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
               >
@@ -428,13 +428,13 @@ export default function Scholarships({ setActivePage }) {
                   <div className="flex gap-2">
                     <button
                       onClick={() => setSelectedScholarshipForDetails(s)}
-                      className="flex-1 bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:text-[#6366F1] text-xs font-bold text-[#475569] py-2 rounded-xl text-center transition-all duration-150"
+                      className="flex-1 bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:text-[#D99A1C] text-xs font-bold text-[#475569] py-2 rounded-xl text-center transition-all duration-150"
                     >
                       Check Criteria
                     </button>
                     <button
                       onClick={() => setActivePage && setActivePage('UniversityDeadline')}
-                      className="flex-1 bg-[#6366F1] hover:bg-[#5053e3] hover:scale-[1.02] active:scale-95 text-xs font-bold text-white py-2 rounded-xl text-center transition-all duration-150 shadow-xs"
+                      className="flex-1 bg-[#D99A1C] hover:bg-[#C28410] hover:scale-[1.02] active:scale-95 text-xs font-bold text-white py-2 rounded-xl text-center transition-all duration-150 shadow-xs"
                     >
                       Deadlines
                     </button>
@@ -465,7 +465,7 @@ export default function Scholarships({ setActivePage }) {
               setSelectedType('All');
               setSearchQuery('');
             }}
-            className="bg-[#6366F1] hover:bg-[#5053e3] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all duration-150 shadow-md inline-flex items-center gap-1.5"
+            className="bg-[#D99A1C] hover:bg-[#C28410] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all duration-150 shadow-md inline-flex items-center gap-1.5"
           >
             Reset Filters
           </button>
