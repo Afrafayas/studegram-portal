@@ -228,7 +228,7 @@ export default function Universities({ setActivePage }) {
   });
 
   return (
-    <div className="flex-1 p-8 space-y-8 bg-[#F0F2F5]">
+    <div className="flex-1 p-8 space-y-8 bg-[#F0F2F5] animate-fade-in-up">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>

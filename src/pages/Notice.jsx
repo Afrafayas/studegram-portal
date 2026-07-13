@@ -7,7 +7,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
     const notice = notices.find((n) => n.id === selectedNoticeId);
     if (notice) {
       return (
-        <div className="flex-1 p-8 space-y-6 bg-[#F0F2F5]">
+        <div className="flex-1 p-8 space-y-6 bg-[#F0F2F5] animate-fade-in-up">
           {/* Back Button and Header */}
           <div className="flex flex-col gap-2">
             <button
@@ -86,7 +86,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
 
   // Notices List View
   return (
-    <div className="flex-1 p-8 space-y-6 bg-[#F0F2F5]">
+    <div className="flex-1 p-8 space-y-6 bg-[#F0F2F5] animate-fade-in-up">
       {/* Title */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Notices & Announcements</h1>

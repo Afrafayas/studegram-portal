@@ -279,7 +279,7 @@ export default function Webinar() {
   };
 
   return (
-    <div className="flex-1 p-8 space-y-8 bg-[#F0F2F5]">
+    <div className="flex-1 p-8 space-y-8 bg-[#F0F2F5] animate-fade-in-up">
       
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

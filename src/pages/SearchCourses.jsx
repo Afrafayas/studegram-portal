@@ -76,7 +76,7 @@ export default function SearchCourses() {
   });
 
   return (
-    <div className="flex-1 p-8 space-y-6 bg-[#F0F2F5]">
+    <div className="flex-1 p-8 space-y-6 bg-[#F0F2F5] animate-fade-in-up">
       {/* Title */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Search Courses</h1>

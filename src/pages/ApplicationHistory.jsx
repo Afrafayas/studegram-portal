@@ -12,7 +12,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
   });
 
   return (
-    <div className="flex-1 p-8 space-y-6 bg-[#F0F2F5]">
+    <div className="flex-1 p-8 space-y-6 bg-[#F0F2F5] animate-fade-in-up">
       {/* Top Header */}
       <div className="flex items-baseline justify-between flex-wrap gap-4 border-b border-[#E2E8F0] pb-4">
         <h1 className="text-22px font-bold tracking-tight text-[#0F172A]">Application History</h1>
