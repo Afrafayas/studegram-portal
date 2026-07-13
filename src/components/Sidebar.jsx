@@ -55,7 +55,7 @@ export default function Sidebar({ activePage, setActivePage, onLogout, isOpen, o
       )}
 
       {/* Sidebar drawer container */}
-      <div className={`fixed inset-y-0 left-0 z-50 md:z-30 md:static w-[240px] min-w-[240px] bg-[#0A0A0F] h-screen md:h-auto md:min-h-[calc(100vh-60px)] flex flex-col justify-between py-4 select-none text-white transform ${
+      <div className={`fixed inset-y-0 left-0 z-50 md:z-30 md:static w-[240px] min-w-[240px] bg-[#0A0A0F] h-screen md:h-[calc(100vh-60px)] md:sticky md:top-[60px] overflow-y-auto flex flex-col justify-between py-4 select-none text-white transform ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       } md:translate-x-0 transition-transform duration-200 ease-in-out`}>
         
