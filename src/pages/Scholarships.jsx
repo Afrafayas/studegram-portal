@@ -374,75 +374,80 @@ export default function Scholarships({ setActivePage }) {
       {/* Scholarships Cards Grid */}
       {filteredScholarships.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredScholarships.map((s) => (
-            <div
-              key={s.id}
-              className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden flex flex-col group hover:shadow-md transition-all duration-200"
-            >
-              {/* Card Gradient Header */}
-              <div className={`h-24 bg-gradient-to-r ${s.gradient} p-4 flex flex-col justify-between relative`}>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] bg-white/20 backdrop-blur-md text-white font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                    {s.type}
-                  </span>
-                  <span className="text-xl bg-white/25 backdrop-blur-md px-2 py-0.5 rounded-lg select-none">
-                    {countryFlags[s.country] || '🌍'}
-                  </span>
-                </div>
-                <h3 className="font-extrabold text-sm text-white truncate leading-tight">{s.name}</h3>
-              </div>
+          {filteredScholarships.map((s) => {
+            const isBlueTheme = s.id % 4 === 0;
+            const topBorderClass = isBlueTheme ? 'border-t-[#2563EB]' : 'border-t-[#D99A1C]';
 
-              {/* Card Body */}
-              <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                <div className="space-y-3">
-                  {/* University Profile Info */}
-                  <div>
-                    <span className="block text-[8px] font-extrabold text-[#94A3B8] uppercase tracking-wider mb-0.5">Offered By</span>
-                    <span className="font-bold text-[#0F172A] text-xs">{s.university}</span>
+            return (
+              <div
+                key={s.id}
+                className={`bg-white border border-[#E2E8F0] border-t-4 ${topBorderClass} rounded-2xl shadow-xs overflow-hidden flex flex-col group hover:shadow-md hover:border-slate-300 transition-all duration-200`}
+              >
+                {/* Card Header */}
+                <div className="h-24 bg-slate-950 p-4 flex flex-col justify-between relative border-b border-slate-900">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] bg-white/10 text-white border border-white/15 font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                      {s.type}
+                    </span>
+                    <span className="text-base bg-white/10 px-2 py-0.5 rounded-lg border border-white/10 text-white select-none">
+                      {countryFlags[s.country] || '🌍'}
+                    </span>
                   </div>
+                  <h3 className="font-extrabold text-sm text-white truncate leading-tight">{s.name}</h3>
+                </div>
 
-                  {/* Value / Amount */}
-                  <div className="bg-slate-50 border border-slate-100 rounded-xl p-3.5 flex justify-between items-center">
+                {/* Card Body */}
+                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="space-y-3">
+                    {/* University Profile Info */}
                     <div>
-                      <span className="block text-[8px] font-extrabold text-[#94A3B8] uppercase tracking-wider mb-0.5">Scholarship Value</span>
-                      <span className="text-emerald-600 font-extrabold text-sm">{s.amount}</span>
+                      <span className="block text-[8px] font-extrabold text-[#94A3B8] uppercase tracking-wider mb-0.5">Offered By</span>
+                      <span className="font-bold text-[#0F172A] text-xs">{s.university}</span>
+                    </div>
+
+                    {/* Value / Amount */}
+                    <div className="bg-slate-50 border border-slate-100 rounded-xl p-3.5 flex justify-between items-center">
+                      <div>
+                        <span className="block text-[8px] font-extrabold text-[#94A3B8] uppercase tracking-wider mb-0.5">Scholarship Value</span>
+                        <span className="text-emerald-600 font-extrabold text-sm">{s.amount}</span>
+                      </div>
+                    </div>
+
+                    {/* Eligibility Snippet */}
+                    <div className="space-y-1">
+                      <span className="block text-[8px] font-extrabold text-[#94A3B8] uppercase tracking-wider">Eligibility Criteria</span>
+                      <p className="text-[11px] text-[#475569] font-semibold leading-relaxed line-clamp-3">
+                        {s.eligibility}
+                      </p>
                     </div>
                   </div>
 
-                  {/* Eligibility Snippet */}
-                  <div className="space-y-1">
-                    <span className="block text-[8px] font-extrabold text-[#94A3B8] uppercase tracking-wider">Eligibility Criteria</span>
-                    <p className="text-[11px] text-[#475569] font-semibold leading-relaxed line-clamp-3">
-                      {s.eligibility}
-                    </p>
-                  </div>
-                </div>
+                  {/* Deadline & Actions */}
+                  <div className="border-t border-slate-50 pt-3 space-y-3.5">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Deadline</span>
+                      {getDeadlineBadge(s.deadline)}
+                    </div>
 
-                {/* Deadline & Actions */}
-                <div className="border-t border-slate-50 pt-3 space-y-3.5">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Deadline</span>
-                    {getDeadlineBadge(s.deadline)}
-                  </div>
-
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setSelectedScholarshipForDetails(s)}
-                      className="flex-1 bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:text-[#D99A1C] text-xs font-bold text-[#475569] py-2 rounded-xl text-center transition-all duration-150"
-                    >
-                      Check Criteria
-                    </button>
-                    <button
-                      onClick={() => setActivePage && setActivePage('UniversityDeadline')}
-                      className="flex-1 bg-[#D99A1C] hover:bg-[#C28410] hover:scale-[1.02] active:scale-95 text-xs font-bold text-white py-2 rounded-xl text-center transition-all duration-150 shadow-xs"
-                    >
-                      Deadlines
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setSelectedScholarshipForDetails(s)}
+                        className="flex-1 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-xs font-bold text-slate-700 py-2.5 rounded-xl text-center transition-all duration-150"
+                      >
+                        Check Criteria
+                      </button>
+                      <button
+                        onClick={() => setActivePage && setActivePage('UniversityDeadline')}
+                        className="flex-1 bg-[#D99A1C] hover:bg-[#B87C0E] hover:scale-[1.01] active:scale-95 text-xs font-bold text-white py-2.5 rounded-xl text-center transition-all duration-150 shadow-xs"
+                      >
+                        Deadlines
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         /* Empty State */
