@@ -389,7 +389,7 @@ export default function Scholarships({ setActivePage }) {
                     <span className="text-[10px] bg-white/10 text-white border border-white/15 font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
                       {s.type}
                     </span>
-                    <span className="text-base bg-white/10 px-2 py-0.5 rounded-lg border border-white/10 text-white select-none">
+                    <span className="w-10 h-10 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-xs font-extrabold text-white select-none shrink-0">
                       {countryFlags[s.country] || '🌍'}
                     </span>
                   </div>
