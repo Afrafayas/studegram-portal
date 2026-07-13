@@ -18,6 +18,7 @@ import UniversityDeadline from './pages/UniversityDeadline';
 import Universities from './pages/Universities';
 import KnowledgeHub from './pages/KnowledgeHub';
 import Scholarships from './pages/Scholarships';
+import Webinar from './pages/Webinar';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('login'); // Starts as 'login'
@@ -25,6 +26,7 @@ export default function App() {
   const [showModal, setShowModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedAppForDetails, setSelectedAppForDetails] = useState(null);
+  const [selectedNoticeId, setSelectedNoticeId] = useState(null);
 
   const [applications, setApplications] = useState([
     {
@@ -102,7 +104,7 @@ export default function App() {
       case 'SearchCourses':
         return <SearchCourses />;
       case 'Notice':
-        return <Notice />;
+        return <Notice selectedNoticeId={selectedNoticeId} setSelectedNoticeId={setSelectedNoticeId} />;
       case 'UniversityDeadline':
         return <UniversityDeadline />;
       case 'Universities':
@@ -111,11 +113,13 @@ export default function App() {
         return <KnowledgeHub />;
       case 'Scholarships':
         return <Scholarships setActivePage={setActivePage} />;
+      case 'Webinar':
+        return <Webinar />;
       default:
         return (
           <div className="flex-1 p-8 flex items-center justify-center min-h-[calc(100vh-100px)] bg-[#F0F2F5]">
             <div className="bg-white border border-[#E2E8F0] rounded-2xl p-8 max-w-sm text-center shadow-md space-y-4 hover:shadow-lg transition-all duration-200">
-              <div className="w-14 h-14 bg-indigo-50 text-[#6366F1] rounded-full flex items-center justify-center mx-auto shadow-inner">
+              <div className="w-14 h-14 bg-indigo-50 text-[#D99A1C] rounded-full flex items-center justify-center mx-auto shadow-inner">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
@@ -126,7 +130,7 @@ export default function App() {
               </div>
               <button 
                 onClick={() => setActivePage('Dashboard')}
-                className="bg-[#6366F1] hover:bg-[#5053e3] text-white text-xs font-bold px-4 py-2 rounded-xl transition-all duration-150 hover:scale-[1.02] active:scale-95 shadow-md inline-flex items-center gap-1.5"
+                className="bg-[#D99A1C] hover:bg-[#C28410] text-white text-xs font-bold px-4 py-2 rounded-xl transition-all duration-150 hover:scale-[1.02] active:scale-95 shadow-md inline-flex items-center gap-1.5"
               >
                 Go back to Dashboard
               </button>
@@ -195,7 +199,12 @@ export default function App() {
       />
 
       {/* Persistent Notification Popups */}
-      <NotificationPopup />
+      <NotificationPopup
+        onViewNotice={(noticeId) => {
+          setActivePage('Notice');
+          setSelectedNoticeId(noticeId);
+        }}
+      />
     </div>
   );
 }

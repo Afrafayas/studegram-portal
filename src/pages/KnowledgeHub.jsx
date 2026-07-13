@@ -266,7 +266,7 @@ export default function KnowledgeHub() {
           <div className="relative max-w-xs w-full">
             <input
               type="text"
-              className="w-full bg-white border border-[#E2E8F0] rounded-xl pl-9 pr-4 py-2 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:ring-1 focus:ring-[#6366F1] shadow-xs font-medium"
+              className="w-full bg-white border border-[#E2E8F0] rounded-xl pl-9 pr-4 py-2 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] shadow-xs font-medium"
               placeholder="Search country or capital..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -343,7 +343,7 @@ export default function KnowledgeHub() {
                   {/* Explore Button */}
                   <button
                     onClick={() => handleSelectCountry(c)}
-                    className="w-full bg-slate-50 border border-slate-200 group-hover:bg-[#6366F1] group-hover:text-white group-hover:border-transparent text-xs font-bold text-[#475569] py-2 rounded-xl text-center transition-all duration-150"
+                    className="w-full bg-slate-50 border border-slate-200 group-hover:bg-[#D99A1C] group-hover:text-white group-hover:border-transparent text-xs font-bold text-[#475569] py-2 rounded-xl text-center transition-all duration-150"
                   >
                     Explore Guide
                   </button>
@@ -365,7 +365,7 @@ export default function KnowledgeHub() {
             </p>
             <button
               onClick={() => setSearchQuery('')}
-              className="bg-[#6366F1] hover:bg-[#5053e3] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all duration-150 shadow-md inline-flex items-center gap-1.5"
+              className="bg-[#D99A1C] hover:bg-[#C28410] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all duration-150 shadow-md inline-flex items-center gap-1.5"
             >
               Reset Search
             </button>
@@ -436,7 +436,7 @@ export default function KnowledgeHub() {
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex-1 text-center py-3.5 text-xs font-bold transition-all border-b-2 select-none ${
                       isActive
-                        ? 'border-[#6366F1] text-[#6366F1] bg-white'
+                        ? 'border-[#D99A1C] text-[#D99A1C] bg-white'
                         : 'border-transparent text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50/70'
                     }`}
                   >
@@ -598,7 +598,7 @@ export default function KnowledgeHub() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs font-semibold text-[#475569]">
                       {selectedCountry.work.jobs.map((job, idx) => (
                         <div key={idx} className="flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#6366F1] shrink-0" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#D99A1C] shrink-0" />
                           <span>{job}</span>
                         </div>
                       ))}

@@ -27,7 +27,7 @@ export default function Universities({ setActivePage }) {
       badge: 'Popular Choice',
       badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-100',
       popularCourses: ['MSc Computer Science (AI)', 'MBA with Placement'],
-      gradient: 'from-[#6366F1] to-[#4F46E5]'
+      gradient: 'from-[#D99A1C] to-[#4F46E5]'
     },
     {
       id: 2,
@@ -41,7 +41,7 @@ export default function Universities({ setActivePage }) {
       badge: 'Top Ranked',
       badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-100',
       popularCourses: ['International Hotel Management', 'Software Engineering'],
-      gradient: 'from-[#06B6D4] to-[#0891B2]'
+      gradient: 'from-[#F5B025] to-[#0891B2]'
     },
     {
       id: 3,
@@ -84,7 +84,7 @@ export default function Universities({ setActivePage }) {
       badge: 'Ivy League Equivalent',
       badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-100',
       popularCourses: ['Applied Computing MSc', 'MBA Rotman School'],
-      gradient: 'from-[#6366F1] to-[#06B6D4]'
+      gradient: 'from-[#D99A1C] to-[#F5B025]'
     },
     {
       id: 6,
@@ -213,7 +213,7 @@ export default function Universities({ setActivePage }) {
       badge: 'Tuition Free',
       badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-100',
       popularCourses: ['Master of Data Science', 'Physics MSc'],
-      gradient: 'from-[#6366F1] to-[#3B82F6]'
+      gradient: 'from-[#D99A1C] to-[#3B82F6]'
     }
   ];
 
@@ -242,7 +242,7 @@ export default function Universities({ setActivePage }) {
         <div className="relative max-w-xs w-full">
           <input
             type="text"
-            className="w-full bg-white border border-[#E2E8F0] rounded-xl pl-9 pr-4 py-2 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:ring-1 focus:ring-[#6366F1] shadow-xs font-medium"
+            className="w-full bg-white border border-[#E2E8F0] rounded-xl pl-9 pr-4 py-2 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] shadow-xs font-medium"
             placeholder="Search by name, city, course..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -265,7 +265,7 @@ export default function Universities({ setActivePage }) {
               onClick={() => setSelectedCountry(c.name)}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-150 border shadow-xs select-none ${
                 isActive
-                  ? 'bg-gradient-to-r from-[#6366F1] to-[#06B6D4] text-white border-transparent'
+                  ? 'bg-gradient-to-r from-[#D99A1C] to-[#F5B025] text-white border-transparent'
                   : 'bg-white text-[#475569] border-[#E2E8F0] hover:bg-slate-50'
               }`}
             >
@@ -343,7 +343,7 @@ export default function Universities({ setActivePage }) {
                     <div className="flex flex-col gap-1">
                       {uni.popularCourses.map((course, idx) => (
                         <div key={idx} className="flex items-center gap-1.5 text-[11px] text-[#475569] font-semibold">
-                          <span className="w-1 h-1 rounded-full bg-[#6366F1] shrink-0" />
+                          <span className="w-1 h-1 rounded-full bg-[#D99A1C] shrink-0" />
                           <span className="truncate">{course}</span>
                         </div>
                       ))}
@@ -355,13 +355,13 @@ export default function Universities({ setActivePage }) {
                 <div className="flex gap-2 pt-2">
                   <button
                     onClick={() => setActivePage && setActivePage('SearchCourses')}
-                    className="flex-1 bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:text-[#6366F1] text-xs font-bold text-[#475569] py-2 rounded-xl text-center transition-all duration-150"
+                    className="flex-1 bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:text-[#D99A1C] text-xs font-bold text-[#475569] py-2 rounded-xl text-center transition-all duration-150"
                   >
                     View Courses
                   </button>
                   <button
                     onClick={() => setActivePage && setActivePage('UniversityDeadline')}
-                    className="flex-1 bg-[#6366F1] hover:bg-[#5053e3] hover:scale-[1.02] active:scale-95 text-xs font-bold text-white py-2 rounded-xl text-center transition-all duration-150 shadow-xs"
+                    className="flex-1 bg-[#D99A1C] hover:bg-[#C28410] hover:scale-[1.02] active:scale-95 text-xs font-bold text-white py-2 rounded-xl text-center transition-all duration-150 shadow-xs"
                   >
                     Deadlines
                   </button>
@@ -389,7 +389,7 @@ export default function Universities({ setActivePage }) {
               setSelectedCountry('All');
               setSearchQuery('');
             }}
-            className="bg-[#6366F1] hover:bg-[#5053e3] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all duration-150 shadow-md inline-flex items-center gap-1.5"
+            className="bg-[#D99A1C] hover:bg-[#C28410] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all duration-150 shadow-md inline-flex items-center gap-1.5"
           >
             Reset Filters
           </button>

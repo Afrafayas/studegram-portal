@@ -116,7 +116,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
             {/* Connector line */}
             <div className="absolute top-1/2 left-0 w-full h-0.5 bg-slate-200 -translate-y-1/2 z-0"></div>
             <div
-              className="absolute top-1/2 left-0 h-0.5 bg-[#6366F1] -translate-y-1/2 transition-all duration-300 z-0"
+              className="absolute top-1/2 left-0 h-0.5 bg-[#D99A1C] -translate-y-1/2 transition-all duration-300 z-0"
               style={{ width: `${Math.min(100, ((stepNumber - 1) / 2) * 100)}%` }}
             ></div>
 
@@ -124,9 +124,9 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
             <div className="flex flex-col items-center relative z-10">
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-150 ${
                 stepNumber > 1
-                  ? 'bg-[#6366F1] text-white'
+                  ? 'bg-[#D99A1C] text-white'
                   : stepNumber === 1
-                  ? 'border-2 border-[#6366F1] bg-white text-[#6366F1] ring-4 ring-indigo-50'
+                  ? 'border-2 border-[#D99A1C] bg-white text-[#D99A1C] ring-4 ring-indigo-50'
                   : 'border border-slate-200 bg-white text-[#64748B]'
               }`}>
                 1
@@ -138,9 +138,9 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
             <div className="flex flex-col items-center relative z-10">
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-150 ${
                 stepNumber > 2
-                  ? 'bg-[#6366F1] text-white'
+                  ? 'bg-[#D99A1C] text-white'
                   : stepNumber === 2
-                  ? 'border-2 border-[#6366F1] bg-white text-[#6366F1] ring-4 ring-indigo-50'
+                  ? 'border-2 border-[#D99A1C] bg-white text-[#D99A1C] ring-4 ring-indigo-50'
                   : 'border border-slate-200 bg-white text-[#64748B]'
               }`}>
                 2
@@ -152,9 +152,9 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
             <div className="flex flex-col items-center relative z-10">
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-150 ${
                 stepNumber > 3
-                  ? 'bg-[#6366F1] text-white'
+                  ? 'bg-[#D99A1C] text-white'
                   : stepNumber === 3
-                  ? 'border-2 border-[#6366F1] bg-white text-[#6366F1] ring-4 ring-indigo-50'
+                  ? 'border-2 border-[#D99A1C] bg-white text-[#D99A1C] ring-4 ring-indigo-50'
                   : 'border border-slate-200 bg-white text-[#64748B]'
               }`}>
                 3
@@ -183,7 +183,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                       name="university"
                       value={formData.university}
                       onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
                     >
                       <option value="Anglia Ruskin University">Anglia Ruskin University</option>
                       <option value="University of Surrey">University of Surrey</option>
@@ -205,7 +205,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                       name="passportCountry"
                       value={formData.passportCountry}
                       onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
                     >
                       <option value="India">India</option>
                       <option value="Nepal">Nepal</option>
@@ -228,7 +228,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                       name="intake"
                       value={formData.intake}
                       onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
                     >
                       <option value="September/October 2026">September/October 2026</option>
                       <option value="January/February 2027">January/February 2027</option>
@@ -246,7 +246,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
               <button
                 type="button"
                 onClick={handleNextStep}
-                className="w-full bg-[#6366F1] hover:bg-[#5053e3] hover:scale-[1.02] text-white font-bold py-2.5 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider mt-6"
+                className="w-full bg-[#D99A1C] hover:bg-[#C28410] hover:scale-[1.02] text-white font-bold py-2.5 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider mt-6"
               >
                 Continue
               </button>
@@ -314,7 +314,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
               <button
                 type="button"
                 onClick={handleNextStep}
-                className="w-full bg-[#6366F1] hover:bg-[#5053e3] hover:scale-[1.02] text-white font-bold py-2.5 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider mt-6"
+                className="w-full bg-[#D99A1C] hover:bg-[#C28410] hover:scale-[1.02] text-white font-bold py-2.5 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider mt-6"
               >
                 Continue
               </button>
@@ -347,7 +347,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
               {/* Section 1: Student Personal Details */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2 border-b border-slate-100 pb-1.5">
-                  <span className="w-4 h-4 bg-[#6366F1] text-white text-[9px] font-bold rounded-full flex items-center justify-center">1</span>
+                  <span className="w-4 h-4 bg-[#D99A1C] text-white text-[9px] font-bold rounded-full flex items-center justify-center">1</span>
                   <h4 className="text-[10px] font-extrabold text-[#0F172A] uppercase tracking-wider">Student Personal Details</h4>
                 </div>
 
@@ -355,35 +355,35 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                   {/* First Name */}
                   <div>
                     <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">First Name</label>
-                    <input required type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white" />
+                    <input required type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white" />
                   </div>
                   {/* Last Name */}
                   <div>
                     <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Last Name</label>
-                    <input required type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white" />
+                    <input required type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white" />
                   </div>
 
                   {/* Passport Expiry Date */}
                   <div>
                     <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Passport Expiry</label>
-                    <input required type="date" name="passportExpiry" value={formData.passportExpiry} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1]" />
+                    <input required type="date" name="passportExpiry" value={formData.passportExpiry} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" />
                   </div>
                   {/* Passport Issue Date */}
                   <div>
                     <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Issue Date</label>
-                    <input required type="date" name="passportIssue" value={formData.passportIssue} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1]" />
+                    <input required type="date" name="passportIssue" value={formData.passportIssue} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" />
                   </div>
 
                   {/* Date of Birth */}
                   <div>
                     <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">DOB</label>
-                    <input required type="date" name="dob" value={formData.dob} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1]" />
+                    <input required type="date" name="dob" value={formData.dob} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" />
                   </div>
                   {/* Gender Select */}
                   <div>
                     <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Gender</label>
                     <div className="relative">
-                      <select name="gender" value={formData.gender} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] cursor-pointer appearance-none">
+                      <select name="gender" value={formData.gender} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] cursor-pointer appearance-none">
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
                         <option value="Other">Other</option>
@@ -399,47 +399,47 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                   {/* State */}
                   <div>
                     <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">State</label>
-                    <input required type="text" name="state" value={formData.state} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1]" />
+                    <input required type="text" name="state" value={formData.state} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" />
                   </div>
                   {/* City */}
                   <div>
                     <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">City</label>
-                    <input required type="text" name="city" value={formData.city} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1]" />
+                    <input required type="text" name="city" value={formData.city} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" />
                   </div>
 
                   {/* WhatsApp */}
                   <div className="col-span-2">
                     <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">WhatsApp Number</label>
                     <div className="flex gap-2">
-                      <select name="whatsappCode" value={formData.whatsappCode} onChange={handleChange} className="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] cursor-pointer">
+                      <select name="whatsappCode" value={formData.whatsappCode} onChange={handleChange} className="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] cursor-pointer">
                         <option value="+91">+91 (IN)</option>
                         <option value="+44">+44 (UK)</option>
                       </select>
-                      <input required type="tel" name="whatsappNumber" value={formData.whatsappNumber} onChange={handleChange} className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1]" placeholder="WhatsApp Number" />
+                      <input required type="tel" name="whatsappNumber" value={formData.whatsappNumber} onChange={handleChange} className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" placeholder="WhatsApp Number" />
                     </div>
                   </div>
 
                   {/* Address Line 1 */}
                   <div className="col-span-2">
                     <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Address Line 1</label>
-                    <input required type="text" name="addressLine1" value={formData.addressLine1} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1]" />
+                    <input required type="text" name="addressLine1" value={formData.addressLine1} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" />
                   </div>
                   {/* Address Line 2 */}
                   <div className="col-span-2">
                     <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Address Line 2</label>
-                    <input type="text" name="addressLine2" value={formData.addressLine2} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1]" />
+                    <input type="text" name="addressLine2" value={formData.addressLine2} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" />
                   </div>
 
                   {/* Pincode */}
                   <div>
                     <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Pincode</label>
-                    <input required type="text" name="pincode" value={formData.pincode} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1]" />
+                    <input required type="text" name="pincode" value={formData.pincode} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" />
                   </div>
                   {/* Country Select */}
                   <div>
                     <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Country</label>
                     <div className="relative">
-                      <select name="country" value={formData.country} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] cursor-pointer appearance-none">
+                      <select name="country" value={formData.country} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] cursor-pointer appearance-none">
                         <option value="India">India</option>
                         <option value="Nepal">Nepal</option>
                         <option value="Nigeria">Nigeria</option>
@@ -456,19 +456,19 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                   {/* Passport No */}
                   <div>
                     <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Passport No</label>
-                    <input required type="text" name="passportNo" value={formData.passportNo} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1]" />
+                    <input required type="text" name="passportNo" value={formData.passportNo} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" />
                   </div>
                   {/* Email */}
                   <div>
                     <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Email ID</label>
-                    <input required type="email" name="email" value={formData.email} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1]" />
+                    <input required type="email" name="email" value={formData.email} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" />
                   </div>
 
                   {/* Previous Visa Refusal select */}
                   <div className="col-span-2">
                     <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Visa Refusal</label>
                     <div className="relative">
-                      <select name="previousRefusal" value={formData.previousRefusal} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] cursor-pointer appearance-none">
+                      <select name="previousRefusal" value={formData.previousRefusal} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] cursor-pointer appearance-none">
                         <option value="No">No</option>
                         <option value="Yes">Yes</option>
                       </select>
@@ -485,7 +485,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
               {/* Section 2: Other Details */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2 border-b border-slate-100 pb-1.5">
-                  <span className="w-4 h-4 bg-[#6366F1] text-white text-[9px] font-bold rounded-full flex items-center justify-center">2</span>
+                  <span className="w-4 h-4 bg-[#D99A1C] text-white text-[9px] font-bold rounded-full flex items-center justify-center">2</span>
                   <h4 className="text-[10px] font-extrabold text-[#0F172A] uppercase tracking-wider">Other Details</h4>
                 </div>
 
@@ -493,17 +493,17 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                   {/* Email of person handling application */}
                   <div>
                     <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Handler Email</label>
-                    <input required type="email" name="handlerEmail" value={formData.handlerEmail} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1]" placeholder="handler@agency.com" />
+                    <input required type="email" name="handlerEmail" value={formData.handlerEmail} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" placeholder="handler@agency.com" />
                   </div>
                   {/* Contact No with +91 code */}
                   <div>
                     <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Handler Phone</label>
                     <div className="flex gap-2">
-                      <select name="handlerContactCode" value={formData.handlerContactCode} onChange={handleChange} className="bg-slate-50 border border-slate-200 rounded-lg px-1.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] cursor-pointer">
+                      <select name="handlerContactCode" value={formData.handlerContactCode} onChange={handleChange} className="bg-slate-50 border border-slate-200 rounded-lg px-1.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] cursor-pointer">
                         <option value="+91">+91</option>
                         <option value="+44">+44</option>
                       </select>
-                      <input required type="tel" name="handlerContact" value={formData.handlerContact} onChange={handleChange} className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1]" placeholder="Contact number" />
+                      <input required type="tel" name="handlerContact" value={formData.handlerContact} onChange={handleChange} className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" placeholder="Contact number" />
                     </div>
                   </div>
                 </div>
@@ -512,14 +512,14 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
               {/* Section 3: Upload Documents */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2 border-b border-slate-100 pb-1.5">
-                  <span className="w-4 h-4 bg-[#6366F1] text-white text-[9px] font-bold rounded-full flex items-center justify-center">3</span>
+                  <span className="w-4 h-4 bg-[#D99A1C] text-white text-[9px] font-bold rounded-full flex items-center justify-center">3</span>
                   <h4 className="text-[10px] font-extrabold text-[#0F172A] uppercase tracking-wider">Upload Documents</h4>
                 </div>
 
                 {/* Dashed indigo border dropzone with cloud icon */}
-                <div className="border-2 border-dashed border-[#6366F1]/50 hover:border-[#6366F1] rounded-xl p-6 bg-indigo-50/10 hover:bg-indigo-50/30 text-center transition-all duration-200 cursor-pointer select-none">
+                <div className="border-2 border-dashed border-[#D99A1C]/50 hover:border-[#D99A1C] rounded-xl p-6 bg-indigo-50/10 hover:bg-indigo-50/30 text-center transition-all duration-200 cursor-pointer select-none">
                   <div className="flex flex-col items-center gap-2">
-                    <div className="p-2.5 bg-white rounded-full shadow-sm text-[#6366F1] border border-indigo-50">
+                    <div className="p-2.5 bg-white rounded-full shadow-sm text-[#D99A1C] border border-indigo-50">
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                       </svg>
@@ -535,7 +535,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
               {/* Full width indigo to cyan gradient Submit button */}
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-[#6366F1] to-[#06B6D4] hover:scale-[1.02] text-white font-bold py-3 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider mt-6"
+                className="w-full bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.02] text-white font-bold py-3 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider mt-6"
               >
                 Submit Application
               </button>
@@ -574,7 +574,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
               <button
                 type="button"
                 onClick={handleResetAndClose}
-                className="bg-[#6366F1] hover:bg-[#5053e3] text-white font-bold py-2.5 px-6 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider mt-4"
+                className="bg-[#D99A1C] hover:bg-[#C28410] text-white font-bold py-2.5 px-6 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider mt-4"
               >
                 Close
               </button>

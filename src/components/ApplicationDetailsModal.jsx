@@ -104,7 +104,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                 Application details for {application.studentName}
               </h2>
               <p className="text-[10px] text-[#64748B] font-semibold mt-0.5">
-                CAMS ID: <span className="text-[#6366F1] font-bold">{application.camsId}</span> &middot; Passport: <span className="font-bold text-[#0F172A]">{application.passportNo}</span>
+                CAMS ID: <span className="text-[#D99A1C] font-bold">{application.camsId}</span> &middot; Passport: <span className="font-bold text-[#0F172A]">{application.passportNo}</span>
               </p>
             </div>
           </div>
@@ -187,7 +187,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                   onClick={() => setActiveTab(tab.id)}
                   className={`py-3 px-4 font-bold text-xs border-b-2 transition-all ${
                     activeTab === tab.id
-                      ? 'border-[#6366F1] text-[#6366F1]'
+                      ? 'border-[#D99A1C] text-[#D99A1C]'
                       : 'border-transparent text-[#64748B] hover:text-[#0F172A]'
                   }`}
                 >
@@ -204,7 +204,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                 <div className="space-y-6">
                   {/* Course Details Card */}
                   <div className="bg-gradient-to-r from-indigo-50/50 to-cyan-50/50 border border-indigo-100/50 rounded-xl p-4.5 space-y-3">
-                    <h4 className="text-[10px] font-extrabold text-[#6366F1] uppercase tracking-wider flex items-center gap-1.5">
+                    <h4 className="text-[10px] font-extrabold text-[#D99A1C] uppercase tracking-wider flex items-center gap-1.5">
                       🎓 Application Choice
                     </h4>
                     <div className="grid grid-cols-2 gap-4">
@@ -250,7 +250,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                       </div>
                       <div>
                         <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Email Address</span>
-                        <span className="text-xs font-semibold text-[#6366F1] underline cursor-pointer">
+                        <span className="text-xs font-semibold text-[#D99A1C] underline cursor-pointer">
                           {application.studentName.toLowerCase().replace(/\s+/g, '')}@example.com
                         </span>
                       </div>
@@ -324,7 +324,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                     <textarea
                       placeholder="Add a progress update, ask helpdesk, or submit details..."
                       rows="2.5"
-                      className="w-full bg-white border border-[#E2E8F0] rounded-xl px-4 py-2.5 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:border-[#6366F1] transition-all resize-none shadow-inner"
+                      className="w-full bg-white border border-[#E2E8F0] rounded-xl px-4 py-2.5 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:border-[#D99A1C] transition-all resize-none shadow-inner"
                       value={newNote}
                       onChange={(e) => setNewNote(e.target.value)}
                     ></textarea>
@@ -332,7 +332,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                       <button
                         type="submit"
                         disabled={!newNote.trim()}
-                        className="bg-[#6366F1] hover:bg-[#5053e3] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-xl text-[10px] uppercase tracking-wider transition-all duration-150 active:scale-95 shadow-md"
+                        className="bg-[#D99A1C] hover:bg-[#C28410] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-xl text-[10px] uppercase tracking-wider transition-all duration-150 active:scale-95 shadow-md"
                       >
                         Post Note
                       </button>
@@ -356,7 +356,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                           <div className="space-y-1">
                             <div className="flex items-baseline gap-2">
                               <h5 className="text-xs font-bold text-slate-800">{note.author}</h5>
-                              <span className="text-[9px] text-[#6366F1] font-extrabold uppercase tracking-wider bg-indigo-50/50 px-1.5 py-0.2 rounded border border-indigo-100/50">
+                              <span className="text-[9px] text-[#D99A1C] font-extrabold uppercase tracking-wider bg-indigo-50/50 px-1.5 py-0.2 rounded border border-indigo-100/50">
                                 {note.role}
                               </span>
                             </div>

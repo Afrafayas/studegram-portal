@@ -48,7 +48,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
           </span>
           <input
             type="text"
-            className="w-full bg-white border border-[#E2E8F0] rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:border-[#6366F1] transition-all"
+            className="w-full bg-white border border-[#E2E8F0] rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:border-[#D99A1C] transition-all"
             placeholder="Search students, CAMS ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -65,7 +65,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
           </button>
 
           {/* Export CSV button */}
-          <button className="border border-[#6366F1] text-[#6366F1] hover:bg-indigo-50 font-semibold px-4 py-2 rounded-xl text-xs transition-all duration-150 hover:scale-[1.02] shadow-sm flex items-center gap-1.5">
+          <button className="border border-[#D99A1C] text-[#D99A1C] hover:bg-indigo-50 font-semibold px-4 py-2 rounded-xl text-xs transition-all duration-150 hover:scale-[1.02] shadow-sm flex items-center gap-1.5">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
@@ -75,7 +75,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
           {/* New Application Button */}
           <button
             onClick={onAddApplicationClick}
-            className="bg-[#6366F1] hover:bg-[#5053e3] text-white font-semibold px-4 py-2 rounded-xl text-xs transition-all duration-150 hover:scale-[1.02] active:scale-95 shadow-md flex items-center gap-1.5"
+            className="bg-[#D99A1C] hover:bg-[#C28410] text-white font-semibold px-4 py-2 rounded-xl text-xs transition-all duration-150 hover:scale-[1.02] active:scale-95 shadow-md flex items-center gap-1.5"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
@@ -104,7 +104,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
                 filteredApps.map((app, index) => (
                   <tr key={index} className="hover:bg-slate-50 transition-colors duration-150">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <a href="#" onClick={(e) => { e.preventDefault(); onViewDetails && onViewDetails(app); }} className="text-[#6366F1] font-bold hover:underline text-xs">{app.camsId}</a>
+                      <a href="#" onClick={(e) => { e.preventDefault(); onViewDetails && onViewDetails(app); }} className="text-[#D99A1C] font-bold hover:underline text-xs">{app.camsId}</a>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-xs font-bold text-[#0F172A]">{app.studentName}</div>

@@ -18,27 +18,27 @@ export default function SearchCourses() {
 
   const allCourses = [
     // United Kingdom
-    { id: 1, title: 'MSc in Computer Science (Artificial Intelligence)', university: 'Anglia Ruskin University', country: 'United Kingdom', level: 'Postgraduate', duration: '12 - 15 Months', intake: 'September 2026', fee: '£16,700/yr', gradient: 'from-[#6366F1] to-[#06B6D4]' },
+    { id: 1, title: 'MSc in Computer Science (Artificial Intelligence)', university: 'Anglia Ruskin University', country: 'United Kingdom', level: 'Postgraduate', duration: '12 - 15 Months', intake: 'September 2026', fee: '£16,700/yr', gradient: 'from-[#D99A1C] to-[#F5B025]' },
     { id: 2, title: 'MBA with Professional Placement', university: 'Coventry University', country: 'United Kingdom', level: 'Postgraduate', duration: '24 Months', intake: 'September 2026', fee: '£19,850/yr', gradient: 'from-teal-500 to-emerald-500' },
     { id: 3, title: 'BSc (Hons) Software Engineering', university: 'University of Surrey', country: 'United Kingdom', level: 'Undergraduate', duration: '3 Years', intake: 'September 2026', fee: '£22,400/yr', gradient: 'from-purple-500 to-pink-500' },
-    { id: 4, title: 'MSc Data Science and Analytics', university: 'University of Hertfordshire', country: 'United Kingdom', level: 'Postgraduate', duration: '1 Year', intake: 'September 2026', fee: '£15,450/yr', gradient: 'from-[#6366F1] to-[#06B6D4]' },
+    { id: 4, title: 'MSc Data Science and Analytics', university: 'University of Hertfordshire', country: 'United Kingdom', level: 'Postgraduate', duration: '1 Year', intake: 'September 2026', fee: '£15,450/yr', gradient: 'from-[#D99A1C] to-[#F5B025]' },
     { id: 5, title: 'MA International Relations', university: 'Nottingham Trent University', country: 'United Kingdom', level: 'Postgraduate', duration: '12 Months', intake: 'January 2027', fee: '£16,000/yr', gradient: 'from-teal-500 to-emerald-500' },
     { id: 6, title: 'BEng (Hons) Mechanical Engineering', university: 'Coventry University', country: 'United Kingdom', level: 'Undergraduate', duration: '3 Years', intake: 'September 2026', fee: '£18,250/yr', gradient: 'from-purple-500 to-pink-500' },
     { id: 7, title: 'International Foundation in Science', university: 'Anglia Ruskin University', country: 'United Kingdom', level: 'Foundation', duration: '9 Months', intake: 'September 2026', fee: '£12,200/yr', gradient: 'from-blue-500 to-indigo-600' },
 
     // Canada
-    { id: 8, title: 'Master of Applied Computing (MScAC)', university: 'University of Toronto', country: 'Canada', level: 'Postgraduate', duration: '16 Months', intake: 'September 2026', fee: '$45,000 CAD/yr', gradient: 'from-[#6366F1] to-[#06B6D4]' },
+    { id: 8, title: 'Master of Applied Computing (MScAC)', university: 'University of Toronto', country: 'Canada', level: 'Postgraduate', duration: '16 Months', intake: 'September 2026', fee: '$45,000 CAD/yr', gradient: 'from-[#D99A1C] to-[#F5B025]' },
     { id: 9, title: 'Master of Management in Finance', university: 'McGill University', country: 'Canada', level: 'Postgraduate', duration: '12 Months', intake: 'September 2026', fee: '$38,000 CAD/yr', gradient: 'from-teal-500 to-emerald-500' },
     { id: 10, title: 'Bachelor of Computer Science (BCS)', university: 'University of British Columbia', country: 'Canada', level: 'Undergraduate', duration: '4 Years', intake: 'September 2026', fee: '$42,000 CAD/yr', gradient: 'from-purple-500 to-pink-500' },
-    { id: 11, title: 'Master of Data Science', university: 'University of British Columbia', country: 'Canada', level: 'Postgraduate', duration: '10 Months', intake: 'September 2026', fee: '$48,000 CAD/yr', gradient: 'from-[#6366F1] to-[#06B6D4]' },
+    { id: 11, title: 'Master of Data Science', university: 'University of British Columbia', country: 'Canada', level: 'Postgraduate', duration: '10 Months', intake: 'September 2026', fee: '$48,000 CAD/yr', gradient: 'from-[#D99A1C] to-[#F5B025]' },
 
     // United States
-    { id: 12, title: 'MS in Computer Science', university: 'New York University', country: 'United States', level: 'Postgraduate', duration: '2 Years', intake: 'September 2026', fee: '$58,000/yr', gradient: 'from-[#6366F1] to-[#06B6D4]' },
+    { id: 12, title: 'MS in Computer Science', university: 'New York University', country: 'United States', level: 'Postgraduate', duration: '2 Years', intake: 'September 2026', fee: '$58,000/yr', gradient: 'from-[#D99A1C] to-[#F5B025]' },
     { id: 13, title: 'MS in Information Systems', university: 'Northeastern University', country: 'United States', level: 'Postgraduate', duration: '18 - 24 Months', intake: 'September 2026', fee: '$52,000/yr', gradient: 'from-teal-500 to-emerald-500' },
     { id: 14, title: 'BS in Economics', university: 'Boston University', country: 'United States', level: 'Undergraduate', duration: '4 Years', intake: 'September 2026', fee: '$55,000/yr', gradient: 'from-purple-500 to-pink-500' },
 
     // Australia
-    { id: 15, title: 'Master of Information Technology', university: 'University of Melbourne', country: 'Australia', level: 'Postgraduate', duration: '2 Years', intake: 'February 2027', fee: '$44,000 AUD/yr', gradient: 'from-[#6366F1] to-[#06B6D4]' },
+    { id: 15, title: 'Master of Information Technology', university: 'University of Melbourne', country: 'Australia', level: 'Postgraduate', duration: '2 Years', intake: 'February 2027', fee: '$44,000 AUD/yr', gradient: 'from-[#D99A1C] to-[#F5B025]' },
     { id: 16, title: 'Master of Commerce', university: 'University of Sydney', country: 'Australia', level: 'Postgraduate', duration: '18 Months', intake: 'February 2027', fee: '$46,000 AUD/yr', gradient: 'from-teal-500 to-emerald-500' },
     { id: 17, title: 'Bachelor of Engineering (Hons)', university: 'Monash University', country: 'Australia', level: 'Undergraduate', duration: '4 Years', intake: 'July 2026', fee: '$41,000 AUD/yr', gradient: 'from-purple-500 to-pink-500' }
   ];
@@ -91,7 +91,7 @@ export default function SearchCourses() {
             <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Course Search</label>
             <input
               type="text"
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white transition-all"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white transition-all"
               placeholder="Search course title..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -103,7 +103,7 @@ export default function SearchCourses() {
             <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">University Country</label>
             <div className="relative">
               <select
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
                 value={country}
                 onChange={(e) => {
                   setCountry(e.target.value);
@@ -128,7 +128,7 @@ export default function SearchCourses() {
             <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Student Nationality</label>
             <div className="relative">
               <select
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
                 value={nationality}
                 onChange={(e) => setNationality(e.target.value)}
               >
@@ -150,7 +150,7 @@ export default function SearchCourses() {
             <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">University</label>
             <div className="relative">
               <select
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
                 value={university}
                 onChange={(e) => setUniversity(e.target.value)}
               >
@@ -173,7 +173,7 @@ export default function SearchCourses() {
             <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Course Level</label>
             <div className="relative">
               <select
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
                 value={courseType}
                 onChange={(e) => setCourseType(e.target.value)}
               >
@@ -209,7 +209,7 @@ export default function SearchCourses() {
                 <div className="absolute inset-0 opacity-10 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:16px_16px]"></div>
 
                 {/* Play button overlay circle */}
-                <button className="relative w-11 h-11 bg-white/20 hover:bg-[#6366F1] hover:scale-110 text-white rounded-full flex items-center justify-center border border-white/20 transition-all duration-150 backdrop-blur-sm shadow-md">
+                <button className="relative w-11 h-11 bg-white/20 hover:bg-[#D99A1C] hover:scale-110 text-white rounded-full flex items-center justify-center border border-white/20 transition-all duration-150 backdrop-blur-sm shadow-md">
                   <svg className="w-4 h-4 fill-current ml-0.5" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z" />
                   </svg>
@@ -225,7 +225,7 @@ export default function SearchCourses() {
               <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                 <div>
                   <p className="text-[10px] font-extrabold text-[#64748B] tracking-wider uppercase mb-1">{course.university}</p>
-                  <h3 className="text-xs font-bold text-[#0F172A] leading-snug group-hover:text-[#6366F1] transition-colors">{course.title}</h3>
+                  <h3 className="text-xs font-bold text-[#0F172A] leading-snug group-hover:text-[#D99A1C] transition-colors">{course.title}</h3>
                 </div>
 
                 {/* specs & Apply Now action on hover */}
@@ -237,7 +237,7 @@ export default function SearchCourses() {
 
                   {/* Apply Now button showing/transitioning on card hover */}
                   <div className="h-9 relative overflow-hidden">
-                    <button className="w-full bg-[#6366F1] hover:bg-[#5053e3] hover:scale-[1.02] text-white text-xs font-bold py-2 rounded-xl transition-all duration-150 opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 shadow-sm">
+                    <button className="w-full bg-[#D99A1C] hover:bg-[#C28410] hover:scale-[1.02] text-white text-xs font-bold py-2 rounded-xl transition-all duration-150 opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 shadow-sm">
                       Apply Now
                     </button>
                   </div>
@@ -266,7 +266,7 @@ export default function SearchCourses() {
               setCourseType('All');
               setSearchQuery('');
             }}
-            className="bg-[#6366F1] hover:bg-[#5053e3] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all duration-150 shadow-md inline-flex items-center gap-1.5"
+            className="bg-[#D99A1C] hover:bg-[#C28410] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all duration-150 shadow-md inline-flex items-center gap-1.5"
           >
             Reset Filters
           </button>
@@ -284,7 +284,7 @@ export default function SearchCourses() {
             setIsSubmitted(false);
             setShowManualModal(true);
           }}
-          className="bg-[#6366F1] hover:bg-[#5053e3] text-white font-bold px-5 py-2.5 rounded-xl text-xs transition-all duration-150 hover:scale-[1.02] shadow-md shrink-0 uppercase tracking-wider"
+          className="bg-[#D99A1C] hover:bg-[#C28410] text-white font-bold px-5 py-2.5 rounded-xl text-xs transition-all duration-150 hover:scale-[1.02] shadow-md shrink-0 uppercase tracking-wider"
         >
           Add Course Manually
         </button>
@@ -337,7 +337,7 @@ export default function SearchCourses() {
                     setShowManualModal(false);
                     setIsSubmitted(false);
                   }}
-                  className="mt-4 bg-[#6366F1] hover:bg-[#5053e3] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all duration-150 shadow-md uppercase tracking-wider"
+                  className="mt-4 bg-[#D99A1C] hover:bg-[#C28410] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all duration-150 shadow-md uppercase tracking-wider"
                 >
                   Done
                 </button>
@@ -363,7 +363,7 @@ export default function SearchCourses() {
                     required
                     type="url"
                     placeholder="Paste university course link here"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white"
                     value={manualCourse.courseUrl}
                     onChange={(e) => setManualCourse({...manualCourse, courseUrl: e.target.value})}
                   />
@@ -375,7 +375,7 @@ export default function SearchCourses() {
                     required
                     type="text"
                     placeholder="Enter university name"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white"
                     value={manualCourse.universityName}
                     onChange={(e) => setManualCourse({...manualCourse, universityName: e.target.value})}
                   />
@@ -387,7 +387,7 @@ export default function SearchCourses() {
                     required
                     type="text"
                     placeholder="Enter course name"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] focus:bg-white"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white"
                     value={manualCourse.courseName}
                     onChange={(e) => setManualCourse({...manualCourse, courseName: e.target.value})}
                   />
@@ -398,7 +398,7 @@ export default function SearchCourses() {
                   <div className="relative">
                     <select
                       required
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#6366F1] cursor-pointer appearance-none pr-8 font-semibold"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] cursor-pointer appearance-none pr-8 font-semibold"
                       value={manualCourse.intake}
                       onChange={(e) => setManualCourse({...manualCourse, intake: e.target.value})}
                     >
@@ -416,7 +416,7 @@ export default function SearchCourses() {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-full bg-[#6366F1] hover:bg-[#5053e3] text-white font-bold py-2 rounded-xl text-xs transition-all duration-150 hover:scale-[1.02] shadow-md uppercase tracking-wider mt-4"
+                  className="w-full bg-[#D99A1C] hover:bg-[#C28410] text-white font-bold py-2 rounded-xl text-xs transition-all duration-150 hover:scale-[1.02] shadow-md uppercase tracking-wider mt-4"
                 >
                   Submit Request
                 </button>
