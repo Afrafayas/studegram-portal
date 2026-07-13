@@ -201,50 +201,66 @@ export default function SearchCourses() {
       {/* Course Cards Grid */}
       {filteredCourses.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCourses.map((course) => (
-            <div key={course.id} className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden flex flex-col group hover:shadow-lg transition-all duration-200">
-              {/* Top banner gradient */}
-              <div className={`relative bg-gradient-to-r ${course.gradient} h-36 flex items-center justify-center overflow-hidden`}>
-                {/* Grid overlay */}
-                <div className="absolute inset-0 opacity-10 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:16px_16px]"></div>
+          {filteredCourses.map((course) => {
+            const isBlueTheme = course.id % 4 === 0;
+            const topBorderClass = isBlueTheme ? 'border-t-[#2563EB]' : 'border-t-[#D99A1C]';
 
-                {/* Play button overlay circle */}
-                <button className="relative w-11 h-11 bg-white/20 hover:bg-[#D99A1C] hover:scale-110 text-white rounded-full flex items-center justify-center border border-white/20 transition-all duration-150 backdrop-blur-sm shadow-md">
-                  <svg className="w-4 h-4 fill-current ml-0.5" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </button>
-
-                {/* Top Right Intake Chip */}
-                <span className="absolute top-3 right-3 bg-white/95 text-[#0F172A] text-[9px] font-extrabold px-2.5 py-0.5 rounded-full shadow-sm select-none">
-                  {course.intake}
-                </span>
-              </div>
-
-              {/* Course Info */}
-              <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                <div>
-                  <p className="text-[10px] font-extrabold text-[#64748B] tracking-wider uppercase mb-1">{course.university}</p>
-                  <h3 className="text-xs font-bold text-[#0F172A] leading-snug group-hover:text-[#D99A1C] transition-colors">{course.title}</h3>
+            return (
+              <div
+                key={course.id}
+                className={`bg-white border border-[#E2E8F0] border-t-4 ${topBorderClass} rounded-2xl shadow-xs overflow-hidden flex flex-col group hover:shadow-md hover:border-slate-300 transition-all duration-200`}
+              >
+                {/* Header Panel */}
+                <div className="h-32 bg-slate-950 p-4 flex flex-col justify-between relative border-b border-slate-900">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] bg-white/10 text-white border border-white/15 font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                      {course.duration}
+                    </span>
+                    <span className="text-[10px] bg-white/10 text-white px-2 py-0.5 rounded-lg border border-white/10 font-bold uppercase tracking-wider">
+                      {course.intake}
+                    </span>
+                  </div>
+                  <div className="text-white">
+                    <h3 className="font-extrabold text-sm truncate leading-tight pr-6">{course.title}</h3>
+                    <p className="text-[10px] text-slate-400 font-semibold flex items-center gap-1 mt-0.5">
+                      <span className="truncate">{course.university}</span>
+                    </p>
+                  </div>
                 </div>
 
-                {/* specs & Apply Now action on hover */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between text-[10px] text-[#64748B] font-semibold border-t border-slate-50 pt-3">
-                    <span>Duration: {course.duration}</span>
-                    <span className="text-[#0F172A]">{course.fee}</span>
+                {/* Course Info */}
+                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                  {/* Detailed key-value rows */}
+                  <div className="grid grid-cols-2 gap-3 text-xs border-b border-slate-100 pb-3">
+                    <div>
+                      <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-0.5">Duration</span>
+                      <span className="font-bold text-[#0F172A]">{course.duration}</span>
+                    </div>
+                    <div>
+                      <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-0.5">Est. Fees</span>
+                      <span className="font-bold text-[#0F172A]">{course.fee}</span>
+                    </div>
                   </div>
 
-                  {/* Apply Now button showing/transitioning on card hover */}
-                  <div className="h-9 relative overflow-hidden">
-                    <button className="w-full bg-[#D99A1C] hover:bg-[#C28410] hover:scale-[1.02] text-white text-xs font-bold py-2 rounded-xl transition-all duration-150 opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 shadow-sm">
+                  {/* Actions */}
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      onClick={() => alert(`Details and admission requirements checklist for ${course.title} has been synchronized to your downloads.`)}
+                      className="flex-1 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-xs font-bold text-slate-700 py-2.5 rounded-xl text-center transition-all duration-150"
+                    >
+                      Check Specs
+                    </button>
+                    <button
+                      onClick={() => alert(`Initiating student application file for ${course.title} at ${course.university}.`)}
+                      className="flex-1 bg-[#D99A1C] hover:bg-[#B87C0E] hover:scale-[1.01] active:scale-95 text-xs font-bold text-white py-2.5 rounded-xl text-center transition-all duration-150 shadow-xs"
+                    >
                       Apply Now
                     </button>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         /* Empty State */

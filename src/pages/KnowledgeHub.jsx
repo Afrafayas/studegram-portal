@@ -301,55 +301,64 @@ export default function KnowledgeHub() {
       {!selectedCountry ? (
         filteredCountries.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCountries.map((c) => (
-              <div
-                key={c.id}
-                onClick={() => handleSelectCountry(c)}
-                className="bg-white border border-[#E2E8F0] rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between group hover:shadow-md hover:scale-[1.01] cursor-pointer transition-all duration-200"
-              >
-                {/* Accent Header Banner */}
-                <div className={`h-24 bg-gradient-to-r ${c.accentColor} p-4 flex flex-col justify-between text-white relative`}>
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl bg-white/20 backdrop-blur-md px-2.5 py-0.5 rounded-full">{c.flag}</span>
-                    <span className="text-[10px] bg-white/20 backdrop-blur-md px-2.5 py-1 rounded-full uppercase tracking-wider font-extrabold text-white">
-                      Rating: {c.rating} ⭐
-                    </span>
-                  </div>
-                  <h3 className="font-extrabold text-base tracking-wide leading-tight">{c.name}</h3>
-                </div>
+            {filteredCountries.map((c, idx) => {
+              const isBlueTheme = idx % 2 === 0;
+              const topBorderClass = isBlueTheme ? 'border-t-[#2563EB]' : 'border-t-[#D99A1C]';
+              const starColorClass = isBlueTheme ? 'text-[#2563EB]' : 'text-[#D99A1C]';
 
-                {/* Card Info */}
-                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                  <p className="text-[11px] text-[#64748B] font-semibold leading-relaxed line-clamp-2">
-                    {c.description}
-                  </p>
-
-                  {/* Highlights Grid */}
-                  <div className="grid grid-cols-3 gap-2 border-t border-slate-50 pt-3.5 text-center">
-                    <div>
-                      <span className="block text-[8px] font-extrabold text-[#94A3B8] uppercase tracking-wider mb-0.5">Capital</span>
-                      <span className="text-[10px] font-bold text-[#334155] truncate block">{c.capital}</span>
+              return (
+                <div
+                  key={c.id}
+                  onClick={() => handleSelectCountry(c)}
+                  className={`bg-white border border-[#E2E8F0] border-t-4 ${topBorderClass} rounded-2xl overflow-hidden shadow-xs flex flex-col justify-between group hover:shadow-md hover:border-slate-300 hover:scale-[1.01] cursor-pointer transition-all duration-200`}
+                >
+                  {/* Header Panel */}
+                  <div className="h-24 bg-slate-950 p-4 flex flex-col justify-between relative border-b border-slate-900">
+                    <div className="flex items-center justify-between">
+                      <span className="text-2xl bg-white/10 px-2.5 py-0.5 rounded-full select-none">{c.flag}</span>
+                      <div className="flex items-center gap-1 bg-white/10 text-white px-2 py-0.5 rounded-lg text-xs font-bold border border-white/10">
+                        <svg className={`w-3.5 h-3.5 fill-current ${starColorClass}`} viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <span>{c.rating}</span>
+                      </div>
                     </div>
-                    <div>
-                      <span className="block text-[8px] font-extrabold text-[#94A3B8] uppercase tracking-wider mb-0.5">Currency</span>
-                      <span className="text-[10px] font-bold text-[#334155] truncate block">{c.currency}</span>
-                    </div>
-                    <div>
-                      <span className="block text-[8px] font-extrabold text-[#94A3B8] uppercase tracking-wider mb-0.5">Post-Work</span>
-                      <span className="text-[10px] font-bold text-[#334155] truncate block">{c.standardPsw}</span>
-                    </div>
+                    <h3 className="font-extrabold text-sm text-white leading-tight">{c.name}</h3>
                   </div>
 
-                  {/* Explore Button */}
-                  <button
-                    onClick={() => handleSelectCountry(c)}
-                    className="w-full bg-slate-50 border border-slate-200 group-hover:bg-[#D99A1C] group-hover:text-white group-hover:border-transparent text-xs font-bold text-[#475569] py-2 rounded-xl text-center transition-all duration-150"
-                  >
-                    Explore Guide
-                  </button>
+                  {/* Card Info */}
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <p className="text-[11px] text-[#64748B] font-semibold leading-relaxed line-clamp-2">
+                      {c.description}
+                    </p>
+
+                    {/* Highlights Grid */}
+                    <div className="grid grid-cols-3 gap-2 border-t border-slate-50 pt-3.5 text-center">
+                      <div>
+                        <span className="block text-[8px] font-extrabold text-[#94A3B8] uppercase tracking-wider mb-0.5">Capital</span>
+                        <span className="text-[10px] font-bold text-[#334155] truncate block">{c.capital}</span>
+                      </div>
+                      <div>
+                        <span className="block text-[8px] font-extrabold text-[#94A3B8] uppercase tracking-wider mb-0.5">Currency</span>
+                        <span className="text-[10px] font-bold text-[#334155] truncate block">{c.currency}</span>
+                      </div>
+                      <div>
+                        <span className="block text-[8px] font-extrabold text-[#94A3B8] uppercase tracking-wider mb-0.5">Post-Work</span>
+                        <span className="text-[10px] font-bold text-[#334155] truncate block">{c.standardPsw}</span>
+                      </div>
+                    </div>
+
+                    {/* Explore Button */}
+                    <button
+                      onClick={() => handleSelectCountry(c)}
+                      className="w-full bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-xs font-bold text-slate-700 py-2.5 rounded-xl text-center transition-all duration-150"
+                    >
+                      Explore Guide
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           /* Empty search state */

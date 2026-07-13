@@ -406,69 +406,74 @@ export default function Webinar() {
         /* Webinars Cards Grid */
         filteredWebinars.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">
-            {filteredWebinars.map((webinar) => (
-              <div
-                key={webinar.id}
-                className="bg-white border border-[#E2E8F0] rounded-2xl overflow-hidden shadow-sm flex flex-col hover:shadow-md transition-all duration-200"
-              >
-                {/* Poster Display */}
-                <div className="h-48 relative overflow-hidden bg-slate-100 group border-b border-slate-100">
-                  <img
-                    src={webinar.poster}
-                    alt={webinar.title}
-                    className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-200"
-                  />
-                  <div className="absolute top-3 left-3 flex gap-2">
-                    <span className={`text-[9px] font-extrabold uppercase px-2.5 py-0.5 rounded-full shadow-xs border ${
-                      webinar.status === 'Upcoming'
-                        ? 'bg-amber-50 text-amber-700 border-amber-100'
-                        : 'bg-slate-100 text-slate-700 border-slate-200'
-                    }`}>
-                      {webinar.status}
-                    </span>
-                  </div>
-                </div>
+            {filteredWebinars.map((webinar, idx) => {
+              const isBlueTheme = idx % 2 === 0;
+              const topBorderClass = isBlueTheme ? 'border-t-[#2563EB]' : 'border-t-[#D99A1C]';
 
-                {/* Card Content details */}
-                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                  <div className="space-y-2">
-                    <div className="text-[10px] font-extrabold text-[#D99A1C] uppercase tracking-wider">
-                      {webinar.university}
+              return (
+                <div
+                  key={webinar.id}
+                  className={`bg-white border border-[#E2E8F0] border-t-4 ${topBorderClass} rounded-2xl overflow-hidden shadow-xs flex flex-col hover:shadow-md hover:border-slate-300 transition-all duration-200`}
+                >
+                  {/* Poster Display */}
+                  <div className="h-48 relative overflow-hidden bg-slate-100 group border-b border-slate-100">
+                    <img
+                      src={webinar.poster}
+                      alt={webinar.title}
+                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-200"
+                    />
+                    <div className="absolute top-3 left-3 flex gap-2">
+                      <span className={`text-[9px] font-extrabold uppercase px-2.5 py-0.5 rounded-full shadow-xs border ${
+                        webinar.status === 'Upcoming'
+                          ? 'bg-amber-50 text-amber-700 border-amber-100'
+                          : 'bg-slate-100 text-slate-700 border-slate-200'
+                      }`}>
+                        {webinar.status}
+                      </span>
                     </div>
-                    <h3 className="font-extrabold text-sm text-[#0F172A] leading-snug truncate-2-lines min-h-[40px]">
-                      {webinar.title}
-                    </h3>
-                    <p className="text-[11px] text-[#64748B] leading-relaxed font-semibold line-clamp-3">
-                      {webinar.description}
-                    </p>
                   </div>
 
-                  {/* Footer & CTA */}
-                  <div className="border-t border-slate-50 pt-3 space-y-3">
-                    <div className="flex items-center justify-between text-xs text-[#475569] font-bold">
-                      <div className="flex items-center gap-1.5">
-                        <svg className="w-4 h-4 text-[#D99A1C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span>{formatDateString(webinar.date)}</span>
+                  {/* Card Content details */}
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <div className="space-y-2">
+                      <div className="text-[10px] font-extrabold text-[#D99A1C] uppercase tracking-wider">
+                        {webinar.university}
                       </div>
+                      <h3 className="font-extrabold text-sm text-[#0F172A] leading-snug truncate-2-lines min-h-[40px]">
+                        {webinar.title}
+                      </h3>
+                      <p className="text-[11px] text-[#64748B] leading-relaxed font-semibold line-clamp-3">
+                        {webinar.description}
+                      </p>
                     </div>
 
-                    <a
-                      href={webinar.youtubeUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full flex items-center justify-center gap-2 bg-[#EF4444] hover:bg-[#DC2626] text-white text-xs font-bold py-2.5 rounded-xl transition-all duration-150 shadow-xs hover:scale-[1.01] active:scale-95 text-center"
-                    >
-                      <svg className="w-4 h-4 fill-current text-white shrink-0" viewBox="0 0 24 24">
-                        <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.517 3.545 12 3.545 12 3.545s-7.517 0-9.388.508a3.003 3.003 0 0 0-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.871.508 9.388.508 9.388.508s7.517 0 9.388-.508a3.003 3.003 0 0 0 2.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                      </svg>
-                      Watch on YouTube
-                    </a>
+                    {/* Footer & CTA */}
+                    <div className="border-t border-slate-50 pt-3 space-y-3">
+                      <div className="flex items-center justify-between text-xs text-[#475569] font-bold">
+                        <div className="flex items-center gap-1.5">
+                          <svg className="w-4 h-4 text-[#D99A1C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <span>{formatDateString(webinar.date)}</span>
+                        </div>
+                      </div>
+
+                      <a
+                        href={webinar.youtubeUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full flex items-center justify-center gap-2 bg-[#EF4444] hover:bg-[#DC2626] text-white text-xs font-bold py-2.5 rounded-xl transition-all duration-150 shadow-xs hover:scale-[1.01] active:scale-95 text-center"
+                      >
+                        <svg className="w-4 h-4 fill-current text-white shrink-0" viewBox="0 0 24 24">
+                          <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.517 3.545 12 3.545 12 3.545s-7.517 0-9.388.508a3.003 3.003 0 0 0-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.871.508 9.388.508 9.388.508s7.517 0 9.388-.508a3.003 3.003 0 0 0 2.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        </svg>
+                        Watch on YouTube
+                      </a>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           /* Empty Webinars State */
@@ -496,85 +501,86 @@ export default function Webinar() {
         /* Informatives Cards Grid */
         filteredInformatives.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">
-            {filteredInformatives.map((info) => (
-              <div
-                key={info.id}
-                className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between"
-              >
-                <div className="space-y-4">
-                  {/* Format Tag Header */}
-                  <div className="flex items-center justify-between">
-                    <span className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded border tracking-wider ${
-                      info.type === 'PDF' ? 'bg-red-50 text-red-700 border-red-100' :
-                      info.type === 'Video' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                      'bg-emerald-50 text-emerald-700 border-emerald-100'
-                    }`}>
-                      {info.type}
-                    </span>
-                    <span className="text-[10px] text-[#64748B] font-bold">
-                      {info.type === 'PDF' && info.fileSize}
-                      {info.type === 'Video' && `Play time: ${info.duration}`}
-                      {info.type === 'Image' && 'Photo'}
-                    </span>
+            {filteredInformatives.map((info, idx) => {
+              const isBlueTheme = idx % 2 === 0;
+              const topBorderClass = isBlueTheme ? 'border-t-[#2563EB]' : 'border-t-[#D99A1C]';
+
+              return (
+                <div
+                  key={info.id}
+                  className={`bg-white border border-[#E2E8F0] border-t-4 ${topBorderClass} rounded-2xl overflow-hidden shadow-xs flex flex-col justify-between group hover:shadow-md hover:border-slate-300 transition-all duration-200`}
+                >
+                  {/* Header Panel */}
+                  <div className="h-24 bg-slate-950 p-4 flex flex-col justify-between relative border-b border-slate-900">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] bg-white/10 text-white border border-white/15 font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                        {info.type}
+                      </span>
+                      <span className="text-[10px] bg-white/10 text-white px-2 py-0.5 rounded-lg border border-white/10 font-bold">
+                        {info.type === 'PDF' && info.fileSize}
+                        {info.type === 'Video' && `${info.duration}`}
+                        {info.type === 'Image' && 'Photo'}
+                      </span>
+                    </div>
+                    <div className="text-white">
+                      <h3 className="font-extrabold text-sm truncate leading-tight pr-6">{info.title}</h3>
+                      <p className="text-[10px] text-slate-400 font-semibold flex items-center gap-1 mt-0.5">
+                        <span className="truncate">{info.university}</span>
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Title & Info */}
-                  <div className="space-y-1.5">
-                    <div className="text-[9px] font-extrabold text-[#D99A1C] uppercase tracking-wider">
-                      {info.university}
-                    </div>
-                    <h3 className="font-extrabold text-sm text-[#0F172A] leading-snug">
-                      {info.title}
-                    </h3>
+                  {/* Card Body */}
+                  <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                     <p className="text-[11px] text-[#64748B] font-semibold leading-relaxed line-clamp-3">
                       {info.description}
                     </p>
+
+                    {/* Media Actions */}
+                    <div className="pt-4 border-t border-slate-50 mt-4">
+                      {info.type === 'PDF' && (
+                        <a
+                          href={info.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full flex items-center justify-center gap-1.5 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold py-2.5 rounded-xl transition-all shadow-xs text-center"
+                        >
+                          <svg className="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          Download Prospectus PDF
+                        </a>
+                      )}
+
+                      {info.type === 'Video' && (
+                        <button
+                          onClick={() => setViewingVideo(info)}
+                          className="w-full flex items-center justify-center gap-1.5 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold py-2.5 rounded-xl transition-all shadow-xs"
+                        >
+                          <svg className="w-4 h-4 text-slate-700 fill-current" viewBox="0 0 20 20">
+                            <path d="M4 4l12 6-12 6V4z" />
+                          </svg>
+                          Watch Campus Video Tour
+                        </button>
+                      )}
+
+                      {info.type === 'Image' && (
+                        <button
+                          onClick={() => setViewingImage(info)}
+                          className="w-full flex items-center justify-center gap-1.5 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold py-2.5 rounded-xl transition-all shadow-xs"
+                        >
+                          <svg className="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          Zoom Image Gallery
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-
-                {/* Media Specific CTA Actions */}
-                <div className="pt-5 border-t border-slate-50 mt-4">
-                  {info.type === 'PDF' && (
-                    <a
-                      href={info.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full flex items-center justify-center gap-1.5 bg-[#0F172A] hover:bg-[#1E293B] text-white text-xs font-bold py-2 rounded-xl transition-all shadow-xs text-center"
-                    >
-                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      Open & Download Prospectus PDF
-                    </a>
-                  )}
-
-                  {info.type === 'Video' && (
-                    <button
-                      onClick={() => setViewingVideo(info)}
-                      className="w-full flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 rounded-xl transition-all shadow-xs"
-                    >
-                      <svg className="w-4 h-4 text-white fill-current" viewBox="0 0 20 20">
-                        <path d="M4 4l12 6-12 6V4z" />
-                      </svg>
-                      Watch Campus Video Tour
-                    </button>
-                  )}
-
-                  {info.type === 'Image' && (
-                    <button
-                      onClick={() => setViewingImage(info)}
-                      className="w-full flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 rounded-xl transition-all shadow-xs"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      Zoom Image Gallery
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           /* Empty Informatives State */
