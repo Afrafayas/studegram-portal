@@ -203,13 +203,17 @@ export default function KnowledgeHub() {
 
   // Lock background scrolling when video modal is open
   useEffect(() => {
+    const mainElement = document.querySelector('main');
     if (viewingVideo) {
       document.body.style.overflow = 'hidden';
+      if (mainElement) mainElement.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
+      if (mainElement) mainElement.style.overflow = '';
     }
     return () => {
       document.body.style.overflow = '';
+      if (mainElement) mainElement.style.overflow = '';
     };
   }, [viewingVideo]);
 
@@ -458,7 +462,8 @@ export default function KnowledgeHub() {
   };
 
   return (
-    <div className="flex-1 p-8 space-y-8 bg-[#F0F2F5] animate-fade-in-up">
+    <div className="flex-1 bg-[#F0F2F5]">
+      <div className="p-8 space-y-8 animate-fade-in-up">
       
       {/* Dynamic View Header */}
       {!selectedCountry ? (
@@ -983,6 +988,7 @@ export default function KnowledgeHub() {
           </div>
         </div>
       )}
+      </div> {/* Closing animation wrapper */}
 
       {/* Video Playback Lightbox Modal */}
       {viewingVideo && (
