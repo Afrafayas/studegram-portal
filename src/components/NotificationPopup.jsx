@@ -67,6 +67,18 @@ export default function NotificationPopup({ onViewNotice }) {
     }
   }, [nextNotification, activeNotification]);
 
+  // Lock background scrolling when activeNotification is present
+  useEffect(() => {
+    if (activeNotification) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [activeNotification]);
+
   if (!activeNotification) return null;
 
   const handleClose = () => {
@@ -106,49 +118,49 @@ export default function NotificationPopup({ onViewNotice }) {
 
   return (
     <div
-      className={`fixed top-20 left-1/2 z-50 max-w-2xl w-[calc(100%-2rem)] p-5 rounded-2xl border-2 border-[#D99A1C] transition-all duration-300
-        backdrop-blur-md bg-white/95 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.3)] shadow-[#D99A1C]/20
+      className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 max-w-3xl w-[calc(100%-2rem)] p-8 rounded-3xl border border-slate-200/50 transition-all duration-300
+        backdrop-blur-md bg-white/95 shadow-[0_32px_64px_-16px_rgba(15,23,42,0.15)]
         overflow-y-auto max-h-[calc(100vh-6rem)]
         ${isClosing ? 'animate-slide-out-top' : 'animate-slide-in-top'}
       `}
     >
       {/* Type-based Top Glow/Gradients */}
       <div
-        className={`absolute inset-x-0 top-0 h-1.5 rounded-t-2xl ${
-          isImportant ? 'bg-gradient-to-r from-amber-500 to-rose-500' : 'bg-gradient-to-r from-indigo-500 to-violet-500'
+        className={`absolute inset-x-0 top-0 h-1 rounded-t-3xl ${
+          isImportant ? 'bg-gradient-to-r from-rose-500 to-amber-500' : 'bg-gradient-to-r from-indigo-500 to-violet-500'
         }`}
       />
 
       {/* Floating Highlighted Close Button */}
       <button
         onClick={handleClose}
-        className="absolute top-4 right-4 z-50 w-8 h-8 rounded-full bg-slate-950/80 hover:bg-rose-600 text-white shadow-md border border-white/20 flex items-center justify-center transition-all duration-150 hover:scale-110 active:scale-95 group"
+        className="absolute top-5 right-5 z-50 w-8 h-8 rounded-full bg-white/90 hover:bg-rose-50 text-slate-700 hover:text-rose-600 shadow-sm border border-slate-200/60 flex items-center justify-center transition-all duration-150 hover:scale-105 active:scale-95 group"
         aria-label="Close notification"
       >
-        <svg className="w-4 h-4 transform group-hover:rotate-90 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-3.5 h-3.5 transform group-hover:rotate-90 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
 
       {/* Top Banner Area (always rendered with same height for uniform sizing) */}
-      <div className="mb-4 overflow-hidden rounded-xl border border-slate-200/30 shadow-inner h-56 relative bg-slate-50">
+      <div className="mb-6 overflow-hidden rounded-2xl border border-slate-100 shadow-inner h-64 relative bg-slate-50">
         {activeNotification.image ? (
           <img
             src={activeNotification.image}
             alt={activeNotification.title}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover hover:scale-103 transition-transform duration-500"
           />
         ) : (
           /* Premium fallback gradient banner with abstract icon */
           <div className={`w-full h-full bg-gradient-to-tr flex flex-col items-center justify-center relative overflow-hidden
-            ${isImportant ? 'from-amber-600 to-rose-700' : 'from-indigo-600 to-violet-700'}
+            ${isImportant ? 'from-rose-500 via-rose-600 to-amber-500' : 'from-indigo-500 via-purple-500 to-violet-600'}
           `}>
             {/* Abstract decorative pattern */}
             <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
             
             {/* Glowing orb */}
-            <div className={`absolute -top-10 left-1/2 -translate-x-1/2 w-40 h-40 rounded-full blur-2xl animate-pulse
-              ${isImportant ? 'bg-rose-400/30' : 'bg-violet-400/30'}
+            <div className={`absolute -top-10 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full blur-2xl animate-pulse
+              ${isImportant ? 'bg-amber-400/30' : 'bg-violet-400/30'}
             `}></div>
             
             <div className={`z-10 w-16 h-16 rounded-full flex items-center justify-center shadow-lg backdrop-blur-md border
@@ -186,38 +198,38 @@ export default function NotificationPopup({ onViewNotice }) {
         </span>
       </div>
 
-      <div className="mt-3.5 space-y-2 min-h-[96px]">
-        <h4 className="text-lg md:text-xl font-extrabold text-slate-900 leading-snug">
+      <div className="mt-4 space-y-2 min-h-[96px]">
+        <h4 className="text-xl md:text-2xl font-extrabold text-slate-900 leading-snug tracking-tight">
           {activeNotification.title}
         </h4>
-        <p className="text-sm md:text-base text-slate-600 leading-relaxed font-semibold line-clamp-2">
+        <p className="text-xs md:text-sm text-slate-600 leading-relaxed font-semibold line-clamp-3">
           {activeNotification.message}
         </p>
       </div>
 
-      <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+      <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
         <button
           onClick={handleClose}
-          className="px-3.5 py-2 rounded-xl text-slate-500 hover:text-slate-700 text-xs font-bold transition-all duration-150 hover:bg-slate-50"
+          className="px-4 py-2.5 rounded-xl text-slate-400 hover:text-slate-600 text-xs font-bold transition-all duration-150 hover:bg-slate-50"
         >
           Remind Me Later
         </button>
         <div className="flex items-center gap-2.5">
           <button
             onClick={handleMarkAsRead}
-            className="px-3.5 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-bold transition-all duration-150"
+            className="px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 text-xs font-bold transition-all duration-150 border border-slate-200/50"
           >
             Mark as Read
           </button>
           <button
             onClick={handleView}
-            className={`px-4.5 py-2 rounded-xl text-white text-xs font-bold transition-all duration-150 hover:scale-[1.02] active:scale-95 shadow-md flex items-center gap-1.5
-              ${isImportant ? 'bg-gradient-to-r from-amber-500 to-rose-500 shadow-amber-200/50' : 'bg-gradient-to-r from-indigo-500 to-violet-500 shadow-indigo-200/50'}
+            className={`px-5 py-2.5 rounded-xl text-white text-xs font-bold transition-all duration-150 hover:scale-[1.02] active:scale-95 shadow-md flex items-center gap-1.5
+              ${isImportant ? 'bg-gradient-to-r from-rose-500 to-amber-500 shadow-rose-200/50' : 'bg-gradient-to-r from-indigo-500 to-violet-500 shadow-indigo-200/50'}
             `}
           >
             <span>View Details</span>
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7-7" />
             </svg>
           </button>
         </div>
