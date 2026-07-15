@@ -113,6 +113,18 @@ export default function Webinar() {
     localStorage.setItem('studegram_webinars', JSON.stringify(webinars));
   }, [webinars]);
 
+  // Lock background scrolling when modal is open
+  useEffect(() => {
+    if (showUploadModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showUploadModal]);
+
   // Handle Poster File Upload & Convert to Base64
   const processFile = (file) => {
     if (file && file.type.startsWith('image/')) {

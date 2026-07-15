@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const REPRESENTED_UNIVERSITIES = {
   uk: [
@@ -200,6 +200,18 @@ export default function KnowledgeHub() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('visa'); // visa, living, work, psw, universities
   const [viewingVideo, setViewingVideo] = useState(null);
+
+  // Lock background scrolling when video modal is open
+  useEffect(() => {
+    if (viewingVideo) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [viewingVideo]);
 
   const countryGuides = [
     {
