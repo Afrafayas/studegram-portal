@@ -1,9 +1,205 @@
 import React, { useState } from 'react';
 
+const REPRESENTED_UNIVERSITIES = {
+  uk: [
+    {
+      name: 'Anglia Ruskin University',
+      city: 'Chelmsford & Cambridge',
+      ranking: '#351-400 Global',
+      intake: 'Sep, Jan, May',
+      fee: '£16,700/yr',
+      rating: '4.5',
+      badge: 'Popular Choice',
+      badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+      popularCourses: ['MSc Computer Science (AI)', 'MBA with Placement'],
+      websiteUrl: 'https://www.aru.ac.uk',
+      videoUrl: 'https://www.youtube.com/embed/HKwmD9yFBx8'
+    },
+    {
+      name: 'University of Surrey',
+      city: 'Guildford',
+      ranking: '#244 Global',
+      intake: 'September, January',
+      fee: '£22,400/yr',
+      rating: '4.8',
+      badge: 'Top Ranked',
+      badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-100',
+      popularCourses: ['International Hotel Management', 'Software Engineering'],
+      websiteUrl: 'https://www.surrey.ac.uk',
+      videoUrl: 'https://www.youtube.com/embed/SwCf8B07_s8'
+    },
+    {
+      name: 'Coventry University',
+      city: 'Coventry',
+      ranking: '#501-600 Global',
+      intake: 'Sep, Jan, May',
+      fee: '£19,850/yr',
+      rating: '4.3',
+      badge: 'High Acceptance',
+      badgeColor: 'bg-amber-50 text-amber-700 border-amber-100',
+      popularCourses: ['MBA Global Business', 'Mechanical Engineering'],
+      websiteUrl: 'https://www.coventry.ac.uk',
+      videoUrl: 'https://www.youtube.com/embed/71Y8QnykFi4'
+    },
+    {
+      name: 'University of Hertfordshire',
+      city: 'Hatfield',
+      ranking: '#601-800 Global',
+      intake: 'September, January',
+      fee: '£15,450/yr',
+      rating: '4.2',
+      badge: 'Affordable',
+      badgeColor: 'bg-blue-50 text-blue-700 border-blue-100',
+      popularCourses: ['Data Science & Analytics', 'Cyber Security MSc'],
+      websiteUrl: 'https://www.herts.ac.uk',
+      videoUrl: 'https://www.youtube.com/embed/PwBtjFEv8UU'
+    }
+  ],
+  ireland: [
+    {
+      name: 'Trinity College Dublin',
+      city: 'Dublin',
+      ranking: '#81 Global',
+      intake: 'September',
+      fee: '€18,500/yr',
+      rating: '4.9',
+      badge: 'Prestigious',
+      badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-100',
+      popularCourses: ['MSc Computer Science', 'MBA'],
+      websiteUrl: 'https://www.tcd.ie',
+      videoUrl: 'https://www.youtube.com/embed/3z_s7v60N8c'
+    },
+    {
+      name: 'University College Dublin',
+      city: 'Dublin',
+      ranking: '#126 Global',
+      intake: 'September, January',
+      fee: '€19,200/yr',
+      rating: '4.7',
+      badge: 'Top Research',
+      badgeColor: 'bg-purple-50 text-purple-700 border-purple-100',
+      popularCourses: ['MSc Data & Computational Science', 'Master of Business'],
+      websiteUrl: 'https://www.ucd.ie',
+      videoUrl: 'https://www.youtube.com/embed/jI2WwP023W4'
+    }
+  ],
+  canada: [
+    {
+      name: 'University of Toronto',
+      city: 'Toronto',
+      ranking: '#21 Global',
+      intake: 'September',
+      fee: '$45,000 CAD/yr',
+      rating: '4.9',
+      badge: 'Ivy League Equivalent',
+      badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-100',
+      popularCourses: ['Applied Computing MSc', 'MBA Rotman School'],
+      websiteUrl: 'https://www.utoronto.ca',
+      videoUrl: 'https://www.youtube.com/embed/d_Mwi4fG7L8'
+    },
+    {
+      name: 'McGill University',
+      city: 'Montreal',
+      ranking: '#30 Global',
+      intake: 'September, January',
+      fee: '$38,000 CAD/yr',
+      rating: '4.8',
+      badge: 'Research Focused',
+      badgeColor: 'bg-purple-50 text-purple-700 border-purple-100',
+      popularCourses: ['Master of Management', 'Computer Engineering'],
+      websiteUrl: 'https://www.mcgill.ca',
+      videoUrl: 'https://www.youtube.com/embed/uK1XW1pve40'
+    },
+    {
+      name: 'University of British Columbia',
+      city: 'Vancouver',
+      ranking: '#34 Global',
+      intake: 'September, January',
+      fee: '$40,000 CAD/yr',
+      rating: '4.8',
+      badge: 'Beautiful Campus',
+      badgeColor: 'bg-rose-50 text-rose-700 border-rose-100',
+      popularCourses: ['Data Science', 'Sauder MBA'],
+      websiteUrl: 'https://www.ubc.ca',
+      videoUrl: 'https://www.youtube.com/embed/h53F4vLz96U'
+    }
+  ],
+  australia: [
+    {
+      name: 'University of Melbourne',
+      city: 'Melbourne',
+      ranking: '#14 Global',
+      intake: 'February, July',
+      fee: '$44,000 AUD/yr',
+      rating: '4.8',
+      badge: '#1 in Australia',
+      badgeColor: 'bg-rose-50 text-rose-700 border-rose-100',
+      popularCourses: ['Master of Information Technology', 'Biomedicine'],
+      websiteUrl: 'https://www.unimelb.edu.au',
+      videoUrl: 'https://www.youtube.com/embed/sOsk7yD9yN4'
+    },
+    {
+      name: 'University of Sydney',
+      city: 'Sydney',
+      ranking: '#19 Global',
+      intake: 'February, July',
+      fee: '$46,000 AUD/yr',
+      rating: '4.7',
+      badge: 'Highly Employable',
+      badgeColor: 'bg-amber-50 text-amber-700 border-amber-100',
+      popularCourses: ['Master of Commerce', 'Software Engineering'],
+      websiteUrl: 'https://www.sydney.edu.au',
+      videoUrl: 'https://www.youtube.com/embed/Gk74R2LzX-c'
+    }
+  ],
+  usa: [
+    {
+      name: 'New York University',
+      city: 'New York City',
+      ranking: '#38 Global',
+      intake: 'September, January',
+      fee: '$58,000/yr',
+      rating: '4.9',
+      badge: 'Global Prestige',
+      badgeColor: 'bg-purple-50 text-purple-700 border-purple-100',
+      popularCourses: ['MS in Computer Science', 'MBA Stern School'],
+      websiteUrl: 'https://www.nyu.edu',
+      videoUrl: 'https://www.youtube.com/embed/9g0HszZ7FmI'
+    },
+    {
+      name: 'Northeastern University',
+      city: 'Boston',
+      ranking: '#53 Global',
+      intake: 'September, January',
+      fee: '$52,000/yr',
+      rating: '4.6',
+      badge: 'Co-op Program Leader',
+      badgeColor: 'bg-sky-50 text-sky-700 border-sky-100',
+      popularCourses: ['Information Systems MS', 'Bioengineering'],
+      websiteUrl: 'https://www.northeastern.edu',
+      videoUrl: 'https://www.youtube.com/embed/yW63jJjXqD8'
+    },
+    {
+      name: 'Boston University',
+      city: 'Boston',
+      ranking: '#93 Global',
+      intake: 'September, January',
+      fee: '$55,000/yr',
+      rating: '4.5',
+      badge: 'Top Placement',
+      badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+      popularCourses: ['MA Economics', 'MS Project Management'],
+      websiteUrl: 'https://www.bu.edu',
+      videoUrl: 'https://www.youtube.com/embed/tY8405-b040'
+    }
+  ]
+};
+
 export default function KnowledgeHub() {
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState('visa'); // visa, living, work, psw
+  const [activeTab, setActiveTab] = useState('visa'); // visa, living, work, psw, universities
+  const [viewingVideo, setViewingVideo] = useState(null);
 
   const countryGuides = [
     {
@@ -433,19 +629,20 @@ export default function KnowledgeHub() {
           <div className="lg:col-span-2 bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden flex flex-col">
             
             {/* Tab Bar buttons */}
-            <div className="flex border-b border-[#E2E8F0] bg-slate-50/50">
+            <div className="flex overflow-x-auto scrollbar-none border-b border-[#E2E8F0] bg-slate-50/50">
               {[
                 { id: 'visa', label: 'Visa & Entry' },
                 { id: 'living', label: 'Cost of Living' },
                 { id: 'work', label: 'Part-Time Work' },
-                { id: 'psw', label: 'Post-Study Rights' }
+                { id: 'psw', label: 'Post-Study Rights' },
+                { id: 'universities', label: 'Represented Universities' }
               ].map((tab) => {
                 const isActive = activeTab === tab.id;
                 return (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex-1 text-center py-3.5 text-xs font-bold transition-all border-b-2 select-none ${
+                    className={`min-w-[120px] md:min-w-0 flex-1 text-center py-3.5 text-xs font-bold transition-all border-b-2 select-none ${
                       isActive
                         ? 'border-[#D99A1C] text-[#D99A1C] bg-white'
                         : 'border-transparent text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50/70'
@@ -653,6 +850,175 @@ export default function KnowledgeHub() {
                 </div>
               )}
 
+              {/* REPRESENTED UNIVERSITIES TAB */}
+              {activeTab === 'universities' && (
+                <div className="space-y-6">
+                  <div className="space-y-1">
+                    <h4 className="text-xs font-extrabold text-[#0F172A] uppercase tracking-wider">Represented Universities</h4>
+                    <p className="text-[11px] text-[#64748B] font-semibold">Browse top universities we partner with in {selectedCountry.name}, explore their details, redirect to their websites, and watch campus tour videos.</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {(REPRESENTED_UNIVERSITIES[selectedCountry.id] || []).map((uni, idx) => {
+                      const isBlueTheme = idx % 2 === 0;
+                      const topBorderClass = isBlueTheme ? 'border-t-[#2563EB]' : 'border-t-[#D99A1C]';
+                      const starColorClass = isBlueTheme ? 'text-[#2563EB]' : 'text-[#D99A1C]';
+
+                      return (
+                        <div
+                          key={uni.name}
+                          className={`bg-white border border-[#E2E8F0] border-t-4 ${topBorderClass} rounded-2xl shadow-xs overflow-hidden flex flex-col justify-between group hover:shadow-md hover:border-slate-300 transition-all duration-200`}
+                        >
+                          {/* Header Panel */}
+                          <div className="h-20 bg-slate-950 p-4 flex flex-col justify-between relative border-b border-slate-900">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] bg-white/10 text-white border border-white/15 font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
+                                {uni.ranking}
+                              </span>
+                              <div className="flex items-center gap-1 bg-white/10 text-white px-2 py-0.5 rounded-lg text-xs font-bold border border-white/10">
+                                <svg className={`w-3.5 h-3.5 fill-current ${starColorClass}`} viewBox="0 0 20 20">
+                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                                <span>{uni.rating}</span>
+                              </div>
+                            </div>
+                            <div className="text-white">
+                              <h3 className="font-extrabold text-sm truncate leading-tight">{uni.name}</h3>
+                              <p className="text-[10px] text-slate-400 font-semibold mt-0.5">
+                                {uni.city}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Card Body */}
+                          <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
+                            <div className="space-y-3">
+                              <span className={`text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded border inline-block ${uni.badgeColor}`}>
+                                {uni.badge}
+                              </span>
+
+                              {/* Detailed key-value rows */}
+                              <div className="grid grid-cols-2 gap-3 text-xs border-y border-slate-100 py-3">
+                                <div>
+                                  <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-0.5">Intakes</span>
+                                  <span className="font-bold text-[#0F172A]">{uni.intake}</span>
+                                </div>
+                                <div>
+                                  <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-0.5">Est. Fees</span>
+                                  <span className="font-bold text-[#0F172A]">{uni.fee}</span>
+                                </div>
+                              </div>
+
+                              {/* Popular Courses */}
+                              <div>
+                                <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Popular Courses</span>
+                                <div className="flex flex-col gap-1">
+                                  {uni.popularCourses.map((course, idx) => (
+                                    <div key={idx} className="flex items-center gap-1.5 text-[11px] text-[#475569] font-semibold">
+                                      <span className="w-1 h-1 rounded-full bg-[#D99A1C] shrink-0" />
+                                      <span className="truncate">{course}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                              <a
+                                href={uni.websiteUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex-1 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-[11px] font-bold text-slate-700 py-2.5 rounded-xl text-center transition-all duration-150 flex items-center justify-center gap-1"
+                              >
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                                Visit Website
+                              </a>
+                              {uni.videoUrl && (
+                                <button
+                                  onClick={() => setViewingVideo({
+                                    title: `${uni.name} Campus Tour`,
+                                    university: uni.name,
+                                    fileUrl: uni.videoUrl,
+                                    description: `Take a virtual tour of the ${uni.name} campus, exploring study spaces, student facilities, and research departments.`
+                                  })}
+                                  className="flex-1 bg-[#D99A1C] hover:bg-[#B87C0E] text-white text-[11px] font-bold py-2.5 rounded-xl text-center transition-all duration-150 shadow-xs flex items-center justify-center gap-1"
+                                >
+                                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20">
+                                    <path d="M4 4l12 6-12 6V4z" />
+                                  </svg>
+                                  Watch Tour
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {(!REPRESENTED_UNIVERSITIES[selectedCountry.id] || REPRESENTED_UNIVERSITIES[selectedCountry.id].length === 0) && (
+                    <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-xs font-semibold text-[#64748B]">
+                      No universities represented currently for this country guide.
+                    </div>
+                  )}
+                </div>
+              )}
+
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Video Playback Lightbox Modal */}
+      {viewingVideo && (
+        <div className="fixed top-[60px] inset-x-0 bottom-0 z-40 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xs select-none">
+          <div className="relative max-w-4xl w-full bg-[#0F172A] border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[calc(100vh-100px)] text-left">
+            
+            {/* Close Button */}
+            <button
+              onClick={() => setViewingVideo(null)}
+              className="absolute top-4 right-4 bg-black/60 hover:bg-black/80 text-white rounded-full p-2.5 transition-all shadow-md z-20"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Scrollable Content Area */}
+            <div className="overflow-y-auto flex-1 flex flex-col items-center">
+              {/* Video Iframe Embed */}
+              <div className="w-full aspect-video bg-black">
+                <iframe
+                  title={viewingVideo.title}
+                  src={viewingVideo.fileUrl}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full border-0"
+                ></iframe>
+              </div>
+
+              {/* Info Block */}
+              <div className="w-full p-6 text-left text-white space-y-2">
+                <span className="text-[10px] text-[#D99A1C] font-extrabold uppercase tracking-wider">{viewingVideo.university}</span>
+                <h3 className="text-sm font-extrabold">{viewingVideo.title}</h3>
+                <p className="text-xs text-slate-300 font-semibold leading-relaxed">{viewingVideo.description}</p>
+                <div className="pt-2 flex justify-end">
+                  <a
+                    href={viewingVideo.fileUrl.replace('embed/', 'watch?v=')}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-[#EF4444] hover:bg-[#DC2626] text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-xs inline-flex items-center gap-1.5"
+                  >
+                    <svg className="w-4 h-4 fill-current text-white" viewBox="0 0 24 24">
+                      <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.517 3.545 12 3.545 12 3.545s-7.517 0-9.388.508a3.003 3.003 0 0 0-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.871.508 9.388.508 9.388.508s7.517 0 9.388-.508a3.003 3.003 0 0 0 2.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                    Watch on YouTube
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </div>
