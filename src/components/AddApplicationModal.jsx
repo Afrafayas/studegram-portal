@@ -1,101 +1,97 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
   if (!isOpen) return null;
 
   const [stepNumber, setStepNumber] = useState(1);
-  const [formData, setFormData] = useState({
-    // Step 1
-    university: 'Anglia Ruskin University',
-    passportCountry: 'India',
-    intake: 'September/October 2026',
-    
-    // Step 3 Section 1
-    firstName: '',
-    lastName: '',
-    passportExpiry: '',
-    passportIssue: '',
-    dob: '',
-    gender: 'Male',
-    state: '',
-    city: '',
-    whatsappCode: '+91',
-    whatsappNumber: '',
-    addressLine1: '',
-    addressLine2: '',
-    pincode: '',
-    country: 'India',
-    passportNo: '',
-    email: '',
-    previousRefusal: 'No',
+  const [students, setStudents] = useState([]);
+  const [universities, setUniversities] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-    // Step 3 Section 2
-    handlerEmail: '',
-    handlerContactCode: '+91',
-    handlerContact: ''
-  });
+  const [selectedStudent, setSelectedStudent] = useState('');
+  const [selectedUniversity, setSelectedUniversity] = useState('');
+  const [selectedCourse, setSelectedCourse] = useState('');
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  useEffect(() => {
+    if (isOpen) {
+      setIsLoading(true);
+      setError('');
+      const token = localStorage.getItem('partner_token');
 
-  const handleNextStep = () => {
-    setStepNumber((prev) => prev + 1);
-  };
+      Promise.all([
+        fetch('/api/students', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+        fetch('/api/universities', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+        fetch('/api/courses', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json())
+      ])
+      .then(([studentsRes, universitiesRes, coursesRes]) => {
+        setStudents(studentsRes.data || []);
+        setUniversities(universitiesRes.data || []);
+        setCourses(coursesRes.data || []);
+      })
+      .catch(err => {
+        console.error('Error loading application options:', err);
+        setError('Failed to load students, universities, or courses from server.');
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+    }
+  }, [isOpen]);
 
   const handleResetAndClose = () => {
+    setSelectedStudent('');
+    setSelectedUniversity('');
+    setSelectedCourse('');
     setStepNumber(1);
-    setFormData({
-      university: 'Anglia Ruskin University',
-      passportCountry: 'India',
-      intake: 'September/October 2026',
-      firstName: '',
-      lastName: '',
-      passportExpiry: '',
-      passportIssue: '',
-      dob: '',
-      gender: 'Male',
-      state: '',
-      city: '',
-      whatsappCode: '+91',
-      whatsappNumber: '',
-      addressLine1: '',
-      addressLine2: '',
-      pincode: '',
-      country: 'India',
-      passportNo: '',
-      email: '',
-      previousRefusal: 'No',
-      handlerEmail: '',
-      handlerContactCode: '+91',
-      handlerContact: ''
-    });
     onClose();
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (onSubmit) {
-      onSubmit(formData);
+    if (!selectedStudent || !selectedUniversity || !selectedCourse) {
+      setError('Please select a student, university, and course.');
+      return;
     }
-    setStepNumber(4);
+
+    setIsSubmitting(true);
+    setError('');
+
+    try {
+      const success = await onSubmit({
+        studentId: selectedStudent,
+        universityId: selectedUniversity,
+        courseId: selectedCourse
+      });
+      if (success) {
+        setStepNumber(4); // Success step
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to submit application.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const currentCourseName = 'MSc in Computer Science (Artificial Intelligence)';
-  const currentCourseType = 'Postgraduate';
+  // Filter courses by selected university
+  const filteredCourses = courses.filter(course => {
+    if (!selectedUniversity) return false;
+    const courseUnivId = course.university?._id || course.university;
+    return courseUnivId === selectedUniversity;
+  });
 
   return (
     <div
       onClick={handleResetAndClose}
       className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
     >
-      {/* Modal Container: max-w-lg, p-8 (padding 32px) */}
       <div
         onClick={(e) => e.stopPropagation()}
         className="bg-white rounded-2xl w-full max-w-lg shadow-2xl relative flex flex-col max-h-[90vh]"
       >
-        {/* Top Header & X close button */}
+        {/* Header */}
         <div className="px-8 pt-8 pb-4 flex items-center justify-between sticky top-0 bg-white rounded-t-2xl z-10">
           <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
             Add New Application
@@ -110,84 +106,80 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
           </button>
         </div>
 
-        {/* Step Indicator connected by progress line */}
-        <div className="px-8 py-4 bg-slate-50/50 border-y border-slate-100">
-          <div className="flex items-center justify-between max-w-xs mx-auto relative select-none">
-            {/* Connector line */}
-            <div className="absolute top-1/2 left-0 w-full h-0.5 bg-slate-200 -translate-y-1/2 z-0"></div>
-            <div
-              className="absolute top-1/2 left-0 h-0.5 bg-[#D99A1C] -translate-y-1/2 transition-all duration-300 z-0"
-              style={{ width: `${Math.min(100, ((stepNumber - 1) / 2) * 100)}%` }}
-            ></div>
-
-            {/* Step 1 */}
-            <div className="flex flex-col items-center relative z-10">
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-150 ${
-                stepNumber > 1
-                  ? 'bg-[#D99A1C] text-white'
-                  : stepNumber === 1
-                  ? 'border-2 border-[#D99A1C] bg-white text-[#D99A1C] ring-4 ring-indigo-50'
-                  : 'border border-slate-200 bg-white text-[#64748B]'
-              }`}>
-                1
-              </div>
-              <span className="text-[9px] font-bold mt-1 text-[#64748B]">Course</span>
-            </div>
-
-            {/* Step 2 */}
-            <div className="flex flex-col items-center relative z-10">
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-150 ${
-                stepNumber > 2
-                  ? 'bg-[#D99A1C] text-white'
-                  : stepNumber === 2
-                  ? 'border-2 border-[#D99A1C] bg-white text-[#D99A1C] ring-4 ring-indigo-50'
-                  : 'border border-slate-200 bg-white text-[#64748B]'
-              }`}>
-                2
-              </div>
-              <span className="text-[9px] font-bold mt-1 text-[#64748B]">Eligibility</span>
-            </div>
-
-            {/* Step 3 */}
-            <div className="flex flex-col items-center relative z-10">
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-150 ${
-                stepNumber > 3
-                  ? 'bg-[#D99A1C] text-white'
-                  : stepNumber === 3
-                  ? 'border-2 border-[#D99A1C] bg-white text-[#D99A1C] ring-4 ring-indigo-50'
-                  : 'border border-slate-200 bg-white text-[#64748B]'
-              }`}>
-                3
-              </div>
-              <span className="text-[9px] font-bold mt-1 text-[#64748B]">Form</span>
-            </div>
-          </div>
-        </div>
-
         {/* Modal Scroll Content */}
         <div className="overflow-y-auto p-8 flex-1">
-          {/* STEP 1: Apply For New Course */}
-          {stepNumber === 1 && (
-            <div className="space-y-6">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl flex gap-3 text-xs shadow-sm mb-6">
+              <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
               <div className="space-y-1">
-                <h3 className="text-xs font-extrabold text-[#0F172A] uppercase tracking-wider">Apply For New Course</h3>
-                <p className="text-[11px] text-[#64748B] font-semibold">Select the university and intake info to get started.</p>
+                <p className="font-bold text-[10px] text-red-800 uppercase tracking-wider">Error</p>
+                <p className="leading-relaxed font-semibold">{error}</p>
+              </div>
+            </div>
+          )}
+
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-12 space-y-3">
+              <svg className="animate-spin h-8 w-8 text-[#D99A1C]" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              <span className="text-xs text-[#64748B] font-semibold">Loading resources...</span>
+            </div>
+          ) : stepNumber === 1 ? (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-1">
+                <h3 className="text-xs font-extrabold text-[#0F172A] uppercase tracking-wider">New Application Details</h3>
+                <p className="text-[11px] text-[#64748B] font-semibold">Select the student profile, target university, and program course.</p>
               </div>
 
               <div className="space-y-4">
+                {/* Student Dropdown */}
+                <div>
+                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Select Student</label>
+                  <div className="relative">
+                    <select
+                      required
+                      value={selectedStudent}
+                      onChange={(e) => setSelectedStudent(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
+                    >
+                      <option value="">-- Choose Student --</option>
+                      {students.map(student => (
+                        <option key={student._id} value={student._id}>
+                          {student.name} ({student.passportNo || 'No Passport'})
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
+                      <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
                 {/* University Dropdown */}
                 <div>
-                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">University</label>
+                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Select University</label>
                   <div className="relative">
                     <select
-                      name="university"
-                      value={formData.university}
-                      onChange={handleChange}
+                      required
+                      value={selectedUniversity}
+                      onChange={(e) => {
+                        setSelectedUniversity(e.target.value);
+                        setSelectedCourse(''); // Reset course
+                      }}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
                     >
-                      <option value="Anglia Ruskin University">Anglia Ruskin University</option>
-                      <option value="University of Surrey">University of Surrey</option>
-                      <option value="Coventry University">Coventry University</option>
+                      <option value="">-- Choose University --</option>
+                      {universities.map(univ => (
+                        <option key={univ._id} value={univ._id}>
+                          {univ.name} ({univ.country || 'Unknown'})
+                        </option>
+                      ))}
                     </select>
                     <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
                       <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -197,20 +189,25 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                   </div>
                 </div>
 
-                {/* Country of Student Passport Dropdown */}
+                {/* Course Dropdown */}
                 <div>
-                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Country of Passport</label>
+                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Select Course</label>
                   <div className="relative">
                     <select
-                      name="passportCountry"
-                      value={formData.passportCountry}
-                      onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
+                      required
+                      disabled={!selectedUniversity}
+                      value={selectedCourse}
+                      onChange={(e) => setSelectedCourse(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <option value="India">India</option>
-                      <option value="Nepal">Nepal</option>
-                      <option value="Nigeria">Nigeria</option>
-                      <option value="Bangladesh">Bangladesh</option>
+                      <option value="">
+                        {!selectedUniversity ? '-- Please Select a University First --' : '-- Choose Course --'}
+                      </option>
+                      {filteredCourses.map(course => (
+                        <option key={course._id} value={course._id}>
+                          {course.title} ({course.degreeLevel || 'N/A'})
+                        </option>
+                      ))}
                     </select>
                     <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
                       <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -218,353 +215,45 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                       </svg>
                     </div>
                   </div>
-                </div>
-
-                {/* Intake Dropdown */}
-                <div>
-                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Intake</label>
-                  <div className="relative">
-                    <select
-                      name="intake"
-                      value={formData.intake}
-                      onChange={handleChange}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
-                    >
-                      <option value="September/October 2026">September/October 2026</option>
-                      <option value="January/February 2027">January/February 2027</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
-                      <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
-                  </div>
+                  {selectedUniversity && filteredCourses.length === 0 && (
+                    <p className="text-[10px] text-amber-600 font-bold mt-1">⚠️ No courses registered under this university in the database.</p>
+                  )}
                 </div>
               </div>
 
-              {/* Indigo Continue button */}
-              <button
-                type="button"
-                onClick={handleNextStep}
-                className="w-full bg-[#D99A1C] hover:bg-[#C28410] hover:scale-[1.02] text-white font-bold py-2.5 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider mt-6"
-              >
-                Continue
-              </button>
-            </div>
-          )}
-
-          {/* STEP 2: Eligibility & Documents */}
-          {stepNumber === 2 && (
-            <div className="space-y-6">
-              <div className="space-y-1">
-                <h3 className="text-xs font-extrabold text-[#0F172A] uppercase tracking-wider">Eligibility & Documents</h3>
-                <p className="text-[11px] text-[#64748B] font-semibold">Review checklists and requirements guidelines.</p>
-              </div>
-
-              {/* Amber warning banner */}
-              <div className="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl flex gap-3 text-xs">
-                <svg className="w-4 h-4 text-[#F59E0B] shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <div className="space-y-0.5">
-                  <p className="font-extrabold uppercase tracking-wider text-[9px] text-[#F59E0B]">Important Note:</p>
-                  <p className="leading-relaxed font-semibold">Please share your full immigration history including previous visa applications, CAS statements, and any official refusal notices (if any) to prevent visa refusal.</p>
-                </div>
-              </div>
-
-              {/* Requirements sections with orange headings */}
-              <div className="space-y-3">
-                <div className="bg-slate-50 border border-slate-100 rounded-xl p-3.5">
-                  <h4 className="text-[10px] font-bold text-[#E85D2F] uppercase tracking-wider mb-1">Academic Requirement</h4>
-                  <p className="text-[11px] text-[#64748B] font-semibold">No academic details available</p>
-                </div>
-                <div className="bg-slate-50 border border-slate-100 rounded-xl p-3.5">
-                  <h4 className="text-[10px] font-bold text-[#E85D2F] uppercase tracking-wider mb-1">English Requirement</h4>
-                  <p className="text-[11px] text-[#64748B] font-semibold">No academic details available</p>
-                </div>
-                <div className="bg-slate-50 border border-slate-100 rounded-xl p-3.5">
-                  <h4 className="text-[10px] font-bold text-[#E85D2F] uppercase tracking-wider mb-1">Others Requirement</h4>
-                  <p className="text-[11px] text-[#64748B] font-semibold">No academic details available</p>
-                </div>
-              </div>
-
-              {/* Document Checklist */}
-              <div className="border border-slate-200 rounded-xl p-4 bg-white space-y-2">
-                <h4 className="text-[10px] font-extrabold text-[#0F172A] uppercase tracking-wider border-b border-slate-50 pb-1.5">Document Checklist</h4>
-                <div className="space-y-1.5 max-h-[140px] overflow-y-auto pr-1">
-                  {[
-                    'CV',
-                    'SOP',
-                    'Graduation Marksheets',
-                    '2 LORs Work Experience Letter',
-                    '12th For Bachelors only',
-                    'Parent Consent Letter Under 18'
-                  ].map((doc, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-[10px] text-[#64748B] font-bold">
-                      <svg className="w-3.5 h-3.5 text-[#10B981] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span>{doc}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Indigo Continue button */}
-              <button
-                type="button"
-                onClick={handleNextStep}
-                className="w-full bg-[#D99A1C] hover:bg-[#C28410] hover:scale-[1.02] text-white font-bold py-2.5 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider mt-6"
-              >
-                Continue
-              </button>
-            </div>
-          )}
-
-          {/* STEP 3: Application Form */}
-          {stepNumber === 3 && (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Header metadata bar */}
-              <div className="bg-[#0A0A0F] text-white p-4 rounded-xl space-y-2 text-[10px] font-semibold">
-                <div className="flex justify-between border-b border-white/5 pb-1.5">
-                  <span className="text-[#64748B]">University:</span>
-                  <span className="text-white truncate max-w-[180px]">{formData.university}</span>
-                </div>
-                <div className="flex justify-between border-b border-white/5 pb-1.5">
-                  <span className="text-[#64748B]">Course:</span>
-                  <span className="text-white truncate max-w-[180px]">{currentCourseName}</span>
-                </div>
-                <div className="flex justify-between border-b border-white/5 pb-1.5">
-                  <span className="text-[#64748B]">Intake:</span>
-                  <span className="text-white">{formData.intake}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#64748B]">Type:</span>
-                  <span className="text-white">{currentCourseType}</span>
-                </div>
-              </div>
-
-              {/* Section 1: Student Personal Details */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 border-b border-slate-100 pb-1.5">
-                  <span className="w-4 h-4 bg-[#D99A1C] text-white text-[9px] font-bold rounded-full flex items-center justify-center">1</span>
-                  <h4 className="text-[10px] font-extrabold text-[#0F172A] uppercase tracking-wider">Student Personal Details</h4>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* First Name */}
-                  <div>
-                    <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">First Name</label>
-                    <input required type="text" name="firstName" value={formData.firstName} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white" />
-                  </div>
-                  {/* Last Name */}
-                  <div>
-                    <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Last Name</label>
-                    <input required type="text" name="lastName" value={formData.lastName} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white" />
-                  </div>
-
-                  {/* Passport Expiry Date */}
-                  <div>
-                    <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Passport Expiry</label>
-                    <input required type="date" name="passportExpiry" value={formData.passportExpiry} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" />
-                  </div>
-                  {/* Passport Issue Date */}
-                  <div>
-                    <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Issue Date</label>
-                    <input required type="date" name="passportIssue" value={formData.passportIssue} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" />
-                  </div>
-
-                  {/* Date of Birth */}
-                  <div>
-                    <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">DOB</label>
-                    <input required type="date" name="dob" value={formData.dob} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" />
-                  </div>
-                  {/* Gender Select */}
-                  <div>
-                    <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Gender</label>
-                    <div className="relative">
-                      <select name="gender" value={formData.gender} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] cursor-pointer appearance-none">
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                        <svg className="w-3 h-3 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* State */}
-                  <div>
-                    <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">State</label>
-                    <input required type="text" name="state" value={formData.state} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" />
-                  </div>
-                  {/* City */}
-                  <div>
-                    <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">City</label>
-                    <input required type="text" name="city" value={formData.city} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" />
-                  </div>
-
-                  {/* WhatsApp */}
-                  <div className="col-span-2">
-                    <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">WhatsApp Number</label>
-                    <div className="flex gap-2">
-                      <select name="whatsappCode" value={formData.whatsappCode} onChange={handleChange} className="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] cursor-pointer">
-                        <option value="+91">+91 (IN)</option>
-                        <option value="+44">+44 (UK)</option>
-                      </select>
-                      <input required type="tel" name="whatsappNumber" value={formData.whatsappNumber} onChange={handleChange} className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" placeholder="WhatsApp Number" />
-                    </div>
-                  </div>
-
-                  {/* Address Line 1 */}
-                  <div className="col-span-2">
-                    <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Address Line 1</label>
-                    <input required type="text" name="addressLine1" value={formData.addressLine1} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" />
-                  </div>
-                  {/* Address Line 2 */}
-                  <div className="col-span-2">
-                    <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Address Line 2</label>
-                    <input type="text" name="addressLine2" value={formData.addressLine2} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" />
-                  </div>
-
-                  {/* Pincode */}
-                  <div>
-                    <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Pincode</label>
-                    <input required type="text" name="pincode" value={formData.pincode} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" />
-                  </div>
-                  {/* Country Select */}
-                  <div>
-                    <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Country</label>
-                    <div className="relative">
-                      <select name="country" value={formData.country} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] cursor-pointer appearance-none">
-                        <option value="India">India</option>
-                        <option value="Nepal">Nepal</option>
-                        <option value="Nigeria">Nigeria</option>
-                        <option value="United Kingdom">United Kingdom</option>
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                        <svg className="w-3 h-3 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Passport No */}
-                  <div>
-                    <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Passport No</label>
-                    <input required type="text" name="passportNo" value={formData.passportNo} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" />
-                  </div>
-                  {/* Email */}
-                  <div>
-                    <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Email ID</label>
-                    <input required type="email" name="email" value={formData.email} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" />
-                  </div>
-
-                  {/* Previous Visa Refusal select */}
-                  <div className="col-span-2">
-                    <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Visa Refusal</label>
-                    <div className="relative">
-                      <select name="previousRefusal" value={formData.previousRefusal} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] cursor-pointer appearance-none">
-                        <option value="No">No</option>
-                        <option value="Yes">Yes</option>
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                        <svg className="w-3 h-3 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Section 2: Other Details */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 border-b border-slate-100 pb-1.5">
-                  <span className="w-4 h-4 bg-[#D99A1C] text-white text-[9px] font-bold rounded-full flex items-center justify-center">2</span>
-                  <h4 className="text-[10px] font-extrabold text-[#0F172A] uppercase tracking-wider">Other Details</h4>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* Email of person handling application */}
-                  <div>
-                    <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Handler Email</label>
-                    <input required type="email" name="handlerEmail" value={formData.handlerEmail} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" placeholder="handler@agency.com" />
-                  </div>
-                  {/* Contact No with +91 code */}
-                  <div>
-                    <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Handler Phone</label>
-                    <div className="flex gap-2">
-                      <select name="handlerContactCode" value={formData.handlerContactCode} onChange={handleChange} className="bg-slate-50 border border-slate-200 rounded-lg px-1.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] cursor-pointer">
-                        <option value="+91">+91</option>
-                        <option value="+44">+44</option>
-                      </select>
-                      <input required type="tel" name="handlerContact" value={formData.handlerContact} onChange={handleChange} className="flex-1 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]" placeholder="Contact number" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Section 3: Upload Documents */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 border-b border-slate-100 pb-1.5">
-                  <span className="w-4 h-4 bg-[#D99A1C] text-white text-[9px] font-bold rounded-full flex items-center justify-center">3</span>
-                  <h4 className="text-[10px] font-extrabold text-[#0F172A] uppercase tracking-wider">Upload Documents</h4>
-                </div>
-
-                {/* Dashed indigo border dropzone with cloud icon */}
-                <div className="border-2 border-dashed border-[#D99A1C]/50 hover:border-[#D99A1C] rounded-xl p-6 bg-indigo-50/10 hover:bg-indigo-50/30 text-center transition-all duration-200 cursor-pointer select-none">
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="p-2.5 bg-white rounded-full shadow-sm text-[#D99A1C] border border-indigo-50">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-extrabold text-[#0F172A] uppercase tracking-wider">Drag and drop or click to upload</p>
-                      <p className="text-[9px] text-[#64748B] font-semibold mt-0.5">PDF, JPEG, or PNG files up to 5MB</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Full width indigo to cyan gradient Submit button */}
+              {/* Submit button */}
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.02] text-white font-bold py-3 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider mt-6"
+                disabled={isSubmitting || !selectedStudent || !selectedUniversity || !selectedCourse}
+                className="w-full bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.02] text-white font-bold py-3 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider mt-6 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
               >
-                Submit Application
+                {isSubmitting ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Submitting...
+                  </>
+                ) : (
+                  'Submit Application'
+                )}
               </button>
             </form>
-          )}
-
-          {/* STEP 4: Success Screen */}
-          {stepNumber === 4 && (
+          ) : (
+            /* STEP 4: Success Screen */
             <div className="flex flex-col items-center text-center py-8 space-y-4">
-              {/* Cute Elephant SVG */}
               <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
-                {/* Back Legs */}
                 <rect x="22" y="52" width="8" height="16" rx="4" fill="#64748B" />
                 <rect x="42" y="52" width="8" height="16" rx="4" fill="#64748B" />
-                {/* Body */}
                 <circle cx="35" cy="42" r="20" fill="#94A3B8" />
-                {/* Head */}
                 <circle cx="52" cy="38" r="14" fill="#94A3B8" />
-                {/* Front Legs */}
                 <rect x="28" y="52" width="8" height="16" rx="4" fill="#94A3B8" />
                 <rect x="48" y="52" width="8" height="16" rx="4" fill="#94A3B8" />
-                {/* Ear */}
                 <circle cx="46" cy="34" r="6" fill="#F1F5F9" />
                 <circle cx="46" cy="34" r="4" fill="#F472B6" />
-                {/* Eye */}
                 <circle cx="56" cy="34" r="1.5" fill="#0F172A" />
-                {/* Trunk curling right */}
                 <path d="M 64 42 C 72 42 76 46 76 50 C 76 54 72 54 70 51" stroke="#94A3B8" strokeWidth="5" strokeLinecap="round" fill="none" />
-                {/* Tail */}
                 <path d="M 16 42 Q 10 40 12 46" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" fill="none" />
               </svg>
               <h3 className="text-base font-bold text-[#10B981] mt-2">🎉 Application Submitted!</h3>

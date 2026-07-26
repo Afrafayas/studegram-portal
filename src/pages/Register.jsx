@@ -15,6 +15,8 @@ export default function Register({ onNavigate }) {
   // Error States
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [apiError, setApiError] = useState('');
 
   const validateForm = () => {
     const newErrors = {};
@@ -60,12 +62,44 @@ export default function Register({ onNavigate }) {
     if (!validateForm()) return;
 
     setIsLoading(true);
+    setSuccessMessage('');
+    setApiError('');
 
-    setTimeout(() => {
+    fetch('/api/partners/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: fullName,
+        email,
+        phone: `+91${phoneNumber.trim()}`,
+        companyName: agencyName,
+        password,
+        country: 'India'
+      })
+    })
+    .then(async (res) => {
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || data.error || 'Registration failed');
+      }
+      setSuccessMessage('Registration successful. Please wait for admin approval before you can log in.');
+      // Clear form
+      setFullName('');
+      setEmail('');
+      setPhoneNumber('');
+      setAgencyName('');
+      setPassword('');
+      setConfirmPassword('');
+      setAgreeTerms(false);
+    })
+    .catch((err) => {
+      setApiError(err.message || 'An error occurred during registration.');
+    })
+    .finally(() => {
       setIsLoading(false);
-      alert('Registration successful! Please sign in with your credentials.');
-      onNavigate('login');
-    }, 1000);
+    });
   };
 
   return (
@@ -142,6 +176,30 @@ export default function Register({ onNavigate }) {
             <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Create Account</h1>
             <p className="text-xs text-[#64748B] font-semibold">Join Studegram today to process enrollments</p>
           </div>
+
+          {successMessage && (
+            <div className="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl flex gap-3 text-xs shadow-sm">
+              <svg className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div className="space-y-1">
+                <p className="font-bold text-[10px] text-amber-800 uppercase tracking-wider">Pending Approval</p>
+                <p className="leading-relaxed font-semibold">{successMessage}</p>
+              </div>
+            </div>
+          )}
+
+          {apiError && (
+            <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl flex gap-3 text-xs shadow-sm">
+              <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div className="space-y-1">
+                <p className="font-bold text-[10px] text-red-800 uppercase tracking-wider">Registration Error</p>
+                <p className="leading-relaxed font-semibold">{apiError}</p>
+              </div>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Full Name */}

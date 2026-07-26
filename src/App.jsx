@@ -21,67 +21,109 @@ import Scholarships from './pages/Scholarships';
 import Webinar from './pages/Webinar';
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('login'); // Starts as 'login'
+  const [currentPage, setCurrentPage] = useState(() => {
+    return localStorage.getItem('partner_token') ? 'dashboard' : 'login';
+  }); // Starts as 'login' or 'dashboard' if already logged in
   const [activePage, setActivePage] = useState('Dashboard');
   const [showModal, setShowModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedAppForDetails, setSelectedAppForDetails] = useState(null);
   const [selectedNoticeId, setSelectedNoticeId] = useState(null);
 
-  const [applications, setApplications] = useState([
-    {
-      camsId: 'CAMS10204',
-      studentName: 'Shanto Shaju',
-      passportNo: 'T1029482',
-      universityName: 'University of Surrey',
-      courseName: 'International Hotel Management MSc',
-      intake: 'September 2026',
-      primaryStatus: 'Processed', // green
-      secondaryStatus: 'Offer Issued', // blue
-      dateAdded: '10 Jun 2026',
-      modifiedDate: '20 Jun 2026'
-    },
-    {
-      camsId: 'CAMS10492',
-      studentName: 'Aneesha Anil',
-      passportNo: 'T9381048',
-      universityName: 'University of Surrey',
-      courseName: 'Human Resources Management MSc',
-      intake: 'January 2027',
-      primaryStatus: 'Processed', // green
-      secondaryStatus: 'Pending', // amber
-      dateAdded: '15 Jun 2026',
-      modifiedDate: '22 Jun 2026'
-    }
-  ]);
+  const [applications, setApplications] = useState([]);
+  const [isLoadingApps, setIsLoadingApps] = useState(false);
   const [duplicateAlert, setDuplicateAlert] = useState(null);
 
-  const handleAddApplicationSubmit = (newApp) => {
-    const isDuplicate = applications.some(
-      (app) => app.passportNo.trim().toLowerCase() === newApp.passportNo.trim().toLowerCase()
-    );
-    if (isDuplicate) {
-      setDuplicateAlert(newApp.passportNo);
-    } else {
-      setDuplicateAlert(null);
-      const newCamsId = `CAMS${Math.floor(10000 + Math.random() * 90000)}`;
-      const addedApp = {
-        camsId: newCamsId,
-        studentName: `${newApp.firstName} ${newApp.lastName}`,
-        passportNo: newApp.passportNo,
-        universityName: newApp.university,
-        courseName: 'MSc in Computer Science (Artificial Intelligence)',
-        intake: newApp.intake,
-        primaryStatus: 'Processed',
-        secondaryStatus: 'Pending',
-        dateAdded: '03 Jul 2026',
-        modifiedDate: '03 Jul 2026'
-      };
-      setApplications((prev) => [addedApp, ...prev]);
+  const fetchApplications = () => {
+    const token = localStorage.getItem('partner_token');
+    if (!token) return;
+
+    setIsLoadingApps(true);
+    fetch('/api/applications', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    .then((res) => {
+      if (!res.ok) throw new Error('Failed to fetch applications');
+      return res.json();
+    })
+    .then((data) => {
+      const mapped = (data.data || []).map((app) => ({
+        id: app._id,
+        camsId: app._id ? `CAMS${app._id.substring(app._id.length - 6).toUpperCase()}` : 'N/A',
+        studentName: app.student?.name || 'N/A',
+        passportNo: app.student?.passportNo || 'N/A',
+        universityName: app.university?.name || 'N/A',
+        courseName: app.course?.title || 'N/A',
+        primaryStatus: 'Processed', // green
+        secondaryStatus: app.status || 'Pending', // e.g. Submitted -> Pending
+        dateAdded: new Date(app.createdAt).toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        }),
+        modifiedDate: new Date(app.updatedAt).toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric'
+        }),
+        student: app.student,
+        course: app.course,
+        university: app.university,
+        status: app.status
+      }));
+      setApplications(mapped);
+    })
+    .catch((err) => {
+      console.error('Error loading applications:', err);
+    })
+    .finally(() => {
+      setIsLoadingApps(false);
+    });
+  };
+
+  React.useEffect(() => {
+    if (currentPage === 'dashboard') {
+      fetchApplications();
+    }
+  }, [currentPage]);
+
+  const handleAddApplicationSubmit = async (selectedData) => {
+    const token = localStorage.getItem('partner_token');
+    if (!token) return false;
+
+    try {
+      const res = await fetch('/api/applications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          student: selectedData.studentId,
+          course: selectedData.courseId,
+          university: selectedData.universityId
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to submit application');
+      }
+
+      fetchApplications();
+      return true;
+    } catch (err) {
+      console.error(err);
+      alert(err.message || 'Error submitting application');
+      return false;
     }
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('partner_token');
+    localStorage.removeItem('partner_data');
     localStorage.removeItem('studegram_closed_notifications');
     localStorage.removeItem('studegram_read_notifications');
     setCurrentPage('login');

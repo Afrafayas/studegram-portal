@@ -10,6 +10,7 @@ export default function Login({ onNavigate, onLoginSuccess }) {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState('');
 
   const validateForm = () => {
     let isValid = true;
@@ -41,15 +42,42 @@ export default function Login({ onNavigate, onLoginSuccess }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setLoginError('');
     if (!validateForm()) return;
 
     setIsLoading(true);
 
-    // Mock network loading state for premium feel
-    setTimeout(() => {
-      setIsLoading(false);
+    fetch('/api/partners/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    })
+    .then(async (res) => {
+      const data = await res.json();
+      if (!res.ok) {
+        if (res.status === 403) {
+          const errMsg = (data.message || '').toLowerCase();
+          if (errMsg.includes('pending')) {
+            throw new Error('Your account is pending admin approval. Please wait until you get approval.');
+          } else if (errMsg.includes('deactivated')) {
+            throw new Error('Your account has been deactivated. Please contact admin.');
+          }
+        }
+        throw new Error(data.message || 'Invalid credentials');
+      }
+
+      localStorage.setItem('partner_token', data.token);
+      localStorage.setItem('partner_data', JSON.stringify(data.data));
       onLoginSuccess();
-    }, 1000);
+    })
+    .catch((err) => {
+      setLoginError(err.message || 'An error occurred during sign in.');
+    })
+    .finally(() => {
+      setIsLoading(false);
+    });
   };
 
   return (
@@ -153,6 +181,18 @@ export default function Login({ onNavigate, onLoginSuccess }) {
           </div>
 
           {/* Form fields */}
+          {loginError && (
+            <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl flex gap-3 text-xs shadow-sm">
+              <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div className="space-y-1">
+                <p className="font-bold text-[10px] text-red-800 uppercase tracking-wider">Login Error</p>
+                <p className="leading-relaxed font-semibold">{loginError}</p>
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email Input */}
             <div className="space-y-1.5">
