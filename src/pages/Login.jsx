@@ -57,14 +57,6 @@ export default function Login({ onNavigate, onLoginSuccess }) {
     .then(async (res) => {
       const data = await res.json();
       if (!res.ok) {
-        if (res.status === 403) {
-          const errMsg = (data.message || '').toLowerCase();
-          if (errMsg.includes('pending')) {
-            throw new Error('Your account is pending admin approval. Please wait until you get approval.');
-          } else if (errMsg.includes('deactivated')) {
-            throw new Error('Your account has been deactivated. Please contact admin.');
-          }
-        }
         throw new Error(data.message || 'Invalid credentials');
       }
 
