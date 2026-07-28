@@ -1,10 +1,10 @@
 import React from 'react';
 
-export default function Dashboard() {
+export default function Dashboard({ applications = [], onViewDetails, onViewHistory }) {
   const stats = [
     {
       label: 'Total Applications',
-      value: '803',
+      value: applications.length.toString(),
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
       icon: (
@@ -15,7 +15,7 @@ export default function Dashboard() {
     },
     {
       label: 'Applications Processed',
-      value: '36',
+      value: applications.filter(a => a.secondaryStatus === 'Processed').length.toString(),
       color: 'text-[#10B981]',
       bgColor: 'bg-emerald-50',
       icon: (
@@ -26,7 +26,7 @@ export default function Dashboard() {
     },
     {
       label: 'With CAS Team',
-      value: '14',
+      value: applications.filter(a => a.secondaryStatus === 'Visa Pending').length.toString(),
       color: 'text-[#F59E0B]',
       bgColor: 'bg-amber-50',
       icon: (
@@ -37,7 +37,7 @@ export default function Dashboard() {
     },
     {
       label: 'Case Closed',
-      value: '393',
+      value: applications.filter(a => a.secondaryStatus === 'Approved' || a.secondaryStatus === 'Rejected').length.toString(),
       color: 'text-[#64748B]',
       bgColor: 'bg-slate-100',
       icon: (
@@ -48,7 +48,7 @@ export default function Dashboard() {
     },
     {
       label: 'Offer Issued',
-      value: '28',
+      value: applications.filter(a => a.secondaryStatus === 'Offer Issued').length.toString(),
       color: 'text-[#10B981]',
       bgColor: 'bg-emerald-50',
       icon: (
@@ -59,11 +59,19 @@ export default function Dashboard() {
     }
   ];
 
-  const recentApps = [
-    { name: 'Shanto Shaju', initials: 'SS', passport: 'T1029482', status: 'Offer Issued', badgeColor: 'bg-blue-50 text-blue-700 border-blue-100', date: '23 Jun 2026' },
-    { name: 'Aneesha Anil', initials: 'AA', passport: 'T9381048', status: 'Pending', badgeColor: 'bg-amber-50 text-amber-700 border-amber-100', date: '22 Jun 2026' },
-    { name: 'Rahul Krishnan', initials: 'RK', passport: 'T1083921', status: 'Processed', badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-100', date: '21 Jun 2026' }
-  ];
+  const recentApps = applications.slice(0, 5).map(app => ({
+    name: app.studentName,
+    initials: app.studentName ? app.studentName.split(' ').map(n => n[0]).join('').toUpperCase() : 'ST',
+    passport: app.passportNo || 'N/A',
+    status: app.secondaryStatus || 'Pending',
+    badgeColor: app.secondaryStatus === 'Offer Issued'
+      ? 'bg-blue-50 text-blue-700 border-blue-100'
+      : app.secondaryStatus === 'Processed'
+        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+        : 'bg-amber-50 text-amber-700 border-amber-100',
+    date: app.dateAdded,
+    rawApp: app
+  }));
 
   // Upcoming deadlines with colored dates by urgency (red within 30 days, amber within 60, green otherwise)
   // Current date is 23 Jun 2026
@@ -142,7 +150,12 @@ export default function Dashboard() {
           <div>
             <div className="px-6 py-4 border-b border-[#E2E8F0] flex justify-between items-center">
               <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">Recent Applications</h2>
-              <button className="text-xs text-[#D99A1C] font-semibold hover:underline">View History</button>
+              <button 
+                onClick={() => onViewHistory && onViewHistory()}
+                className="text-xs text-[#D99A1C] font-semibold hover:underline"
+              >
+                View History
+              </button>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
@@ -150,29 +163,49 @@ export default function Dashboard() {
                   <tr className="bg-slate-50 border-b border-[#E2E8F0]">
                     <th className="px-6 py-3 text-[#64748B] text-[10px] font-extrabold uppercase tracking-wider">Student</th>
                     <th className="px-6 py-3 text-[#64748B] text-[10px] font-extrabold uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-[#64748B] text-[10px] font-extrabold uppercase tracking-wider text-right">Date</th>
+                    <th className="px-6 py-3 text-[#64748B] text-[10px] font-extrabold uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-3 text-[#64748B] text-[10px] font-extrabold uppercase tracking-wider text-right pr-6">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {recentApps.map((student, index) => (
-                    <tr key={index} className="hover:bg-slate-50 transition-colors duration-150">
-                      <td className="px-6 py-3.5 flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#D99A1C] to-[#F5B025] text-white flex items-center justify-center font-bold text-xs shrink-0">
-                          {student.initials}
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-[#0F172A]">{student.name}</p>
-                          <p className="text-[10px] text-[#64748B] font-medium">Passport: {student.passport}</p>
-                        </div>
+                  {recentApps.length > 0 ? (
+                    recentApps.map((student, index) => (
+                      <tr key={index} className="hover:bg-slate-50 transition-colors duration-150">
+                        <td className="px-6 py-3.5 flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#D99A1C] to-[#F5B025] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                            {student.initials}
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-[#0F172A]">{student.name}</p>
+                            <p className="text-[10px] text-[#64748B] font-medium">Passport: {student.passport}</p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-3.5">
+                          <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold border uppercase tracking-wider ${student.badgeColor}`}>
+                            {student.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-3.5 text-xs text-[#64748B] font-semibold whitespace-nowrap">{student.date}</td>
+                        <td className="px-6 py-3.5 text-right whitespace-nowrap pr-6">
+                          <button 
+                            onClick={() => onViewDetails && onViewDetails(student.rawApp)} 
+                            className="p-1.5 hover:bg-slate-100 rounded-lg text-[#64748B] hover:text-[#0F172A] transition-all duration-150 inline-flex items-center justify-center"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4" className="px-6 py-10 text-center text-xs text-slate-400 font-semibold select-none">
+                        No applications filed yet.
                       </td>
-                      <td className="px-6 py-3.5">
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${student.badgeColor}`}>
-                          {student.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-3.5 text-xs text-[#64748B] font-semibold text-right whitespace-nowrap">{student.date}</td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>

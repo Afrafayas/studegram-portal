@@ -15,6 +15,14 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
   const [selectedUniversity, setSelectedUniversity] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('');
 
+  // Mode and form inputs for registering a new student
+  const [studentSelectionMode, setStudentSelectionMode] = useState('existing'); // 'existing' or 'new'
+  const [newStudentName, setNewStudentName] = useState('');
+  const [newStudentEmail, setNewStudentEmail] = useState('');
+  const [newStudentPhone, setNewStudentPhone] = useState('');
+  const [newStudentPassport, setNewStudentPassport] = useState('');
+  const [newStudentDob, setNewStudentDob] = useState('');
+
   useEffect(() => {
     if (isOpen) {
       setIsLoading(true);
@@ -45,14 +53,30 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
     setSelectedStudent('');
     setSelectedUniversity('');
     setSelectedCourse('');
+    setStudentSelectionMode('existing');
+    setNewStudentName('');
+    setNewStudentEmail('');
+    setNewStudentPhone('');
+    setNewStudentPassport('');
+    setNewStudentDob('');
     setStepNumber(1);
     onClose();
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedStudent || !selectedUniversity || !selectedCourse) {
-      setError('Please select a student, university, and course.');
+    if (studentSelectionMode === 'existing' && !selectedStudent) {
+      setError('Please select a student.');
+      return;
+    }
+    if (studentSelectionMode === 'new') {
+      if (!newStudentName || !newStudentEmail || !newStudentPhone) {
+        setError('Please fill in all required new student details (Name, Email, Phone).');
+        return;
+      }
+    }
+    if (!selectedUniversity || !selectedCourse) {
+      setError('Please select a university and course.');
       return;
     }
 
@@ -60,8 +84,34 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
     setError('');
 
     try {
+      let studentId = selectedStudent;
+
+      if (studentSelectionMode === 'new') {
+        const token = localStorage.getItem('partner_token');
+        const studentRes = await fetch('/api/students', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            name: newStudentName,
+            email: newStudentEmail,
+            phone: newStudentPhone,
+            passportNo: newStudentPassport,
+            dob: newStudentDob,
+            referredBy: 'Agent'
+          })
+        });
+        const studentResult = await studentRes.json();
+        if (!studentRes.ok || !studentResult.success) {
+          throw new Error(studentResult.message || 'Failed to create new student profile.');
+        }
+        studentId = studentResult.data._id;
+      }
+
       const success = await onSubmit({
-        studentId: selectedStudent,
+        studentId: studentId,
         universityId: selectedUniversity,
         courseId: selectedCourse
       });
@@ -136,29 +186,114 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
               </div>
 
               <div className="space-y-4">
-                {/* Student Dropdown */}
+                {/* Student Dropdown / Register Switcher */}
                 <div>
-                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Select Student</label>
-                  <div className="relative">
-                    <select
-                      required
-                      value={selectedStudent}
-                      onChange={(e) => setSelectedStudent(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
-                    >
-                      <option value="">-- Choose Student --</option>
-                      {students.map(student => (
-                        <option key={student._id} value={student._id}>
-                          {student.name} ({student.passportNo || 'No Passport'})
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
-                      <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
+                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-2">Student Information</label>
+                  
+                  <div className="flex gap-4 mb-3">
+                    <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-[#0F172A]">
+                      <input
+                        type="radio"
+                        name="studentSelectionMode"
+                        checked={studentSelectionMode === 'existing'}
+                        onChange={() => setStudentSelectionMode('existing')}
+                        className="text-[#D99A1C] focus:ring-[#D99A1C]"
+                      />
+                      Existing Student
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-[#0F172A]">
+                      <input
+                        type="radio"
+                        name="studentSelectionMode"
+                        checked={studentSelectionMode === 'new'}
+                        onChange={() => setStudentSelectionMode('new')}
+                        className="text-[#D99A1C] focus:ring-[#D99A1C]"
+                      />
+                      Register New Student
+                    </label>
                   </div>
+
+                  {studentSelectionMode === 'existing' ? (
+                    <div className="relative">
+                      <select
+                        required={studentSelectionMode === 'existing'}
+                        value={selectedStudent}
+                        onChange={(e) => setSelectedStudent(e.target.value)}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
+                      >
+                        <option value="">-- Choose Student --</option>
+                        {students.map(student => (
+                          <option key={student._id} value={student._id}>
+                            {student.name} ({student.passportNo || 'No Passport'})
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
+                        <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 space-y-3 shadow-inner">
+                      <div>
+                        <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Student Full Name *</label>
+                        <input
+                          type="text"
+                          required={studentSelectionMode === 'new'}
+                          value={newStudentName}
+                          onChange={(e) => setNewStudentName(e.target.value)}
+                          placeholder="e.g. John Doe"
+                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] font-semibold text-[#0F172A]"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Email Address *</label>
+                          <input
+                            type="email"
+                            required={studentSelectionMode === 'new'}
+                            value={newStudentEmail}
+                            onChange={(e) => setNewStudentEmail(e.target.value)}
+                            placeholder="john@gmail.com"
+                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] font-semibold text-[#0F172A]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Phone Number *</label>
+                          <input
+                            type="text"
+                            required={studentSelectionMode === 'new'}
+                            value={newStudentPhone}
+                            onChange={(e) => setNewStudentPhone(e.target.value)}
+                            placeholder="+44 7946 0000"
+                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] font-semibold text-[#0F172A]"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Passport No (Optional)</label>
+                          <input
+                            type="text"
+                            value={newStudentPassport}
+                            onChange={(e) => setNewStudentPassport(e.target.value)}
+                            placeholder="U9998822"
+                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] font-semibold text-[#0F172A]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Date of Birth (Optional)</label>
+                          <input
+                            type="date"
+                            value={newStudentDob}
+                            onChange={(e) => setNewStudentDob(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] font-semibold text-[#0F172A]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* University Dropdown */}
@@ -224,7 +359,13 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
               {/* Submit button */}
               <button
                 type="submit"
-                disabled={isSubmitting || !selectedStudent || !selectedUniversity || !selectedCourse}
+                disabled={
+                  isSubmitting ||
+                  (studentSelectionMode === 'existing' && !selectedStudent) ||
+                  (studentSelectionMode === 'new' && (!newStudentName || !newStudentEmail || !newStudentPhone)) ||
+                  !selectedUniversity ||
+                  !selectedCourse
+                }
                 className="w-full bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.02] text-white font-bold py-3 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider mt-6 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (
