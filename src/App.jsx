@@ -18,7 +18,7 @@ import UniversityDeadline from './pages/UniversityDeadline';
 import Universities from './pages/Universities';
 import KnowledgeHub from './pages/KnowledgeHub';
 import Scholarships from './pages/Scholarships';
-import Webinar from './pages/Webinar';
+import API from './api/axios';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState(() => {
@@ -34,30 +34,25 @@ export default function App() {
   const [isLoadingApps, setIsLoadingApps] = useState(false);
   const [duplicateAlert, setDuplicateAlert] = useState(null);
 
-  const fetchApplications = () => {
+  const fetchApplications = async () => {
     const token = localStorage.getItem('partner_token');
     if (!token) return;
 
     setIsLoadingApps(true);
-    fetch('/api/applications', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
-    .then((res) => {
-      if (!res.ok) throw new Error('Failed to fetch applications');
-      return res.json();
-    })
-    .then((data) => {
-      const mapped = (data.data || []).map((app) => ({
+    try {
+      const res = await API.get('/applications');
+      const data = res.data;
+      const mapped = (data.data || []).map((app, idx) => ({
         id: app._id,
-        camsId: app._id ? `CAMS${app._id.substring(app._id.length - 6).toUpperCase()}` : 'N/A',
+        camsId: `CAMS-${10001 + idx}`,
         studentName: app.student?.name || 'N/A',
         passportNo: app.student?.passportNo || 'N/A',
         universityName: app.university?.name || 'N/A',
         courseName: app.course?.title || 'N/A',
-        primaryStatus: 'Processed', // green
-        secondaryStatus: app.status || 'Pending', // e.g. Submitted -> Pending
+        primaryStatus: app.status || 'Submitted',
+        secondaryStatus: app.status || 'Submitted',
+        status: app.status || 'Submitted',
+        statusHistory: app.statusHistory || [],
         dateAdded: new Date(app.createdAt).toLocaleDateString('en-GB', {
           day: '2-digit',
           month: 'short',
@@ -70,21 +65,18 @@ export default function App() {
         }),
         student: app.student,
         course: app.course,
-        university: app.university,
-        status: app.status
+        university: app.university
       }));
       setApplications(mapped);
-    })
-    .catch((err) => {
+    } catch (err) {
       console.error('Error loading applications:', err);
-    })
-    .finally(() => {
+    } finally {
       setIsLoadingApps(false);
-    });
+    }
   };
 
   React.useEffect(() => {
-    if (currentPage === 'dashboard') {
+    if (currentPage === 'dashboard' || currentPage === 'history') {
       fetchApplications();
     }
   }, [currentPage]);
@@ -94,22 +86,15 @@ export default function App() {
     if (!token) return false;
 
     try {
-      const res = await fetch('/api/applications', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          student: selectedData.studentId,
-          course: selectedData.courseId,
-          university: selectedData.universityId
-        })
+      const res = await API.post('/applications', {
+        student: selectedData.studentId,
+        course: selectedData.courseId,
+        university: selectedData.universityId
       });
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || 'Failed to submit application');
+      const data = res.data;
+      if (!data?.success) {
+        throw new Error(data?.message || 'Failed to submit application');
       }
 
       fetchApplications();

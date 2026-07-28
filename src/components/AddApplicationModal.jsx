@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import API from '../api/axios';
 
 export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
   if (!isOpen) return null;
@@ -27,12 +28,11 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
     if (isOpen) {
       setIsLoading(true);
       setError('');
-      const token = localStorage.getItem('partner_token');
 
       Promise.all([
-        fetch('/api/students', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
-        fetch('/api/universities', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
-        fetch('/api/courses', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json())
+        API.get('/students').then(res => res.data),
+        API.get('/universities').then(res => res.data),
+        API.get('/courses').then(res => res.data)
       ])
       .then(([studentsRes, universitiesRes, coursesRes]) => {
         setStudents(studentsRes.data || []);
@@ -87,25 +87,17 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
       let studentId = selectedStudent;
 
       if (studentSelectionMode === 'new') {
-        const token = localStorage.getItem('partner_token');
-        const studentRes = await fetch('/api/students', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            name: newStudentName,
-            email: newStudentEmail,
-            phone: newStudentPhone,
-            passportNo: newStudentPassport,
-            dob: newStudentDob,
-            referredBy: 'Agent'
-          })
+        const studentRes = await API.post('/students', {
+          name: newStudentName,
+          email: newStudentEmail,
+          phone: newStudentPhone,
+          passportNo: newStudentPassport,
+          dob: newStudentDob,
+          referredBy: 'Agent'
         });
-        const studentResult = await studentRes.json();
-        if (!studentRes.ok || !studentResult.success) {
-          throw new Error(studentResult.message || 'Failed to create new student profile.');
+        const studentResult = studentRes.data;
+        if (!studentResult?.success) {
+          throw new Error(studentResult?.message || 'Failed to create new student profile.');
         }
         studentId = studentResult.data._id;
       }
@@ -222,9 +214,9 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
                       >
                         <option value="">-- Choose Student --</option>
-                        {students.map(student => (
+                        {students.map((student, idx) => (
                           <option key={student._id} value={student._id}>
-                            {student.name} ({student.passportNo || 'No Passport'})
+                            STD-{10001 + idx} - {student.name} ({student.passportNo || 'No Passport'})
                           </option>
                         ))}
                       </select>
@@ -260,30 +252,30 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                           />
                         </div>
                         <div>
-                          <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Phone Number *</label>
+                          <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Passport Number *</label>
                           <input
                             type="text"
                             required={studentSelectionMode === 'new'}
-                            value={newStudentPhone}
-                            onChange={(e) => setNewStudentPhone(e.target.value)}
-                            placeholder="+44 7946 0000"
+                            value={newStudentPassport}
+                            onChange={(e) => setNewStudentPassport(e.target.value)}
+                            placeholder="e.g. A1234567"
                             className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] font-semibold text-[#0F172A]"
                           />
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Passport No (Optional)</label>
+                          <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Phone Number</label>
                           <input
                             type="text"
-                            value={newStudentPassport}
-                            onChange={(e) => setNewStudentPassport(e.target.value)}
-                            placeholder="U9998822"
+                            value={newStudentPhone}
+                            onChange={(e) => setNewStudentPhone(e.target.value)}
+                            placeholder="+91 9876543210"
                             className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] font-semibold text-[#0F172A]"
                           />
                         </div>
                         <div>
-                          <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Date of Birth (Optional)</label>
+                          <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Date of Birth</label>
                           <input
                             type="date"
                             value={newStudentDob}
@@ -310,9 +302,9 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
                     >
                       <option value="">-- Choose University --</option>
-                      {universities.map(univ => (
+                      {universities.map((univ, idx) => (
                         <option key={univ._id} value={univ._id}>
-                          {univ.name} ({univ.country || 'Unknown'})
+                          UNIV-{10001 + idx} - {univ.name} ({univ.country || 'Unknown'})
                         </option>
                       ))}
                     </select>
@@ -338,9 +330,9 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                       <option value="">
                         {!selectedUniversity ? '-- Please Select a University First --' : '-- Choose Course --'}
                       </option>
-                      {filteredCourses.map(course => (
+                      {filteredCourses.map((course, idx) => (
                         <option key={course._id} value={course._id}>
-                          {course.title} ({course.degreeLevel || 'N/A'})
+                          CRS-{10001 + idx} - {course.title} ({course.degreeLevel || 'N/A'})
                         </option>
                       ))}
                     </select>

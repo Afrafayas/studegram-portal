@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import API from '../api/axios';
 
 export default function ApplicationDetailsModal({ isOpen, onClose, application }) {
   if (!isOpen || !application) return null;
@@ -20,7 +21,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
   // File Constraints
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB limit
 
-  const fetchChatMessages = (silent = false) => {
+  const loadChatMessages = async (silent = false) => {
     const token = localStorage.getItem('partner_token');
     if (!token || !application?.id) return;
 
@@ -28,48 +29,35 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
       setIsChatLoading(true);
     }
     
-    fetch(`/api/applications/${application.id}/chat`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
-    .then(async (res) => {
-      if (res.status === 403) {
-        setIsUnauthorized(true);
-        throw new Error('Not authorized to access this application chat.');
-      }
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to load chat messages.');
-      }
-      return res.json();
-    })
-    .then((data) => {
+    try {
+      const res = await API.get(`/applications/${application.id}/chat`);
+      const data = res.data;
       setChatMessages(data.data || []);
       setIsUnauthorized(false);
       setChatError('');
-    })
-    .catch((err) => {
-      console.error('Chat fetch error:', err);
-      if (!silent || err.message.includes('authorized')) {
-        setChatError(err.message || 'Error loading chat messages.');
+    } catch (err) {
+      if (err.response?.status === 403) {
+        setIsUnauthorized(true);
+        setChatError('Not authorized to access this application chat.');
+      } else {
+        console.error('Error loading application chat:', err);
+        setChatError('Could not sync live messages.');
       }
-    })
-    .finally(() => {
+    } finally {
       if (!silent) {
         setIsChatLoading(false);
       }
-    });
+    }
   };
 
   // Poll for messages every 8 seconds when active on Messages tab
   useEffect(() => {
     let intervalId;
     if (isOpen && mainTab === 'activity' && application?.id) {
-      fetchChatMessages(false); // Initial load is non-silent
+      loadChatMessages(false); // Initial load is non-silent
 
       intervalId = setInterval(() => {
-        fetchChatMessages(true); // Polling fetches are silent
+        loadChatMessages(true); // Polling fetches are silent
       }, 8000);
     }
     return () => {
@@ -123,59 +111,44 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
     });
 
     try {
-      const res = await fetch(`/api/applications/${application.id}/chat`, {
-        method: 'POST',
+      const res = await API.post(`/applications/${application.id}/chat`, formData, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
+          'Content-Type': 'multipart/form-data'
+        }
       });
 
-      const data = await res.json();
-      if (res.status === 403) {
-        setIsUnauthorized(true);
-        throw new Error('Not authorized to send messages in this chat.');
-      }
-      if (!res.ok) {
-        throw new Error(data.message || 'Failed to send message.');
+      const data = res.data;
+      if (!data?.success) {
+        throw new Error(data?.message || 'Failed to send message.');
       }
 
       setChatMessages((prev) => [...prev, data.data]);
       setChatInput('');
       setChatFiles([]);
     } catch (err) {
-      console.error('Send message error:', err);
-      setChatError(err.message || 'Error sending message. Connection failed.');
-      alert(err.message || 'Error sending message. Please check your network connection.');
+      if (err.response?.status === 403) {
+        setIsUnauthorized(true);
+        setChatError('Not authorized to send messages in this chat.');
+      } else {
+        console.error('Send message error:', err);
+        setChatError(err.message || 'Error sending message. Connection failed.');
+        alert(err.message || 'Error sending message. Please check your network connection.');
+      }
     } finally {
       setIsChatSending(false);
     }
   };
 
-  const [newNote, setNewNote] = useState('');
   const [notes, setNotes] = useState([
     {
-      author: 'Studegram Support Team',
-      role: 'Senior Processor',
-      text: 'Academic transcript and passport bio-page have been verified. Sent application files to University of Surrey Admissions team.',
-      date: '18 Jun 2026, 11:30 AM',
-      avatarColor: 'bg-indigo-500'
-    },
-    {
-      author: 'Agent Helpdesk',
-      role: 'Support Representative',
-      text: 'Verified IELTS score sheet online (TRF code matching). Academic requirement checklist ticked.',
-      date: '12 Jun 2026, 04:15 PM',
+      author: 'Studegram Verification Team',
+      role: 'Compliance',
+      text: 'Verified passport bio-page and academic transcripts. Eligibility confirmed for admission processing.',
+      date: '12 Jun 2026, 11:30 AM',
       avatarColor: 'bg-emerald-500'
-    },
-    {
-      author: 'System Audit',
-      role: 'Automation',
-      text: 'Application created successfully. Generated unique identifier ' + application.camsId + '.',
-      date: application.dateAdded + ', 09:00 AM',
-      avatarColor: 'bg-slate-400'
     }
   ]);
+  const [newNote, setNewNote] = useState('');
 
   const handleAddNote = (e) => {
     e.preventDefault();
@@ -212,22 +185,68 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
     { name: 'Letter of Recommendation (LOR 1 & 2)', status: 'Pending Review', date: '15 Jun 2026', type: 'PDF' }
   ];
 
-  const getTimelineStep = () => {
-    if (application.secondaryStatus === 'Offer Issued') return 3;
-    if (application.primaryStatus === 'Processed') return 2;
-    return 1;
+  const currentAppStatus = application.status || application.secondaryStatus || 'Submitted';
+
+  const getTimelineStepIndex = (statusStr) => {
+    const s = (statusStr || '').toLowerCase();
+    if (s.includes('enrolled') || s.includes('closed')) return 6;
+    if (s.includes('visa approved') || s.includes('approved')) return 5;
+    if (s.includes('visa processing') || s.includes('visa filed') || s.includes('visa pending')) return 4;
+    if (s.includes('cas') || s.includes('i-20')) return 3;
+    if (s.includes('offer')) return 2;
+    if (s.includes('review') || s.includes('verification') || s.includes('processed') || s.includes('sent')) return 1;
+    return 0;
   };
 
-  const currentStepIndex = getTimelineStep();
+  const currentStepIndex = getTimelineStepIndex(currentAppStatus);
+
+  const findStatusDate = (keywords) => {
+    if (!application.statusHistory || !Array.isArray(application.statusHistory)) return null;
+    const historyItem = application.statusHistory.find(h => 
+      keywords.some(kw => (h.status || '').toLowerCase().includes(kw))
+    );
+    if (historyItem && historyItem.updatedAt) {
+      return new Date(historyItem.updatedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    return null;
+  };
 
   const timelineSteps = [
-    { label: 'Application Submitted', desc: 'Agent filed application on portal', date: application.dateAdded },
-    { label: 'Document Verification', desc: 'Studegram team verified eligibility checklists', date: '12 Jun 2026' },
-    { label: 'Sent to University', desc: 'Application files forwarded to admissions office', date: '18 Jun 2026' },
-    { label: 'Offer Letter Issued', desc: 'Conditional or Unconditional Offer received', date: application.secondaryStatus === 'Offer Issued' ? '20 Jun 2026' : null },
-    { label: 'CAS Released', desc: 'Confirmation of Acceptance for Studies issued', date: null },
-    { label: 'Visa Filed', desc: 'Student visa slots booked and application submitted', date: null },
-    { label: 'Visa Decision', desc: 'Visa application outcome from embassy', date: null }
+    { 
+      label: 'Application Submitted', 
+      desc: 'Agent filed application on portal', 
+      date: application.dateAdded || findStatusDate(['submitted', 'pending']) || 'Filed' 
+    },
+    { 
+      label: 'Document Verification', 
+      desc: 'Studegram team & admissions office reviewing eligibility', 
+      date: findStatusDate(['review', 'verification', 'sent', 'processed']) 
+    },
+    { 
+      label: 'Offer Letter Issued', 
+      desc: 'Conditional or Unconditional Offer letter received from university', 
+      date: findStatusDate(['offer']) 
+    },
+    { 
+      label: 'CAS / I-20 Released', 
+      desc: 'Confirmation of Acceptance for Studies issued', 
+      date: findStatusDate(['cas', 'i-20']) 
+    },
+    { 
+      label: 'Visa Processing / Filed', 
+      desc: 'Student visa application submitted to embassy', 
+      date: findStatusDate(['visa processing', 'visa filed', 'visa pending']) 
+    },
+    { 
+      label: 'Visa Approved', 
+      desc: 'Visa application approved by embassy', 
+      date: findStatusDate(['visa approved', 'approved']) 
+    },
+    { 
+      label: 'Enrolled / Closed', 
+      desc: 'Student arrived & enrolled. Application completed and closed', 
+      date: findStatusDate(['enrolled', 'closed']) 
+    }
   ];
 
   return (
