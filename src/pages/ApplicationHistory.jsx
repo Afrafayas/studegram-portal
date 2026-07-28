@@ -16,7 +16,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
       {/* Top Header */}
       <div className="flex items-baseline justify-between flex-wrap gap-4 border-b border-[#E2E8F0] pb-4">
         <h1 className="text-22px font-bold tracking-tight text-[#0F172A]">Application History</h1>
-        <span className="text-xs text-[#64748B] font-semibold">803 total · 36 processed</span>
+        <span className="text-xs text-[#64748B] font-semibold">{applications.length} total · {applications.filter(a => a.secondaryStatus === 'Processed').length} processed</span>
       </div>
 
       {/* Duplicate Alert Banner */}
@@ -115,21 +115,30 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
                       <div className="text-[10px] text-[#64748B] font-semibold leading-relaxed truncate max-w-xs">{app.courseName}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-col sm:flex-row gap-1.5 items-start">
-                        {/* Processed Badge (Green/Success: #10B981) */}
-                        <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold border bg-emerald-50 text-emerald-700 border-emerald-100 uppercase">
-                          {app.primaryStatus}
-                        </span>
-                        {/* Secondary Badges: blue=offer issued, amber=pending */}
-                        {app.secondaryStatus === 'Offer Issued' ? (
-                          <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold border bg-blue-50 text-blue-700 border-blue-100 uppercase">
-                            Offer Issued
-                          </span>
-                        ) : (
-                          <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold border bg-amber-50 text-amber-700 border-amber-100 uppercase">
-                            Pending
-                          </span>
-                        )}
+                      <div className="flex items-center gap-1.5">
+                        {(() => {
+                          const currentStatus = app.status || app.secondaryStatus || 'Submitted';
+                          const isClosed = currentStatus.includes('Closed') || currentStatus === 'Enrolled / Closed';
+                          const isApproved = currentStatus.includes('Approved');
+                          const isOffer = currentStatus.includes('Offer');
+                          const isCAS = currentStatus.includes('CAS');
+                          const isRejected = currentStatus.includes('Rejected');
+
+                          let badgeStyle = 'bg-amber-50 text-amber-700 border-amber-200';
+                          if (isClosed || isApproved) {
+                            badgeStyle = 'bg-emerald-50 text-emerald-700 border-emerald-200 font-extrabold';
+                          } else if (isOffer || isCAS) {
+                            badgeStyle = 'bg-blue-50 text-blue-700 border-blue-200';
+                          } else if (isRejected) {
+                            badgeStyle = 'bg-rose-50 text-rose-700 border-rose-200';
+                          }
+
+                          return (
+                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wider ${badgeStyle}`}>
+                              {currentStatus}
+                            </span>
+                          );
+                        })()}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-xs text-[#64748B] font-semibold">{app.dateAdded}</td>

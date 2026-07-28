@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import API from '../api/axios';
 
 export default function Register({ onNavigate }) {
   const [fullName, setFullName] = useState('');
@@ -65,24 +66,18 @@ export default function Register({ onNavigate }) {
     setSuccessMessage('');
     setApiError('');
 
-    fetch('/api/partners/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name: fullName,
-        email,
-        phone: `+91${phoneNumber.trim()}`,
-        companyName: agencyName,
-        password,
-        country: 'India'
-      })
+    API.post('/partners/register', {
+      name: fullName,
+      email,
+      phone: `+91${phoneNumber.trim()}`,
+      companyName: agencyName,
+      password,
+      country: 'India'
     })
-    .then(async (res) => {
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || data.error || 'Registration failed');
+    .then((res) => {
+      const data = res.data;
+      if (!data?.success) {
+        throw new Error(data?.message || data?.error || 'Registration failed');
       }
       setSuccessMessage('Registration successful. Please wait for admin approval before you can log in.');
       // Clear form

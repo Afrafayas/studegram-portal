@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import API from '../api/axios';
 
 export default function Login({ onNavigate, onLoginSuccess }) {
   const [email, setEmail] = useState('');
@@ -47,17 +48,11 @@ export default function Login({ onNavigate, onLoginSuccess }) {
 
     setIsLoading(true);
 
-    fetch('/api/partners/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ email, password })
-    })
-    .then(async (res) => {
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.message || 'Invalid credentials');
+    API.post('/partners/login', { email, password })
+    .then((res) => {
+      const data = res.data;
+      if (!data?.success) {
+        throw new Error(data?.message || 'Invalid credentials');
       }
 
       localStorage.setItem('partner_token', data.token);
