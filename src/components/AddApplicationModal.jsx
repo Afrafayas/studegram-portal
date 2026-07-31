@@ -24,6 +24,10 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
   const [newStudentPassport, setNewStudentPassport] = useState('');
   const [newStudentDob, setNewStudentDob] = useState('');
 
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+
   useEffect(() => {
     if (isOpen) {
       setIsLoading(true);
@@ -59,6 +63,9 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
     setNewStudentPhone('');
     setNewStudentPassport('');
     setNewStudentDob('');
+    setUploadedFiles([]);
+    setIsUploading(false);
+    setUploadError('');
     setStepNumber(1);
     onClose();
   };
@@ -77,6 +84,10 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
     }
     if (!selectedUniversity || !selectedCourse) {
       setError('Please select a university and course.');
+      return;
+    }
+    if (uploadedFiles.length === 0) {
+      setError('Please upload at least one document (e.g. Passport Bio-Page, Transcripts) to submit the application.');
       return;
     }
 
@@ -105,7 +116,8 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
       const success = await onSubmit({
         studentId: studentId,
         universityId: selectedUniversity,
-        courseId: selectedCourse
+        courseId: selectedCourse,
+        documents: uploadedFiles
       });
       if (success) {
         setStepNumber(4); // Success step
@@ -348,11 +360,81 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                 </div>
               </div>
 
+              {/* Document upload section */}
+              <div className="space-y-3">
+                <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
+                  Supporting Documents *
+                </label>
+                <div className="border-2 border-dashed border-[#E2E8F0] hover:border-[#D99A1C] transition-colors rounded-xl p-4 text-center cursor-pointer relative bg-slate-50">
+                  <input
+                    type="file"
+                    multiple
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    onChange={async (e) => {
+                      const files = Array.from(e.target.files || []);
+                      if (files.length === 0) return;
+                      setIsUploading(true);
+                      setUploadError('');
+                      try {
+                        const uploadPromises = files.map(async (file) => {
+                          const formData = new FormData();
+                          formData.append('file', file);
+                          const res = await API.post('/upload', formData, {
+                            headers: { 'Content-Type': 'multipart/form-data' }
+                          });
+                          return { name: file.name, url: res.data.url };
+                        });
+                        const results = await Promise.all(uploadPromises);
+                        setUploadedFiles(prev => [...prev, ...results]);
+                      } catch (err) {
+                        console.error('File upload failed:', err);
+                        setUploadError('Failed to upload some documents. Please check your connection.');
+                      } finally {
+                        setIsUploading(false);
+                      }
+                    }}
+                  />
+                  <div className="space-y-1 text-slate-500">
+                    <span className="text-lg">📄</span>
+                    <p className="text-xs font-semibold text-slate-700">Click or drag files here to upload</p>
+                    <p className="text-[10px] text-slate-400 font-semibold">Upload at least one document (PDF, PNG, JPG, Word)</p>
+                  </div>
+                </div>
+
+                {isUploading && (
+                  <p className="text-[10px] text-[#D99A1C] font-semibold animate-pulse">⏳ Uploading files, please wait...</p>
+                )}
+                {uploadError && (
+                  <p className="text-[10px] text-red-500 font-semibold">❌ {uploadError}</p>
+                )}
+
+                {/* Uploaded File Badges */}
+                {uploadedFiles.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-1.5">
+                    {uploadedFiles.map((file, idx) => (
+                      <div key={idx} className="flex items-center gap-1.5 bg-[#D99A1C]/10 border border-[#D99A1C]/25 text-[#D99A1C] text-[10px] px-2.5 py-1 rounded-lg font-bold">
+                        <span>📄</span>
+                        <span className="truncate max-w-[150px]">{file.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => setUploadedFiles(prev => prev.filter((_, i) => i !== idx))}
+                          className="hover:text-red-500 transition-colors pl-1 font-bold text-xs"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {/* Submit button */}
               <button
                 type="submit"
                 disabled={
                   isSubmitting ||
+                  isUploading ||
+                  uploadedFiles.length === 0 ||
                   (studentSelectionMode === 'existing' && !selectedStudent) ||
                   (studentSelectionMode === 'new' && (!newStudentName || !newStudentEmail || !newStudentPhone)) ||
                   !selectedUniversity ||

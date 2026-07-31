@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function Navbar({ onNewApplicationClick, onLogout, onToggleSidebar }) {
+export default function Navbar({ activePage, onNewApplicationClick, onLogout, onToggleSidebar }) {
   const [searchQuery, setSearchQuery] = useState('');
 
   return (
@@ -22,9 +22,21 @@ export default function Navbar({ onNewApplicationClick, onLogout, onToggleSideba
         <div className="w-8 h-8 md:w-9 h-9 rounded-xl bg-gradient-to-tr from-[#D99A1C] to-[#F5B025] flex items-center justify-center font-extrabold text-black text-sm md:text-lg shadow-sm">
           S
         </div>
-        <span className="font-extrabold text-base md:text-xl tracking-tight text-white">
-          Studegram
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="font-extrabold text-base md:text-xl tracking-tight text-white">
+            Studegram
+          </span>
+          {activePage && (
+            <>
+              <svg className="w-3.5 h-3.5 text-slate-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7-7" />
+              </svg>
+              <span className="text-[#D99A1C] font-extrabold text-xs md:text-sm mt-0.5">
+                {activePage}
+              </span>
+            </>
+          )}
+        </div>
       </div>
  
       {/* Center section: Rounded search bar */}

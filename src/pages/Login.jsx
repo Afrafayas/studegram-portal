@@ -60,12 +60,57 @@ export default function Login({ onNavigate, onLoginSuccess }) {
       onLoginSuccess();
     })
     .catch((err) => {
-      setLoginError(err.message || 'An error occurred during sign in.');
+      const serverMessage = err.response?.data?.message;
+      setLoginError(serverMessage || 'An error occurred during sign in.');
     })
     .finally(() => {
       setIsLoading(false);
     });
   };
+
+  const getAlertConfig = () => {
+    if (!loginError) return null;
+    const lower = loginError.toLowerCase();
+    
+    if (lower.includes('pending') || lower.includes('approval')) {
+      return {
+        bg: 'bg-amber-50/75 border-amber-200/80 text-amber-900',
+        titleColor: 'text-amber-800',
+        title: 'Awaiting Admin Approval',
+        icon: (
+          <svg className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        )
+      };
+    }
+    
+    if (lower.includes('deactivated') || lower.includes('inactive')) {
+      return {
+        bg: 'bg-rose-50/75 border-rose-200/80 text-rose-900',
+        titleColor: 'text-rose-800',
+        title: 'Account Suspended',
+        icon: (
+          <svg className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        )
+      };
+    }
+
+    return {
+      bg: 'bg-red-50/75 border-red-200/80 text-red-900',
+      titleColor: 'text-red-800',
+      title: 'Sign In Failed',
+      icon: (
+        <svg className="w-5 h-5 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      )
+    };
+  };
+
+  const alertConfig = getAlertConfig();
 
   return (
     <div className="min-h-screen bg-[#F0F2F5] flex items-stretch select-none">
@@ -168,13 +213,11 @@ export default function Login({ onNavigate, onLoginSuccess }) {
           </div>
 
           {/* Form fields */}
-          {loginError && (
-            <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl flex gap-3 text-xs shadow-sm">
-              <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <div className="space-y-1">
-                <p className="font-bold text-[10px] text-red-800 uppercase tracking-wider">Login Error</p>
+          {alertConfig && (
+            <div className={`border p-4 rounded-xl flex gap-3 text-xs shadow-xs backdrop-blur-xs transition-all duration-300 ${alertConfig.bg}`}>
+              {alertConfig.icon}
+              <div className="space-y-1 text-left">
+                <p className={`font-bold text-[10px] uppercase tracking-wider ${alertConfig.titleColor}`}>{alertConfig.title}</p>
                 <p className="leading-relaxed font-semibold">{loginError}</p>
               </div>
             </div>

@@ -18,6 +18,7 @@ import UniversityDeadline from './pages/UniversityDeadline';
 import Universities from './pages/Universities';
 import KnowledgeHub from './pages/KnowledgeHub';
 import Scholarships from './pages/Scholarships';
+import Webinar from './pages/Webinar';
 import API from './api/axios';
 
 export default function App() {
@@ -65,7 +66,8 @@ export default function App() {
         }),
         student: app.student,
         course: app.course,
-        university: app.university
+        university: app.university,
+        documents: app.documents || []
       }));
       setApplications(mapped);
     } catch (err) {
@@ -89,7 +91,8 @@ export default function App() {
       const res = await API.post('/applications', {
         student: selectedData.studentId,
         course: selectedData.courseId,
-        university: selectedData.universityId
+        university: selectedData.universityId,
+        documents: selectedData.documents || []
       });
 
       const data = res.data;
@@ -189,6 +192,7 @@ export default function App() {
     <div className="min-h-screen bg-[#F0F2F5] flex flex-col font-sans text-[#0F172A] select-text">
       {/* Top Navbar */}
       <Navbar 
+        activePage={activePage}
         onNewApplicationClick={() => setShowModal(true)} 
         onLogout={handleLogout} 
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}

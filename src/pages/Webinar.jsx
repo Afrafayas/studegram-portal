@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import API from '../api/axios';
 
 // Pre-populated Mock Data
 const INITIAL_WEBINARS = [
@@ -57,41 +58,74 @@ const UNIVERSITIES_LIST = [
 ];
 
 export default function Webinar() {
-  const [webinars, setWebinars] = useState(() => {
-    const saved = localStorage.getItem('studegram_webinars');
-    if (saved) {
-      const list = JSON.parse(saved);
-      let updatedList = list.map((webinar) => {
-        if (webinar.id === 'webinar-1' && webinar.youtubeUrl.includes('dQw4w9WgXcQ')) {
-          return { ...webinar, youtubeUrl: 'https://www.youtube.com/watch?v=71Y8QnykFi4' };
-        }
-        if (webinar.id === 'webinar-2' && webinar.youtubeUrl.includes('dQw4w9WgXcQ')) {
-          return { ...webinar, youtubeUrl: 'https://www.youtube.com/watch?v=SwCf8B07_s8' };
-        }
-        if (webinar.id === 'webinar-3' && webinar.youtubeUrl.includes('dQw4w9WgXcQ')) {
-          return { ...webinar, youtubeUrl: 'https://www.youtube.com/watch?v=HKwmD9yFBx8' };
-        }
-        return webinar;
-      });
 
-      // Ensure Hertfordshire is appended to existing localStorage list if missing
-      const hasHerts = updatedList.some((w) => w.id === 'webinar-4');
-      if (!hasHerts) {
-        updatedList.push({
-          id: 'webinar-4',
-          title: 'University of Hertfordshire: Campus Life & Engineering Tour',
-          university: 'University of Hertfordshire',
-          date: '2026-07-28T10:00',
-          description: 'Discover campus life, housing options, and virtual tours of the advanced aerospace, robotics, and automotive labs at Hertfordshire.',
-          youtubeUrl: 'https://www.youtube.com/watch?v=PwBtjFEv8UU',
-          status: 'Upcoming',
-          poster: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=800&q=80'
-        });
-      }
-      return updatedList;
+
+  const [webinars, setWebinars] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Helper to map backend object to frontend object
+  const mapBackendToFrontend = (w) => {
+    let poster = 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80';
+    let description = w.description || '';
+    if (description.startsWith('POSTER_URL:')) {
+      const parts = description.split('|||');
+      poster = parts[0].substring('POSTER_URL:'.length);
+      description = parts.slice(1).join('|||');
     }
-    return INITIAL_WEBINARS;
-  });
+    return {
+      id: w._id,
+      title: w.title,
+      university: w.speaker || 'Unknown University',
+      date: w.date || '',
+      description: description,
+      youtubeUrl: w.link || '',
+      status: w.status === 'Completed' ? 'Recorded' : w.status,
+      poster: poster
+    };
+  };
+
+  // Fetch webinars from backend
+  useEffect(() => {
+    let isMounted = true;
+    const fetchWebinars = async () => {
+      try {
+        const res = await API.get('/webinars');
+        if (res.data && res.data.success && isMounted) {
+          if (res.data.data.length === 0) {
+            // Seed default webinars
+            const seedPromises = INITIAL_WEBINARS.map(w => {
+              const payload = {
+                title: w.title,
+                speaker: w.university,
+                date: w.date,
+                link: w.youtubeUrl,
+                status: w.status === 'Recorded' ? 'Completed' : w.status,
+                description: `POSTER_URL:${w.poster}|||${w.description}`
+              };
+              return API.post('/webinars', payload);
+            });
+            await Promise.all(seedPromises);
+            // Refetch
+            const refetchRes = await API.get('/webinars');
+            if (refetchRes.data && refetchRes.data.success && isMounted) {
+              setWebinars(refetchRes.data.data.map(mapBackendToFrontend));
+            }
+          } else {
+            setWebinars(res.data.data.map(mapBackendToFrontend));
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching webinars:', err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    fetchWebinars();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -107,11 +141,6 @@ export default function Webinar() {
   const [formPosterUrl, setFormPosterUrl] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const [fileName, setFileName] = useState('');
-
-  // Sync webinars to localStorage
-  useEffect(() => {
-    localStorage.setItem('studegram_webinars', JSON.stringify(webinars));
-  }, [webinars]);
 
   // Lock background scrolling when modal is open
   useEffect(() => {
@@ -165,7 +194,7 @@ export default function Webinar() {
   };
 
   // Submit Poster / Webinar Form
-  const handleUploadSubmit = (e) => {
+  const handleUploadSubmit = async (e) => {
     e.preventDefault();
     if (!formTitle.trim() || !formDate || !formDescription.trim()) {
       alert('Please fill out all required fields.');
@@ -181,28 +210,35 @@ export default function Webinar() {
       videoUrl = 'https://' + videoUrl;
     }
 
-    const newWebinar = {
-      id: `webinar-${Date.now()}`,
+    const payload = {
       title: formTitle,
-      university: formUni,
+      speaker: formUni,
       date: formDate,
-      description: formDescription,
-      youtubeUrl: videoUrl || 'https://www.youtube.com',
-      status: new Date(formDate) > new Date() ? 'Upcoming' : 'Recorded',
-      poster: posterSrc
+      link: videoUrl || 'https://www.youtube.com',
+      status: new Date(formDate) > new Date() ? 'Upcoming' : 'Completed',
+      description: `POSTER_URL:${posterSrc}|||${formDescription}`
     };
 
-    setWebinars([newWebinar, ...webinars]);
-    
-    // Reset Form & Close Modal
-    setFormTitle('');
-    setFormUni(UNIVERSITIES_LIST[0]);
-    setFormDate('');
-    setFormDescription('');
-    setFormYoutube('');
-    setFormPosterUrl('');
-    setFileName('');
-    setShowUploadModal(false);
+    try {
+      const res = await API.post('/webinars', payload);
+      if (res.data && res.data.success) {
+        const addedWebinar = mapBackendToFrontend(res.data.data);
+        setWebinars(prev => [addedWebinar, ...prev]);
+
+        // Reset Form & Close Modal
+        setFormTitle('');
+        setFormUni(UNIVERSITIES_LIST[0]);
+        setFormDate('');
+        setFormDescription('');
+        setFormYoutube('');
+        setFormPosterUrl('');
+        setFileName('');
+        setShowUploadModal(false);
+      }
+    } catch (err) {
+      console.error('Error creating webinar:', err);
+      alert(err.response?.data?.message || 'Failed to host webinar. Please try again.');
+    }
   };
 
   // Filter Logic
@@ -299,7 +335,12 @@ export default function Webinar() {
       </div>
 
       {/* Webinars Cards Grid */}
-      {filteredWebinars.length > 0 && (
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-20 space-y-4">
+          <div className="w-10 h-10 border-4 border-[#D99A1C] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-xs text-[#64748B] font-bold">Loading seminars & webinars...</p>
+        </div>
+      ) : filteredWebinars.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">
           {filteredWebinars.map((webinar, idx) => {
             const isBlueTheme = idx % 2 === 0;
@@ -369,6 +410,20 @@ export default function Webinar() {
               </div>
             );
           })}
+        </div>
+      ) : (
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl p-12 text-center max-w-md mx-auto shadow-sm space-y-4">
+          <div className="w-14 h-14 bg-amber-50 text-[#D99A1C] rounded-full flex items-center justify-center mx-auto shadow-inner">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div className="space-y-1">
+            <h3 className="font-extrabold text-sm text-[#0F172A]">No Webinars Found</h3>
+            <p className="text-[11px] text-[#64748B] font-semibold leading-relaxed">
+              We couldn't find any webinars matching your current search query or university filter.
+            </p>
+          </div>
         </div>
       )}
       </div>

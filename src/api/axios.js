@@ -27,6 +27,15 @@ API.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       console.warn('Unauthorized partner request - Token may be expired.');
+      const isAuthRequest = error.config && (
+        error.config.url.includes('/login') || 
+        error.config.url.includes('/register')
+      );
+      if (!isAuthRequest) {
+        localStorage.removeItem('partner_token');
+        localStorage.removeItem('partner_data');
+        window.location.reload();
+      }
     }
     return Promise.reject(error);
   }
