@@ -20,8 +20,10 @@ import KnowledgeHub from './pages/KnowledgeHub';
 import Scholarships from './pages/Scholarships';
 import Webinar from './pages/Webinar';
 import API from './api/axios';
+import { useToast } from './context/ToastContext';
 
 export default function App() {
+  const toast = useToast();
   const [currentPage, setCurrentPage] = useState(() => {
     return localStorage.getItem('partner_token') ? 'dashboard' : 'login';
   }); // Starts as 'login' or 'dashboard' if already logged in
@@ -104,7 +106,7 @@ export default function App() {
       return true;
     } catch (err) {
       console.error(err);
-      alert(err.message || 'Error submitting application');
+      toast.error(err.message || 'Error submitting application');
       return false;
     }
   };

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
+import { useToast } from '../context/ToastContext';
 
 // Pre-populated Mock Data
 const INITIAL_WEBINARS = [
@@ -58,7 +59,7 @@ const UNIVERSITIES_LIST = [
 ];
 
 export default function Webinar() {
-
+  const toast = useToast();
 
   const [webinars, setWebinars] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -168,7 +169,7 @@ export default function Webinar() {
       };
       reader.readAsDataURL(file);
     } else {
-      alert('Please upload a valid image file (PNG/JPG).');
+      toast.error('Please upload a valid image file (PNG/JPG).');
     }
   };
 
@@ -197,7 +198,7 @@ export default function Webinar() {
   const handleUploadSubmit = async (e) => {
     e.preventDefault();
     if (!formTitle.trim() || !formDate || !formDescription.trim()) {
-      alert('Please fill out all required fields.');
+      toast.error('Please fill out all required fields.');
       return;
     }
 
@@ -234,10 +235,11 @@ export default function Webinar() {
         setFormPosterUrl('');
         setFileName('');
         setShowUploadModal(false);
+        toast.success('Webinar hosted successfully!');
       }
     } catch (err) {
       console.error('Error creating webinar:', err);
-      alert(err.response?.data?.message || 'Failed to host webinar. Please try again.');
+      toast.error(err.response?.data?.message || 'Failed to host webinar. Please try again.');
     }
   };
 

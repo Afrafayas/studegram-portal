@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useToast } from '../context/ToastContext';
 
 export default function SearchCourses() {
+  const toast = useToast();
   const [country, setCountry] = useState('United Kingdom');
   const [nationality, setNationality] = useState('India');
   const [university, setUniversity] = useState('All');
@@ -245,13 +247,13 @@ export default function SearchCourses() {
                   {/* Actions */}
                   <div className="flex gap-2 pt-1">
                     <button
-                      onClick={() => alert(`Details and admission requirements checklist for ${course.title} has been synchronized to your downloads.`)}
+                      onClick={() => toast.success(`Details and admission requirements checklist for ${course.title} has been synchronized to your downloads.`)}
                       className="flex-1 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-xs font-bold text-slate-700 py-2.5 rounded-xl text-center transition-all duration-150"
                     >
                       Check Specs
                     </button>
                     <button
-                      onClick={() => alert(`Initiating student application file for ${course.title} at ${course.university}.`)}
+                      onClick={() => toast.info(`Initiating student application file for ${course.title} at ${course.university}.`)}
                       className="flex-1 bg-[#D99A1C] hover:bg-[#B87C0E] hover:scale-[1.01] active:scale-95 text-xs font-bold text-white py-2.5 rounded-xl text-center transition-all duration-150 shadow-xs"
                     >
                       Apply Now

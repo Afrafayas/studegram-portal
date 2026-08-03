@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import API from '../api/axios';
+import { useToast } from '../context/ToastContext';
 
 export default function ApplicationDetailsModal({ isOpen, onClose, application }) {
   if (!isOpen || !application) return null;
+
+  const toast = useToast();
 
   // Layout tabs state: 'details' (App Details) or 'activity' (Messages & Updates)
   const [mainTab, setMainTab] = useState('details');
@@ -91,13 +94,13 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
     const files = Array.from(e.target.files || []);
 
     if (chatFiles.length + files.length > 5) {
-      alert('You can only attach up to 5 documents per message.');
+      toast.error('You can only attach up to 5 documents per message.');
       return;
     }
 
     const oversized = files.filter(f => f.size > MAX_FILE_SIZE);
     if (oversized.length > 0) {
-      alert(`The following file(s) exceed the 10MB size limit:\n${oversized.map(f => `${f.name} (${(f.size / (1024 * 1024)).toFixed(2)} MB)`).join('\n')}`);
+      toast.error(`The following file(s) exceed the 10MB size limit:\n${oversized.map(f => `${f.name} (${(f.size / (1024 * 1024)).toFixed(2)} MB)`).join('\n')}`);
       return;
     }
 
@@ -142,7 +145,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
       } else {
         console.error('Send message error:', err);
         setChatError(err.message || 'Error sending message. Connection failed.');
-        alert(err.message || 'Error sending message. Please check your network connection.');
+        toast.error(err.message || 'Error sending message. Please check your network connection.');
       }
     } finally {
       setIsChatSending(false);

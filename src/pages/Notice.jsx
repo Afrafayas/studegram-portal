@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { notices } from '../data/notices';
+import { useToast } from '../context/ToastContext';
 
 const CATEGORIES_LIST = [
   'Admission',
@@ -14,6 +15,7 @@ const CATEGORIES_LIST = [
 ];
 
 export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
+  const toast = useToast();
   // State for notices list
   const [localNotices, setLocalNotices] = useState(() => {
     const saved = localStorage.getItem('studegram_notices');
@@ -64,7 +66,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
       };
       reader.readAsDataURL(file);
     } else {
-      alert('Please upload a valid image file (PNG/JPG).');
+      toast.error('Please upload a valid image file (PNG/JPG).');
     }
   };
 
@@ -93,7 +95,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
   const handleUploadSubmit = (e) => {
     e.preventDefault();
     if (!formTitle.trim() || !formMessage.trim()) {
-      alert('Please fill out all required fields.');
+      toast.error('Please fill out all required fields.');
       return;
     }
 
