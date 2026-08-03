@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 
-export default function Navbar({ activePage, onNewApplicationClick, onLogout, onToggleSidebar }) {
+export default function Navbar({ activePage, partnerData, onBack, onNewApplicationClick, onLogout, onToggleSidebar }) {
   const [searchQuery, setSearchQuery] = useState('');
+  
+  const displayInitials = partnerData?.name
+    ? partnerData.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+    : 'JD';
 
   return (
     <nav className="h-[60px] min-h-[60px] bg-[#0A0A0F] border-b border-white/5 px-4 md:px-6 flex items-center justify-between sticky top-0 z-40 select-none text-white">
@@ -17,6 +21,18 @@ export default function Navbar({ activePage, onNewApplicationClick, onLogout, on
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
+
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="p-1.5 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg focus:outline-none transition-all flex items-center justify-center active:scale-95 duration-100"
+            title="Go Back"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </button>
+        )}
  
         {/* Logo Mark: Gradient with black text */}
         <div className="w-8 h-8 md:w-9 h-9 rounded-xl bg-gradient-to-tr from-[#D99A1C] to-[#F5B025] flex items-center justify-center font-extrabold text-black text-sm md:text-lg shadow-sm">
@@ -80,7 +96,7 @@ export default function Navbar({ activePage, onNewApplicationClick, onLogout, on
           className="relative cursor-pointer group focus:outline-none"
         >
           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#D99A1C] to-[#F5B025] flex items-center justify-center font-bold text-black text-xs shadow-md border-2 border-[#0A0A0F] group-hover:border-rose-500 transition-all">
-            JD
+            {displayInitials}
           </div>
           <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#10B981] rounded-full ring-2 ring-[#0A0A0F]"></span>
         </button>

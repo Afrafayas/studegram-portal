@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import AddApplicationModal from './components/AddApplicationModal';
@@ -27,7 +27,50 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(() => {
     return localStorage.getItem('partner_token') ? 'dashboard' : 'login';
   }); // Starts as 'login' or 'dashboard' if already logged in
+  const [partnerData, setPartnerData] = useState(() => {
+    try {
+      const saved = localStorage.getItem('partner_data');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [activePage, setActivePage] = useState('Dashboard');
+  const [navigationHistory, setNavigationHistory] = useState([]);
+  const prevActivePageRef = useRef('Dashboard');
+  const isBackNavRef = useRef(false);
+
+  useEffect(() => {
+    if (isBackNavRef.current) {
+      isBackNavRef.current = false;
+      prevActivePageRef.current = activePage;
+      return;
+    }
+
+    const prevPage = prevActivePageRef.current;
+
+    if (prevPage !== activePage) {
+      setNavigationHistory(prev => {
+        const last = prev[prev.length - 1];
+        if (last === prevPage) {
+          return prev;
+        }
+        return [...prev, prevPage];
+      });
+    }
+
+    prevActivePageRef.current = activePage;
+  }, [activePage]);
+
+  const handleBack = navigationHistory.length > 0 ? () => {
+    const prevPage = navigationHistory[navigationHistory.length - 1];
+    if (prevPage) {
+      isBackNavRef.current = true;
+      setActivePage(prevPage);
+      prevActivePageRef.current = prevPage;
+      setNavigationHistory(prev => prev.slice(0, -1));
+    }
+  } : null;
   const [showModal, setShowModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedAppForDetails, setSelectedAppForDetails] = useState(null);
@@ -116,6 +159,8 @@ export default function App() {
     localStorage.removeItem('partner_data');
     localStorage.removeItem('studegram_closed_notifications');
     localStorage.removeItem('studegram_read_notifications');
+    setNavigationHistory([]);
+    prevActivePageRef.current = 'Dashboard';
     setCurrentPage('login');
   };
 
@@ -180,6 +225,12 @@ export default function App() {
         onLoginSuccess={() => {
           setCurrentPage('dashboard');
           setActivePage('Dashboard');
+          setNavigationHistory([]);
+          prevActivePageRef.current = 'Dashboard';
+          try {
+            const saved = localStorage.getItem('partner_data');
+            setPartnerData(saved ? JSON.parse(saved) : null);
+          } catch {}
         }} 
       />
     );
@@ -195,6 +246,8 @@ export default function App() {
       {/* Top Navbar */}
       <Navbar 
         activePage={activePage}
+        partnerData={partnerData}
+        onBack={handleBack}
         onNewApplicationClick={() => setShowModal(true)} 
         onLogout={handleLogout} 
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
@@ -206,6 +259,7 @@ export default function App() {
         <Sidebar 
           activePage={activePage} 
           setActivePage={setActivePage} 
+          partnerData={partnerData}
           onLogout={handleLogout} 
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
