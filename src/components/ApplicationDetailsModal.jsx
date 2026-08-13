@@ -523,16 +523,6 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                             await API.put(`/applications/${application.id}`, { documents: updatedDocs });
                             setLocalDocuments(updatedDocs);
 
-                            // Auto log in secure chat thread
-                            try {
-                              const chatMessageText = `📎 New Document Uploaded: "${file.name}"\nComment: ${uploadComment.trim() || 'No comments provided.'}`;
-                              const chatFormData = new FormData();
-                              chatFormData.append('message', chatMessageText);
-                              await API.post(`/applications/${application.id}/chat`, chatFormData);
-                            } catch (chatErr) {
-                              console.warn('Failed to log document upload in chat:', chatErr.message);
-                            }
-
                             setUploadComment('');
                           } catch (err) {
                             console.error('File upload failed:', err);
