@@ -552,7 +552,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                     {/* Persistent Comment Area for new upload */}
                     <div className="space-y-1.5 mt-2 bg-slate-50 border border-slate-200/60 p-3.5 rounded-xl">
                       <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
-                        Comment / Note (added to next upload)
+                        Comments / Notes
                       </label>
                       <textarea
                         rows="2"
