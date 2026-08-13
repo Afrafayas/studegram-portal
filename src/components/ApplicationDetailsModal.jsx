@@ -569,9 +569,14 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                               <div>
                                 <h5 className="text-xs font-bold text-slate-800">{doc.name}</h5>
                                 {doc.comment && (
-                                  <p className="text-[10px] text-slate-500 bg-slate-50 border border-slate-200/50 px-2 py-0.5 rounded font-semibold mt-1 inline-block">
-                                    💬 {doc.comment}
-                                  </p>
+                                  <div className="bg-slate-50 border border-slate-200/85 rounded-xl p-2.5 mt-2 space-y-1 max-w-[280px]">
+                                    <h6 className="text-[9px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                                      <span>💬</span> Comments / Notes
+                                    </h6>
+                                    <p className="text-[10.5px] font-semibold text-slate-805 whitespace-pre-wrap leading-normal">
+                                      {doc.comment}
+                                    </p>
+                                  </div>
                                 )}
                                 <p className="text-[9px] text-slate-450 font-semibold mt-1">
                                   Uploaded: {doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Just Now'}
