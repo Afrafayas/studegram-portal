@@ -125,7 +125,10 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
         studentId: studentId,
         universityId: selectedUniversity,
         courseId: selectedCourse,
-        documents: uploadedFiles,
+        documents: uploadedFiles.map(file => ({
+          ...file,
+          comment: notes.trim()
+        })),
         notes: notes
       });
       if (success) {
