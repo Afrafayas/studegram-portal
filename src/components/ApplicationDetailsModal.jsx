@@ -425,10 +425,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                           <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Application Status</span>
                           <div className="flex items-center gap-1.5 mt-0.5">
                             <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-100 text-emerald-700 text-[8px] font-extrabold rounded-full uppercase">
-                              {application.primaryStatus}
-                            </span>
-                            <span className="px-2 py-0.5 bg-indigo-50 border border-indigo-100 text-indigo-700 text-[8px] font-extrabold rounded-full uppercase">
-                              {application.secondaryStatus}
+                              {application.status}
                             </span>
                           </div>
                         </div>
