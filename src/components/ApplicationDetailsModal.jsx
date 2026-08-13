@@ -474,16 +474,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                       </div>
                     </div>
 
-                    {application.notes && (
-                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4.5 space-y-2">
-                        <h4 className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider flex items-center gap-1.5">
-                          📝 Application Notes / Comments
-                        </h4>
-                        <p className="text-xs font-semibold text-slate-805 whitespace-pre-wrap leading-relaxed">
-                          {application.notes}
-                        </p>
-                      </div>
-                    )}
+
                   </div>
                 )}
 
