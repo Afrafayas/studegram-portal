@@ -14,18 +14,12 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
   const [localDocuments, setLocalDocuments] = useState([]);
   const [isUploadingDoc, setIsUploadingDoc] = useState(false);
   const [uploadDocError, setUploadDocError] = useState('');
-  const [selectedUploadFile, setSelectedUploadFile] = useState(null);
   const [uploadComment, setUploadComment] = useState('');
-  const [editingDocIdx, setEditingDocIdx] = useState(null);
-  const [editingCommentText, setEditingCommentText] = useState('');
 
   useEffect(() => {
     if (application) {
       setLocalDocuments(application.documents || []);
-      setSelectedUploadFile(null);
       setUploadComment('');
-      setEditingDocIdx(null);
-      setEditingCommentText('');
     }
   }, [application]);
 
@@ -509,11 +503,42 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                       <input
                         type="file"
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        onChange={(e) => {
+                        onChange={async (e) => {
                           const file = e.target.files?.[0];
-                          if (file) {
-                            setSelectedUploadFile(file);
-                            setUploadDocError('');
+                          if (!file) return;
+                          setIsUploadingDoc(true);
+                          setUploadDocError('');
+                          try {
+                            const formData = new FormData();
+                            formData.append('file', file);
+                            const res = await API.post('/upload', formData, {
+                              headers: { 'Content-Type': 'multipart/form-data' }
+                            });
+                            const newDoc = { 
+                              name: file.name, 
+                              url: res.data.url,
+                              comment: uploadComment.trim()
+                            };
+                            const updatedDocs = [...localDocuments, newDoc];
+                            await API.put(`/applications/${application.id}`, { documents: updatedDocs });
+                            setLocalDocuments(updatedDocs);
+
+                            // Auto log in secure chat thread
+                            try {
+                              const chatMessageText = `📎 New Document Uploaded: "${file.name}"\nComment: ${uploadComment.trim() || 'No comments provided.'}`;
+                              const chatFormData = new FormData();
+                              chatFormData.append('message', chatMessageText);
+                              await API.post(`/applications/${application.id}/chat`, chatFormData);
+                            } catch (chatErr) {
+                              console.warn('Failed to log document upload in chat:', chatErr.message);
+                            }
+
+                            setUploadComment('');
+                          } catch (err) {
+                            console.error('File upload failed:', err);
+                            setUploadDocError('Failed to upload document. Please check your connection.');
+                          } finally {
+                            setIsUploadingDoc(false);
                           }
                         }}
                       />
@@ -524,88 +549,21 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                       </div>
                     </div>
 
-                    {selectedUploadFile && (
-                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-4">
-                        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs">📄</span>
-                            <span className="text-xs font-bold text-slate-800 truncate max-w-[250px]">
-                              {selectedUploadFile.name}
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedUploadFile(null);
-                              setUploadComment('');
-                            }}
-                            className="text-xs text-rose-500 hover:text-rose-700 font-bold"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                        
-                        <div className="space-y-1.5">
-                          <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Comments / Notes</label>
-                          <textarea
-                            rows="2.5"
-                            className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] font-semibold text-[#0F172A] resize-none shadow-sm"
-                            placeholder="Add comment about this document upload..."
-                            value={uploadComment}
-                            onChange={(e) => setUploadComment(e.target.value)}
-                          />
-                        </div>
+                    {/* Persistent Comment Area for new upload */}
+                    <div className="space-y-1.5 mt-2 bg-slate-50 border border-slate-200/60 p-3.5 rounded-xl">
+                      <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
+                        Comment / Note (added to next upload)
+                      </label>
+                      <textarea
+                        rows="2"
+                        className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] font-semibold text-[#0F172A] resize-none shadow-sm"
+                        placeholder="Type comment here first, then click box above to select and upload file..."
+                        value={uploadComment}
+                        onChange={(e) => setUploadComment(e.target.value)}
+                      />
+                    </div>
 
-                        <div className="flex justify-end">
-                          <button
-                            type="button"
-                            disabled={isUploadingDoc}
-                            onClick={async () => {
-                              setIsUploadingDoc(true);
-                              setUploadDocError('');
-                              try {
-                                const formData = new FormData();
-                                formData.append('file', selectedUploadFile);
-                                const uploadRes = await API.post('/upload', formData, {
-                                  headers: { 'Content-Type': 'multipart/form-data' }
-                                });
-                                const newDoc = { 
-                                  name: selectedUploadFile.name, 
-                                  url: uploadRes.data.url,
-                                  comment: uploadComment.trim()
-                                };
-                                const updatedDocs = [...localDocuments, newDoc];
-                                await API.put(`/applications/${application.id}`, { documents: updatedDocs });
-                                setLocalDocuments(updatedDocs);
-
-                                // Auto log in secure chat thread
-                                try {
-                                  const chatMessageText = `📎 New Document Uploaded: "${selectedUploadFile.name}"\nComment: ${uploadComment.trim() || 'No comments provided.'}`;
-                                  const chatFormData = new FormData();
-                                  chatFormData.append('message', chatMessageText);
-                                  await API.post(`/applications/${application.id}/chat`, chatFormData);
-                                } catch (chatErr) {
-                                  console.warn('Failed to log document upload in chat:', chatErr.message);
-                                }
-
-                                setSelectedUploadFile(null);
-                                setUploadComment('');
-                              } catch (err) {
-                                console.error('File upload failed:', err);
-                                setUploadDocError('Failed to upload document. Please check your connection.');
-                              } finally {
-                                setIsUploadingDoc(false);
-                              }
-                            }}
-                            className="bg-[#D99A1C] hover:bg-[#C28410] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-xl text-[10px] uppercase tracking-wider transition-all duration-150 active:scale-95 shadow-md flex items-center gap-1.5"
-                          >
-                            {isUploadingDoc ? 'Uploading...' : 'Upload Document'}
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {isUploadingDoc && !selectedUploadFile && (
+                    {isUploadingDoc && (
                       <p className="text-[10px] text-[#D99A1C] font-semibold animate-pulse">⏳ Uploading file, please wait...</p>
                     )}
                     {uploadDocError && (
@@ -620,69 +578,10 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                               <span className="text-base text-amber-500">📄</span>
                               <div>
                                 <h5 className="text-xs font-bold text-slate-800">{doc.name}</h5>
-                                {editingDocIdx === idx ? (
-                                  <div className="mt-2 flex items-center gap-2">
-                                    <input
-                                      type="text"
-                                      value={editingCommentText}
-                                      onChange={(e) => setEditingCommentText(e.target.value)}
-                                      className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#D99A1C] max-w-[200px]"
-                                      placeholder="Add/Edit comment..."
-                                      autoFocus
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={async () => {
-                                        const updatedDocs = localDocuments.map((d, i) => 
-                                          i === idx ? { ...d, comment: editingCommentText.trim() } : d
-                                        );
-                                        try {
-                                          await API.put(`/applications/${application.id}`, { documents: updatedDocs });
-                                          setLocalDocuments(updatedDocs);
-                                          
-                                          // Log to chat
-                                          try {
-                                            const chatMsg = `💬 Comment updated on document "${doc.name}": "${editingCommentText.trim() || 'Comment removed'}"`;
-                                            const chatFormData = new FormData();
-                                            chatFormData.append('message', chatMsg);
-                                            await API.post(`/applications/${application.id}/chat`, chatFormData);
-                                          } catch {}
-
-                                          setEditingDocIdx(null);
-                                        } catch (err) {
-                                          console.error('Failed to save document comment:', err);
-                                        }
-                                      }}
-                                      className="text-[10px] text-emerald-600 font-extrabold hover:text-emerald-700"
-                                    >
-                                      Save
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => setEditingDocIdx(null)}
-                                      className="text-[10px] text-slate-400 font-extrabold hover:text-slate-500"
-                                    >
-                                      Cancel
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <div className="mt-1 flex flex-wrap items-center gap-2">
-                                    {doc.comment ? (
-                                      <p className="text-[10px] text-slate-500 bg-slate-50 border border-slate-200/50 px-2 py-0.5 rounded font-semibold inline-block">
-                                        💬 {doc.comment}
-                                      </p>
-                                    ) : null}
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setEditingDocIdx(idx);
-                                        setEditingCommentText(doc.comment || '');
-                                      }}
-                                      className="text-[9px] text-[#D99A1C] hover:text-[#C28410] font-extrabold transition-all"
-                                    >
-                                      {doc.comment ? 'Edit Comment' : '+ Add Comment'}
-                                    </button>
-                                  </div>
+                                {doc.comment && (
+                                  <p className="text-[10px] text-slate-500 bg-slate-50 border border-slate-200/50 px-2 py-0.5 rounded font-semibold mt-1 inline-block">
+                                    💬 {doc.comment}
+                                  </p>
                                 )}
                                 <p className="text-[9px] text-slate-450 font-semibold mt-1">
                                   Uploaded: {doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Just Now'}
