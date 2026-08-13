@@ -460,16 +460,18 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                         </div>
                         <div>
                           <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Date of Birth</span>
-                          <span className="text-xs font-bold text-[#0F172A]">18 June 2003</span>
+                          <span className="text-xs font-bold text-[#0F172A]">
+                            {application.student?.dob ? (isNaN(new Date(application.student.dob).getTime()) ? application.student.dob : new Date(application.student.dob).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })) : 'N/A'}
+                          </span>
                         </div>
                         <div>
                           <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Gender</span>
-                          <span className="text-xs font-bold text-[#0F172A]">Male</span>
+                          <span className="text-xs font-bold text-[#0F172A]">{application.student?.gender || 'N/A'}</span>
                         </div>
                         <div className="col-span-2">
                           <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Resident Address</span>
                           <span className="text-xs font-medium text-slate-700 leading-relaxed block">
-                            House No 24, Oasis Villa, Hill View Road, Calicut, Kerala - 673001, India
+                            {application.student?.address || 'N/A'}
                           </span>
                         </div>
                       </div>

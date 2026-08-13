@@ -23,6 +23,8 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
   const [newStudentPhone, setNewStudentPhone] = useState('');
   const [newStudentPassport, setNewStudentPassport] = useState('');
   const [newStudentDob, setNewStudentDob] = useState('');
+  const [newStudentGender, setNewStudentGender] = useState('');
+  const [newStudentAddress, setNewStudentAddress] = useState('');
 
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -64,6 +66,8 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
     setNewStudentPhone('');
     setNewStudentPassport('');
     setNewStudentDob('');
+    setNewStudentGender('');
+    setNewStudentAddress('');
     setUploadedFiles([]);
     setIsUploading(false);
     setUploadError('');
@@ -106,6 +110,8 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
           phone: newStudentPhone,
           passportNo: newStudentPassport,
           dob: newStudentDob,
+          gender: newStudentGender,
+          address: newStudentAddress,
           referredBy: 'Agent'
         });
         const studentResult = studentRes.data;
@@ -295,6 +301,32 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                             type="date"
                             value={newStudentDob}
                             onChange={(e) => setNewStudentDob(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] font-semibold text-[#0F172A]"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Gender</label>
+                          <select
+                            value={newStudentGender}
+                            onChange={(e) => setNewStudentGender(e.target.value)}
+                            className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] font-semibold text-[#0F172A] cursor-pointer"
+                          >
+                            <option value="">-- Select Gender --</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Resident Address</label>
+                          <input
+                            type="text"
+                            value={newStudentAddress}
+                            onChange={(e) => setNewStudentAddress(e.target.value)}
+                            placeholder="Address, City, State"
                             className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] font-semibold text-[#0F172A]"
                           />
                         </div>
