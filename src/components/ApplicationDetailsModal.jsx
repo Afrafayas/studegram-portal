@@ -16,12 +16,16 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
   const [uploadDocError, setUploadDocError] = useState('');
   const [selectedUploadFile, setSelectedUploadFile] = useState(null);
   const [uploadComment, setUploadComment] = useState('');
+  const [editingDocIdx, setEditingDocIdx] = useState(null);
+  const [editingCommentText, setEditingCommentText] = useState('');
 
   useEffect(() => {
     if (application) {
       setLocalDocuments(application.documents || []);
       setSelectedUploadFile(null);
       setUploadComment('');
+      setEditingDocIdx(null);
+      setEditingCommentText('');
     }
   }, [application]);
 
@@ -616,10 +620,69 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                               <span className="text-base text-amber-500">📄</span>
                               <div>
                                 <h5 className="text-xs font-bold text-slate-800">{doc.name}</h5>
-                                {doc.comment && (
-                                  <p className="text-[10px] text-slate-500 bg-slate-50 border border-slate-200/50 px-2 py-0.5 rounded font-semibold mt-1 inline-block">
-                                    💬 {doc.comment}
-                                  </p>
+                                {editingDocIdx === idx ? (
+                                  <div className="mt-2 flex items-center gap-2">
+                                    <input
+                                      type="text"
+                                      value={editingCommentText}
+                                      onChange={(e) => setEditingCommentText(e.target.value)}
+                                      className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#D99A1C] max-w-[200px]"
+                                      placeholder="Add/Edit comment..."
+                                      autoFocus
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={async () => {
+                                        const updatedDocs = localDocuments.map((d, i) => 
+                                          i === idx ? { ...d, comment: editingCommentText.trim() } : d
+                                        );
+                                        try {
+                                          await API.put(`/applications/${application.id}`, { documents: updatedDocs });
+                                          setLocalDocuments(updatedDocs);
+                                          
+                                          // Log to chat
+                                          try {
+                                            const chatMsg = `💬 Comment updated on document "${doc.name}": "${editingCommentText.trim() || 'Comment removed'}"`;
+                                            const chatFormData = new FormData();
+                                            chatFormData.append('message', chatMsg);
+                                            await API.post(`/applications/${application.id}/chat`, chatFormData);
+                                          } catch {}
+
+                                          setEditingDocIdx(null);
+                                        } catch (err) {
+                                          console.error('Failed to save document comment:', err);
+                                        }
+                                      }}
+                                      className="text-[10px] text-emerald-600 font-extrabold hover:text-emerald-700"
+                                    >
+                                      Save
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => setEditingDocIdx(null)}
+                                      className="text-[10px] text-slate-400 font-extrabold hover:text-slate-500"
+                                    >
+                                      Cancel
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                                    {doc.comment ? (
+                                      <p className="text-[10px] text-slate-500 bg-slate-50 border border-slate-200/50 px-2 py-0.5 rounded font-semibold inline-block">
+                                        💬 {doc.comment}
+                                      </p>
+                                    ) : null}
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setEditingDocIdx(idx);
+                                        setEditingCommentText(doc.comment || '');
+                                      }}
+                                      className="text-[9px] text-[#D99A1C] hover:text-[#C28410] font-extrabold transition-all"
+                                    >
+                                      {doc.comment ? 'Edit Comment' : '+ Add Comment'}
+                                    </button>
+                                  </div>
                                 )}
                                 <p className="text-[9px] text-slate-450 font-semibold mt-1">
                                   Uploaded: {doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Just Now'}
