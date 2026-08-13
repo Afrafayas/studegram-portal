@@ -112,7 +112,8 @@ export default function App() {
         student: app.student,
         course: app.course,
         university: app.university,
-        documents: app.documents || []
+        documents: app.documents || [],
+        notes: app.notes || ''
       }));
       setApplications(mapped);
     } catch (err) {
@@ -137,7 +138,8 @@ export default function App() {
         student: selectedData.studentId,
         course: selectedData.courseId,
         university: selectedData.universityId,
-        documents: selectedData.documents || []
+        documents: selectedData.documents || [],
+        notes: selectedData.notes
       });
 
       const data = res.data;

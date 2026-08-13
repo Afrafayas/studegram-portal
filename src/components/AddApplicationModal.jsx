@@ -27,6 +27,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
+  const [notes, setNotes] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -66,6 +67,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
     setUploadedFiles([]);
     setIsUploading(false);
     setUploadError('');
+    setNotes('');
     setStepNumber(1);
     onClose();
   };
@@ -117,7 +119,8 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
         studentId: studentId,
         universityId: selectedUniversity,
         courseId: selectedCourse,
-        documents: uploadedFiles
+        documents: uploadedFiles,
+        notes: notes
       });
       if (success) {
         setStepNumber(4); // Success step
@@ -426,6 +429,18 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                     ))}
                   </div>
                 )}
+              </div>
+
+              {/* Comments / Notes */}
+              <div className="space-y-1.5 mt-4">
+                <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Comments / Notes</label>
+                <textarea
+                  rows="3"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white font-semibold text-[#0F172A] resize-none"
+                  placeholder="Add any comments or notes for this application..."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
               </div>
 
               {/* Submit button */}
