@@ -15,11 +15,13 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
   const [isUploadingDoc, setIsUploadingDoc] = useState(false);
   const [uploadDocError, setUploadDocError] = useState('');
   const [uploadComment, setUploadComment] = useState('');
+  const [selectedUploadFile, setSelectedUploadFile] = useState(null);
 
   useEffect(() => {
     if (application) {
       setLocalDocuments(application.documents || []);
       setUploadComment('');
+      setSelectedUploadFile(null);
     }
   }, [application]);
 
@@ -499,45 +501,42 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                     </div>
 
                     {/* Additional File Uploader */}
-                    <div className="border-2 border-dashed border-[#E2E8F0] hover:border-[#D99A1C] transition-colors rounded-xl p-4 text-center cursor-pointer relative bg-slate-50">
-                      <input
-                        type="file"
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          setIsUploadingDoc(true);
-                          setUploadDocError('');
-                          try {
-                            const formData = new FormData();
-                            formData.append('file', file);
-                            const res = await API.post('/upload', formData, {
-                              headers: { 'Content-Type': 'multipart/form-data' }
-                            });
-                            const newDoc = { 
-                              name: file.name, 
-                              url: res.data.url,
-                              comment: uploadComment.trim()
-                            };
-                            const updatedDocs = [...localDocuments, newDoc];
-                            await API.put(`/applications/${application.id}`, { documents: updatedDocs });
-                            setLocalDocuments(updatedDocs);
-
-                            setUploadComment('');
-                          } catch (err) {
-                            console.error('File upload failed:', err);
-                            setUploadDocError('Failed to upload document. Please check your connection.');
-                          } finally {
-                            setIsUploadingDoc(false);
-                          }
-                        }}
-                      />
-                      <div className="space-y-1 text-slate-500">
-                        <span className="text-lg">📤</span>
-                        <p className="text-xs font-semibold text-slate-700">Click to upload additional document</p>
-                        <p className="text-[10px] text-slate-400 font-semibold">Attach any supporting file (PDF, PNG, JPG, Word)</p>
+                    {selectedUploadFile ? (
+                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-3xs">
+                        <div className="flex items-center gap-2 truncate pr-2">
+                          <span className="text-xs">📄</span>
+                          <span className="text-xs font-bold text-slate-800 truncate max-w-[250px]">
+                            {selectedUploadFile.name}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedUploadFile(null)}
+                          className="text-xs text-rose-500 hover:text-rose-700 font-bold transition-colors cursor-pointer shrink-0"
+                        >
+                          Remove
+                        </button>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="border-2 border-dashed border-[#E2E8F0] hover:border-[#D99A1C] transition-colors rounded-xl p-4 text-center cursor-pointer relative bg-slate-50">
+                        <input
+                          type="file"
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setSelectedUploadFile(file);
+                              setUploadDocError('');
+                            }
+                          }}
+                        />
+                        <div className="space-y-1 text-slate-500">
+                          <span className="text-lg">📤</span>
+                          <p className="text-xs font-semibold text-slate-700">Click to upload additional document</p>
+                          <p className="text-[10px] text-slate-400 font-semibold">Attach any supporting file (PDF, PNG, JPG, Word)</p>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Persistent Comment Area for new upload */}
                     <div className="space-y-1.5 mt-2 bg-slate-50 border border-slate-200/60 p-3.5 rounded-xl">
@@ -547,13 +546,51 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                       <textarea
                         rows="2"
                         className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] font-semibold text-[#0F172A] resize-none shadow-sm"
-                        placeholder="Type comment here first, then click box above to select and upload file..."
+                        placeholder="Add comment here..."
                         value={uploadComment}
                         onChange={(e) => setUploadComment(e.target.value)}
                       />
                     </div>
 
-                    {isUploadingDoc && (
+                    {/* Submit Button */}
+                    <div className="flex justify-end pt-1">
+                      <button
+                        type="button"
+                        disabled={isUploadingDoc || !selectedUploadFile}
+                        onClick={async () => {
+                          setIsUploadingDoc(true);
+                          setUploadDocError('');
+                          try {
+                            const formData = new FormData();
+                            formData.append('file', selectedUploadFile);
+                            const res = await API.post('/upload', formData, {
+                              headers: { 'Content-Type': 'multipart/form-data' }
+                            });
+                            const newDoc = { 
+                              name: selectedUploadFile.name, 
+                              url: res.data.url,
+                              comment: uploadComment.trim()
+                            };
+                            const updatedDocs = [...localDocuments, newDoc];
+                            await API.put(`/applications/${application.id}`, { documents: updatedDocs });
+                            setLocalDocuments(updatedDocs);
+
+                            setSelectedUploadFile(null);
+                            setUploadComment('');
+                          } catch (err) {
+                            console.error('File upload failed:', err);
+                            setUploadDocError('Failed to upload document. Please check your connection.');
+                          } finally {
+                            setIsUploadingDoc(false);
+                          }
+                        }}
+                        className="bg-[#D99A1C] hover:bg-[#C28410] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-xl text-[10px] uppercase tracking-wider transition-all duration-150 active:scale-95 shadow-md flex items-center gap-1.5 cursor-pointer"
+                      >
+                        {isUploadingDoc ? 'Uploading...' : 'Upload Document'}
+                      </button>
+                    </div>
+
+                    {isUploadingDoc && !selectedUploadFile && (
                       <p className="text-[10px] text-[#D99A1C] font-semibold animate-pulse">⏳ Uploading file, please wait...</p>
                     )}
                     {uploadDocError && (
