@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import AddApplicationModal from './components/AddApplicationModal';
@@ -309,3 +309,4 @@ export default function App() {
     </div>
   );
 }
+

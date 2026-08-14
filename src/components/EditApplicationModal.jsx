@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
 
@@ -15,6 +15,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
   const [selectedCourse, setSelectedCourse] = useState('');
   const [notes, setNotes] = useState('');
   const [selectedIntake, setSelectedIntake] = useState('September 2026');
+  const [internalRemarks, setInternalRemarks] = useState('');
 
   // Student fields
   const [studentName, setStudentName] = useState('');
@@ -48,6 +49,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
         setSelectedCourse(application.course?._id || application.course || '');
         setNotes(application.notes || '');
         setSelectedIntake(application.intake || 'September 2026');
+        setInternalRemarks(application.internalRemarks || '');
 
         // Prepopulate student fields
         const s = application.student || {};
@@ -99,14 +101,15 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
 
       // Run both API calls in parallel
       await Promise.all([
-        API.put(`/applications/${application.id}`, {
+        API.put(/applications/, {
           university: selectedUniversity,
           course: selectedCourse,
           intake: selectedIntake,
-          notes: notes.trim()
+          notes: notes.trim(),
+          internalRemarks: internalRemarks.trim()
         }),
         studentId
-          ? API.put(`/students/${studentId}`, {
+          ? API.put(/students/, {
               name: studentName.trim(),
               email: studentEmail.trim(),
               phone: studentPhone.trim(),
@@ -169,11 +172,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`py-2.5 px-4 rounded-t-xl text-xs font-bold border-b-2 transition-all ${
-                activeTab === tab.id
-                  ? 'border-[#D99A1C] text-[#D99A1C] bg-white shadow-sm'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
-              }`}
+              className={`py-2.5 px-4 rounded-t-xl text-xs font-bold border-b-2 transition-all ${activeTab === tab.id ? "border-[#D99A1C] text-[#D99A1C] bg-white shadow-sm" : "border-transparent text-slate-500 hover:text-slate-800"}`}
             >
               {tab.label}
             </button>
@@ -290,6 +289,18 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                       placeholder="Add any comments or notes for this application..."
                       value={notes}
                       onChange={e => setNotes(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Internal Remarks (Staff / Agent Notes) */}
+                  <div>
+                    <label className={labelClass}>🔒 Internal Remarks (Staff / Agent Only)</label>
+                    <textarea
+                      rows="2"
+                      className={inputClass + ' resize-none bg-amber-50/50'}
+                      placeholder="Internal tracking notes (e.g. waiting for IELTS score sheet, fee paid)..."
+                      value={internalRemarks}
+                      onChange={e => setInternalRemarks(e.target.value)}
                     />
                   </div>
                 </div>
@@ -438,3 +449,4 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
     </div>
   );
 }
+

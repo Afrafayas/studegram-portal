@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
 
@@ -278,7 +278,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
         {/* Top Header & close button */}
         <div className="px-6 py-4 flex items-center justify-between border-b border-slate-100 sticky top-0 bg-white z-10">
           <div className="flex items-center gap-3">
-            <span className="text-xl">🎓</span>
+            <span className="text-xl">ðŸŽ“</span>
             <div>
               <h2 className="text-sm font-bold text-[#0F172A] tracking-tight">
                 Application details for {application.studentName}
@@ -308,7 +308,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
             }`}
           >
-            📁 App Details
+            ðŸ“ App Details
           </button>
           <button
             onClick={() => setMainTab('activity')}
@@ -318,7 +318,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
             }`}
           >
-            💬 Messages & Activity
+            ðŸ’¬ Messages & Activity
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
           </button>
         </div>
@@ -353,8 +353,8 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                       <span 
                         className={`absolute -left-[20.5px] top-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold text-white z-10 transition-all duration-300 border ${iconBg} ${iconBorder}`}
                       >
-                        {isCompleted && '✓'}
-                        {isCurrent && '●'}
+                        {isCompleted && 'âœ“'}
+                        {isCurrent && 'â—'}
                       </span>
 
                       <div className="space-y-0.5">
@@ -366,7 +366,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                         </p>
                         {step.date && (
                           <span className="inline-block text-[9px] text-slate-400 font-bold mt-1 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded">
-                            📅 {step.date}
+                            ðŸ“… {step.date}
                           </span>
                         )}
                       </div>
@@ -406,7 +406,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                   <div className="space-y-6">
                     <div className="bg-gradient-to-r from-indigo-50/50 to-cyan-50/50 border border-indigo-100/50 rounded-xl p-4.5 space-y-3">
                       <h4 className="text-[10px] font-extrabold text-[#D99A1C] uppercase tracking-wider flex items-center gap-1.5">
-                        🎓 Application Choice
+                        ðŸŽ“ Application Choice
                       </h4>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -494,7 +494,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                     {selectedUploadFile ? (
                       <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-3xs">
                         <div className="flex items-center gap-2 truncate pr-2">
-                          <span className="text-xs">📄</span>
+                          <span className="text-xs">ðŸ“„</span>
                           <span className="text-xs font-bold text-slate-800 truncate max-w-[250px]">
                             {selectedUploadFile.name}
                           </span>
@@ -521,7 +521,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                           }}
                         />
                         <div className="space-y-1 text-slate-500">
-                          <span className="text-lg">📤</span>
+                          <span className="text-lg">ðŸ“¤</span>
                           <p className="text-xs font-semibold text-slate-700">Click to upload additional document</p>
                           <p className="text-[10px] text-slate-400 font-semibold">Attach any supporting file (PDF, PNG, JPG, Word)</p>
                         </div>
@@ -581,10 +581,10 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                     </div>
 
                     {isUploadingDoc && !selectedUploadFile && (
-                      <p className="text-[10px] text-[#D99A1C] font-semibold animate-pulse">⏳ Uploading file, please wait...</p>
+                      <p className="text-[10px] text-[#D99A1C] font-semibold animate-pulse">â³ Uploading file, please wait...</p>
                     )}
                     {uploadDocError && (
-                      <p className="text-[10px] text-red-500 font-semibold">❌ {uploadDocError}</p>
+                      <p className="text-[10px] text-red-500 font-semibold">âŒ {uploadDocError}</p>
                     )}
 
                     <div className="divide-y divide-slate-100 border border-slate-100 bg-white rounded-xl overflow-hidden shadow-sm">
@@ -592,13 +592,13 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                         localDocuments.map((doc, idx) => (
                           <div key={idx} className="p-3.5 flex items-center justify-between hover:bg-slate-50 transition-colors border-b last:border-b-0 border-slate-100">
                             <div className="flex items-center gap-3">
-                              <span className="text-base text-amber-500">📄</span>
+                              <span className="text-base text-amber-500">ðŸ“„</span>
                               <div>
                                 <h5 className="text-xs font-bold text-slate-800">{doc.name}</h5>
                                 {doc.comment && (
                                   <div className="bg-slate-50 border border-slate-200/85 rounded-xl p-2.5 mt-2 space-y-1 max-w-[280px]">
                                     <h6 className="text-[9px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                                      <span>💬</span> Comments / Notes
+                                      <span>ðŸ’¬</span> Comments / Notes
                                     </h6>
                                     <p className="text-[10.5px] font-semibold text-slate-805 whitespace-pre-wrap leading-normal">
                                       {doc.comment}
@@ -625,7 +625,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                         ))
                       ) : (
                         <div className="p-6 text-center text-slate-400 text-xs font-semibold">
-                          ⚠️ No documents found. Upload one above.
+                          âš ï¸ No documents found. Upload one above.
                         </div>
                       )}
                     </div>
@@ -685,7 +685,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
               <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50/40 min-h-0">
                 {chatError && !isUnauthorized && (
                   <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded-xl text-[11px] font-semibold text-center shadow-sm">
-                    ⚠️ {chatError}
+                    âš ï¸ {chatError}
                   </div>
                 )}
 
@@ -717,7 +717,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                 ) : chatMessages.length === 0 ? (
                   /* Empty state message */
                   <div className="flex flex-col items-center justify-center h-full text-center p-6 space-y-2 select-none">
-                    <span className="text-3xl">💬</span>
+                    <span className="text-3xl">ðŸ’¬</span>
                     <p className="text-xs font-bold text-slate-700">No Support Messages Yet</p>
                     <p className="text-[10px] text-slate-400 font-semibold max-w-xs leading-relaxed">
                       Start the conversation below to resolve any issues or queries about this student application with the support team.
@@ -731,7 +731,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                       return (
                         <div key={msg._id || index} className="flex justify-center my-3.5 px-4">
                           <div className="text-[9px] text-slate-500 font-extrabold bg-slate-100 border border-slate-200/40 px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm max-w-full text-center uppercase tracking-wider select-none">
-                            <span>ℹ️</span>
+                            <span>â„¹ï¸</span>
                             <span>{msg.message}</span>
                             <span className="text-[8px] text-slate-400 font-bold select-none">
                               &middot; {new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
@@ -794,7 +794,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
 
                         {/* Timestamp */}
                         <span className="text-[8px] text-slate-400 font-bold mt-1 px-1 select-none">
-                          🕒 {new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                          ðŸ•’ {new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
                     );
@@ -817,7 +817,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                         onClick={() => setChatFiles(prev => prev.filter((_, i) => i !== idx))}
                         className="text-red-500 hover:text-red-700 font-extrabold focus:outline-none"
                       >
-                        ×
+                        Ã—
                       </button>
                     </div>
                   ))}
@@ -931,7 +931,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                             {note.text}
                           </p>
                           <span className="block text-[8px] text-slate-400 font-bold select-none mt-1">
-                            🕒 {note.date}
+                            ðŸ•’ {note.date}
                           </span>
                         </div>
                       </div>
@@ -946,3 +946,4 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
     </div>
   );
 }
+
