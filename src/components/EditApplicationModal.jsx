@@ -101,22 +101,22 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
 
       // Run both API calls in parallel
       await Promise.all([
-        API.put(/applications/, {
+        API.put('/applications/' + application.id, {
           university: selectedUniversity,
           course: selectedCourse,
           intake: selectedIntake,
-          notes: notes.trim(),
-          internalRemarks: internalRemarks.trim()
+          notes: (notes || '').toString().trim(),
+          internalRemarks: (internalRemarks || '').toString().trim()
         }),
         studentId
-          ? API.put(/students/, {
-              name: studentName.trim(),
-              email: studentEmail.trim(),
-              phone: studentPhone.trim(),
-              passportNo: studentPassport.trim(),
-              dob: studentDob.trim(),
+          ? API.put('/students/' + studentId, {
+              name: (studentName || '').toString().trim(),
+              email: (studentEmail || '').toString().trim(),
+              phone: (studentPhone || '').toString().trim(),
+              passportNo: (studentPassport || '').toString().trim(),
+              dob: (studentDob || '').toString().trim(),
               gender: studentGender,
-              address: studentAddress.trim()
+              address: (studentAddress || '').toString().trim()
             })
           : Promise.resolve()
       ]);
@@ -449,4 +449,5 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
     </div>
   );
 }
+
 
