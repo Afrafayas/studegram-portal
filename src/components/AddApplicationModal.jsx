@@ -30,6 +30,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [notes, setNotes] = useState('');
+  const [selectedIntake, setSelectedIntake] = useState('September 2026');
 
   useEffect(() => {
     if (isOpen) {
@@ -125,6 +126,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
         studentId: studentId,
         universityId: selectedUniversity,
         courseId: selectedCourse,
+        intake: selectedIntake,
         documents: uploadedFiles.map(file => ({
           ...file,
           comment: notes.trim()
@@ -395,6 +397,31 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                   {selectedUniversity && filteredCourses.length === 0 && (
                     <p className="text-[10px] text-amber-600 font-bold mt-1">⚠️ No courses registered under this university in the database.</p>
                   )}
+                </div>
+
+                {/* Requested Intake Season */}
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
+                    Requested Intake Season *
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={selectedIntake}
+                      onChange={(e) => setSelectedIntake(e.target.value)}
+                      required
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white font-semibold text-[#0F172A] appearance-none"
+                    >
+                      <option value="September 2026">September 2026</option>
+                      <option value="January 2027">January 2027</option>
+                      <option value="May 2027">May 2027</option>
+                      <option value="September 2027">September 2027</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
+                      <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
               </div>
 

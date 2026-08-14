@@ -114,6 +114,7 @@ export default function App() {
         student: app.student,
         course: app.course,
         university: app.university,
+        intake: app.intake || 'September 2026',
         documents: app.documents || [],
         notes: app.notes || ''
       }));

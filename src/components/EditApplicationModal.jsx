@@ -14,6 +14,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
   const [selectedUniversity, setSelectedUniversity] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('');
   const [notes, setNotes] = useState('');
+  const [selectedIntake, setSelectedIntake] = useState('September 2026');
 
   // Student fields
   const [studentName, setStudentName] = useState('');
@@ -46,6 +47,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
         setSelectedUniversity(application.university?._id || application.university || '');
         setSelectedCourse(application.course?._id || application.course || '');
         setNotes(application.notes || '');
+        setSelectedIntake(application.intake || 'September 2026');
 
         // Prepopulate student fields
         const s = application.student || {};
@@ -100,6 +102,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
         API.put(`/applications/${application.id}`, {
           university: selectedUniversity,
           course: selectedCourse,
+          intake: selectedIntake,
           notes: notes.trim()
         }),
         studentId
@@ -253,6 +256,29 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                         ⚠️ No courses found for this university.
                       </p>
                     )}
+                  </div>
+
+                  {/* Target Intake Season (Deferral option) */}
+                  <div>
+                    <label className={labelClass}>Target Intake Season (Deferral) *</label>
+                    <div className="relative">
+                      <select
+                        value={selectedIntake}
+                        onChange={e => setSelectedIntake(e.target.value)}
+                        required
+                        className={inputClass + ' appearance-none'}
+                      >
+                        <option value="September 2026">September 2026</option>
+                        <option value="January 2027">January 2027</option>
+                        <option value="May 2027">May 2027</option>
+                        <option value="September 2027">September 2027</option>
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Notes */}
