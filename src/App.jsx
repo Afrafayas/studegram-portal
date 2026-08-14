@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import AddApplicationModal from './components/AddApplicationModal';
 import ApplicationDetailsModal from './components/ApplicationDetailsModal';
+import EditApplicationModal from './components/EditApplicationModal';
 import NotificationPopup from './components/NotificationPopup';
 
 // Auth Pages
@@ -74,6 +75,7 @@ export default function App() {
   const [showModal, setShowModal] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedAppForDetails, setSelectedAppForDetails] = useState(null);
+  const [selectedAppForEdit, setSelectedAppForEdit] = useState(null);
   const [selectedNoticeId, setSelectedNoticeId] = useState(null);
 
   const [applications, setApplications] = useState([]);
@@ -178,6 +180,7 @@ export default function App() {
             duplicateAlert={duplicateAlert}
             setDuplicateAlert={setDuplicateAlert}
             onViewDetails={(app) => setSelectedAppForDetails(app)}
+            onEditClick={(app) => setSelectedAppForEdit(app)}
           />
         );
       case 'SearchCourses':
@@ -285,6 +288,14 @@ export default function App() {
         isOpen={!!selectedAppForDetails}
         onClose={() => setSelectedAppForDetails(null)}
         application={selectedAppForDetails}
+      />
+
+      {/* Edit Application Modal */}
+      <EditApplicationModal
+        isOpen={!!selectedAppForEdit}
+        onClose={() => setSelectedAppForEdit(null)}
+        application={selectedAppForEdit}
+        onUpdateSuccess={fetchApplications}
       />
 
       {/* Persistent Notification Popups */}

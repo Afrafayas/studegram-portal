@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function ApplicationHistory({ onAddApplicationClick, applications = [], duplicateAlert, setDuplicateAlert, onViewDetails }) {
+export default function ApplicationHistory({ onAddApplicationClick, applications = [], duplicateAlert, setDuplicateAlert, onViewDetails, onEditClick }) {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredApps = applications.filter((app) => {
@@ -143,10 +143,19 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-xs text-[#64748B] font-semibold">{app.dateAdded}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <button onClick={() => onViewDetails && onViewDetails(app)} className="p-1.5 hover:bg-slate-100 rounded-lg text-[#64748B] hover:text-[#0F172A] transition-all duration-150 inline-flex items-center justify-center">
+                      <button onClick={() => onViewDetails && onViewDetails(app)} className="p-1.5 hover:bg-slate-100 rounded-lg text-[#64748B] hover:text-[#0F172A] transition-all duration-150 inline-flex items-center justify-center" title="View Details">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      </button>
+                      <button 
+                        onClick={() => onEditClick && onEditClick(app)} 
+                        title="Edit Application"
+                        className="p-1.5 hover:bg-slate-100 rounded-lg text-[#64748B] hover:text-[#D99A1C] transition-all duration-150 inline-flex items-center justify-center ml-1"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
                       </button>
                     </td>
