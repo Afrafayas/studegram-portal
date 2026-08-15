@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 
 export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
@@ -395,7 +395,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                     </div>
                   </div>
                   {selectedUniversity && filteredCourses.length === 0 && (
-                    <p className="text-[10px] text-amber-600 font-bold mt-1">⚠️ No courses registered under this university in the database.</p>
+                    <p className="text-[10px] text-amber-600 font-bold mt-1">âš ï¸ No courses registered under this university in the database.</p>
                   )}
                 </div>
 
@@ -460,30 +460,30 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                     }}
                   />
                   <div className="space-y-1 text-slate-500">
-                    <span className="text-lg">📄</span>
+                    <span className="text-lg">ðŸ“„</span>
                     <p className="text-xs font-semibold text-slate-700">Click or drag files here to upload</p>
                     <p className="text-[10px] text-slate-400 font-semibold">Upload at least one document (PDF, PNG, JPG, Word)</p>
                   </div>
                 </div>
 
                 {isUploading && (
-                  <p className="text-[10px] text-[#D99A1C] font-semibold animate-pulse">⏳ Uploading files, please wait...</p>
+                  <p className="text-[10px] text-[#D99A1C] font-semibold animate-pulse">â³ Uploading files, please wait...</p>
                 )}
                 {uploadError && (
-                  <p className="text-[10px] text-red-500 font-semibold">❌ {uploadError}</p>
+                  <p className="text-[10px] text-red-500 font-semibold">âŒ {uploadError}</p>
                 )}
 
                 {/* Uploaded Documents & Per-Document Comments */}
                 {uploadedFiles.length > 0 && (
                   <div className="space-y-2 pt-2">
                     <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider text-left">
-                      📄 Uploaded Documents & Document-Specific Comments
+                      ðŸ“„ Uploaded Documents & Document-Specific Comments
                     </label>
                     {uploadedFiles.map((file, idx) => (
                       <div key={idx} className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2 text-left">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
-                            <span className="text-amber-500">📄</span>
+                            <span className="text-amber-500">ðŸ“„</span>
                             <span className="truncate max-w-[220px]">{file.name}</span>
                           </div>
                           <button
@@ -491,7 +491,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                             onClick={() => setUploadedFiles(prev => prev.filter((_, i) => i !== idx))}
                             className="text-xs text-red-500 hover:text-red-700 font-bold cursor-pointer"
                           >
-                            ✕ Remove
+                            âœ• Remove
                           </button>
                         </div>
                         <input
@@ -513,7 +513,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
               {/* Application-Level General Comment */}
               <div className="space-y-1.5 mt-4 text-left">
                 <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
-                  💬 Application General Comment (Overall Notes)
+                  ðŸ’¬ Application General Comment (Overall Notes)
                 </label>
                 <textarea
                   rows="3"
@@ -567,7 +567,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                 <path d="M 64 42 C 72 42 76 46 76 50 C 76 54 72 54 70 51" stroke="#94A3B8" strokeWidth="5" strokeLinecap="round" fill="none" />
                 <path d="M 16 42 Q 10 40 12 46" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" fill="none" />
               </svg>
-              <h3 className="text-base font-bold text-[#10B981] mt-2">🎉 Application Submitted!</h3>
+              <h3 className="text-base font-bold text-[#10B981] mt-2">ðŸŽ‰ Application Submitted!</h3>
               <p className="text-xs text-[#64748B] font-semibold max-w-xs leading-relaxed">
                 Your application has been logged in the Studegram system. Our handlers will verify the information.
               </p>
@@ -585,3 +585,4 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
     </div>
   );
 }
+
