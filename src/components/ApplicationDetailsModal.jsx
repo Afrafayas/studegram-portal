@@ -28,6 +28,25 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
     }
   }, [application]);
 
+  const handleAddAppComment = async (e) => {
+    e.preventDefault();
+    if (!newAppComment.trim()) return;
+    setIsPostingAppComment(true);
+    try {
+      const res = await API.post('/applications/' + application.id + '/comments', { text: newAppComment.trim() });
+      if (res.data?.success) {
+        setAppComments(res.data.data || []);
+        setNewAppComment('');
+        toast.success('Comment added successfully!');
+        if (onUpdateSuccess) onUpdateSuccess();
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to add comment');
+    } finally {
+      setIsPostingAppComment(false);
+    }
+  };
+
   // Chat State Hooks
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
@@ -1003,6 +1022,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
     </div>
   );
 }
+
 
 
 
