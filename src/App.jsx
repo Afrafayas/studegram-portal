@@ -116,7 +116,8 @@ export default function App() {
         university: app.university,
         intake: app.intake || 'September 2026',
         documents: app.documents || [],
-        notes: app.notes || ''
+        notes: app.notes || '',
+        applicationComments: app.applicationComments || []
       }));
       setApplications(mapped);
     } catch (err) {
@@ -309,4 +310,5 @@ export default function App() {
     </div>
   );
 }
+
 
