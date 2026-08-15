@@ -142,6 +142,7 @@ export default function App() {
         student: selectedData.studentId,
         course: selectedData.courseId,
         university: selectedData.universityId,
+        intake: selectedData.intake,
         documents: selectedData.documents || [],
         notes: selectedData.notes
       });
@@ -310,5 +311,6 @@ export default function App() {
     </div>
   );
 }
+
 
 
