@@ -205,7 +205,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
     { name: 'Letter of Recommendation (LOR 1 & 2)', status: 'Pending Review', date: '15 Jun 2026', type: 'PDF' }
   ];
 
-  const currentAppStatus = application.status || application.secondaryStatus || 'Submitted';
+  const currentAppStatus = application?.status || application?.secondaryStatus || 'Submitted';
 
   const getTimelineStepIndex = (statusStr) => {
     const s = (statusStr || '').toLowerCase();
@@ -221,7 +221,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
   const currentStepIndex = getTimelineStepIndex(currentAppStatus);
 
   const findStatusDate = (keywords) => {
-    if (!application.statusHistory || !Array.isArray(application.statusHistory)) return null;
+    if (!application?.statusHistory || !Array.isArray(application.statusHistory)) return null;
     const historyItem = application.statusHistory.find(h => 
       keywords.some(kw => (h.status || '').toLowerCase().includes(kw))
     );
@@ -235,7 +235,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
     { 
       label: 'Application Submitted', 
       desc: 'Agent filed application on portal', 
-      date: application.dateAdded || findStatusDate(['submitted', 'pending']) || 'Filed' 
+      date: application?.dateAdded || findStatusDate(['submitted', 'pending']) || 'Filed' 
     },
     { 
       label: 'Document Verification', 
@@ -1003,6 +1003,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
     </div>
   );
 }
+
 
 
 
