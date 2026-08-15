@@ -15,7 +15,6 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
   const [selectedCourse, setSelectedCourse] = useState('');
   const [notes, setNotes] = useState('');
   const [selectedIntake, setSelectedIntake] = useState('September 2026');
-  const [internalRemarks, setInternalRemarks] = useState('');
 
   // Student fields
   const [studentName, setStudentName] = useState('');
@@ -49,7 +48,6 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
         setSelectedCourse(application.course?._id || application.course || '');
         setNotes(application.notes || '');
         setSelectedIntake(application.intake || 'September 2026');
-        setInternalRemarks(application.internalRemarks || '');
 
         // Prepopulate student fields
         const s = application.student || {};
@@ -106,7 +104,6 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
           course: selectedCourse,
           intake: selectedIntake,
           notes: (notes || '').toString().trim(),
-          internalRemarks: (internalRemarks || '').toString().trim()
         }),
         studentId
           ? API.put('/students/' + studentId, {
@@ -292,17 +289,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                     />
                   </div>
 
-                  {/* Internal Remarks (Staff / Agent Notes) */}
-                  <div>
-                    <label className={labelClass}>🔒 Internal Remarks (Staff / Agent Only)</label>
-                    <textarea
-                      rows="2"
-                      className={inputClass + ' resize-none bg-amber-50/50'}
-                      placeholder="Internal tracking notes (e.g. waiting for IELTS score sheet, fee paid)..."
-                      value={internalRemarks}
-                      onChange={e => setInternalRemarks(e.target.value)}
-                    />
-                  </div>
+
                 </div>
               )}
 
@@ -449,5 +436,6 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
     </div>
   );
 }
+
 
 
