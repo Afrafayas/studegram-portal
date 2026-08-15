@@ -473,33 +473,52 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                   <p className="text-[10px] text-red-500 font-semibold">❌ {uploadError}</p>
                 )}
 
-                {/* Uploaded File Badges */}
+                {/* Uploaded Documents & Per-Document Comments */}
                 {uploadedFiles.length > 0 && (
-                  <div className="flex flex-wrap gap-2 pt-1.5">
+                  <div className="space-y-2 pt-2">
+                    <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider text-left">
+                      📄 Uploaded Documents & Document-Specific Comments
+                    </label>
                     {uploadedFiles.map((file, idx) => (
-                      <div key={idx} className="flex items-center gap-1.5 bg-[#D99A1C]/10 border border-[#D99A1C]/25 text-[#D99A1C] text-[10px] px-2.5 py-1 rounded-lg font-bold">
-                        <span>📄</span>
-                        <span className="truncate max-w-[150px]">{file.name}</span>
-                        <button
-                          type="button"
-                          onClick={() => setUploadedFiles(prev => prev.filter((_, i) => i !== idx))}
-                          className="hover:text-red-500 transition-colors pl-1 font-bold text-xs"
-                        >
-                          ✕
-                        </button>
+                      <div key={idx} className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2 text-left">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
+                            <span className="text-amber-500">📄</span>
+                            <span className="truncate max-w-[220px]">{file.name}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setUploadedFiles(prev => prev.filter((_, i) => i !== idx))}
+                            className="text-xs text-red-500 hover:text-red-700 font-bold cursor-pointer"
+                          >
+                            ✕ Remove
+                          </button>
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Add comment for this specific document (optional)..."
+                          value={file.comment || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setUploadedFiles(prev => prev.map((f, i) => i === idx ? { ...f, comment: val } : f));
+                          }}
+                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#D99A1C]"
+                        />
                       </div>
                     ))}
                   </div>
                 )}
               </div>
 
-              {/* Comments / Notes */}
-              <div className="space-y-1.5 mt-4">
-                <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Comments / Notes</label>
+              {/* Application-Level General Comment */}
+              <div className="space-y-1.5 mt-4 text-left">
+                <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
+                  💬 Application General Comment (Overall Notes)
+                </label>
                 <textarea
                   rows="3"
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white font-semibold text-[#0F172A] resize-none"
-                  placeholder="Add any comments or notes for this application..."
+                  placeholder="Enter general comments or overall notes for this application..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                 />
