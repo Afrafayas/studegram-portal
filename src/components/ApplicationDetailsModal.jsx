@@ -308,7 +308,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
             }`}
           >
-            ðŸ“ App Details
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 002 2z" /></svg> App Details
           </button>
           <button
             onClick={() => setMainTab('activity')}
@@ -946,4 +946,5 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
     </div>
   );
 }
+
 
