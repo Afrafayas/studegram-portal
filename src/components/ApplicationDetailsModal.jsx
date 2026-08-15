@@ -513,8 +513,8 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                         {application.notes && (
                           <div className="bg-white border border-amber-200/60 rounded-xl p-3 space-y-1 shadow-3xs">
                             <div className="flex items-center justify-between text-[9px] font-extrabold">
-                              <span className="bg-amber-100/70 text-amber-800 px-2 py-0.5 rounded-md border border-amber-200/80">Initial Application Cover Note</span>
-                              <span className="text-slate-400">Created on submission</span>
+                              <span className="bg-amber-100/70 text-amber-800 px-2 py-0.5 rounded-md border border-amber-200/80">Submission Note</span>
+                              <span className="text-slate-400">Filed on submission</span>
                             </div>
                             <p className="text-xs font-semibold text-slate-800 whitespace-pre-wrap leading-relaxed">
                               {application.notes}
@@ -1022,6 +1022,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
     </div>
   );
 }
+
 
 
 
