@@ -2,10 +2,12 @@
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
 
-export default function ApplicationDetailsModal({ isOpen, onClose, application }) {
-  if (!isOpen || !application) return null;
-
+export default function ApplicationDetailsModal({ isOpen, onClose, application, onStatusChange, onDocumentUploaded, onUpdateSuccess }) {
   const toast = useToast();
+
+  const [appComments, setAppComments] = useState([]);
+  const [newAppComment, setNewAppComment] = useState("");
+  const [isPostingAppComment, setIsPostingAppComment] = useState(false);
 
   // Layout tabs state: 'details' (App Details) or 'activity' (Messages & Updates)
   const [mainTab, setMainTab] = useState('details');
@@ -20,6 +22,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
   useEffect(() => {
     if (application) {
       setLocalDocuments(application.documents || []);
+      setAppComments(application.applicationComments || []);
       setUploadComment('');
       setSelectedUploadFile(null);
     }
@@ -265,6 +268,8 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
       date: findStatusDate(['enrolled', 'closed']) 
     }
   ];
+
+  if (!isOpen || !application) return null;
 
   return (
     <div
