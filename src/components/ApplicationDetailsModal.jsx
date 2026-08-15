@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
 
@@ -18,6 +18,43 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
   const [uploadDocError, setUploadDocError] = useState('');
   const [uploadComment, setUploadComment] = useState('');
   const [selectedUploadFile, setSelectedUploadFile] = useState(null);
+  const [editingDocIdx, setEditingDocIdx] = useState(null);
+  const [editDocComment, setEditDocComment] = useState('');
+  const [replaceFile, setReplaceFile] = useState(null);
+  const [isReplacing, setIsReplacing] = useState(false);
+
+  const handleSaveEditedDoc = async (idx) => {
+    setIsReplacing(true);
+    try {
+      let updatedUrl = localDocuments[idx].url;
+      let updatedName = localDocuments[idx].name;
+
+      if (replaceFile) {
+        const formData = new FormData();
+        formData.append('file', replaceFile);
+        const uploadRes = await API.post('/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        updatedUrl = uploadRes.data.url;
+        updatedName = replaceFile.name;
+      }
+
+      const updatedDocs = localDocuments.map((d, i) => 
+        i === idx ? { ...d, name: updatedName, url: updatedUrl, comment: editDocComment.trim() } : d
+      );
+
+      await API.put('/applications/' + application.id, { documents: updatedDocs });
+      setLocalDocuments(updatedDocs);
+      setEditingDocIdx(null);
+      setReplaceFile(null);
+      toast.success('Document updated successfully!');
+      if (onUpdateSuccess) onUpdateSuccess();
+    } catch (err) {
+      toast.error('Failed to update document.');
+    } finally {
+      setIsReplacing(false);
+    }
+  };
 
   useEffect(() => {
     if (application) {
@@ -692,19 +729,71 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                                 <p className="text-[9px] text-slate-450 font-semibold mt-1">
                                   Uploaded: {doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Just Now'}
                                 </p>
+
+                                {editingDocIdx === idx && (
+                                  <div className="mt-3 p-3 bg-amber-50/50 border border-amber-200/80 rounded-xl space-y-2 text-left">
+                                    <label className="block text-[9px] font-extrabold text-amber-800 uppercase tracking-wider">
+                                      ✏️ Edit Description or Replace File
+                                    </label>
+                                    <input
+                                      type="text"
+                                      placeholder="Update document description..."
+                                      value={editDocComment}
+                                      onChange={(e) => setEditDocComment(e.target.value)}
+                                      className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-semibold focus:ring-1 focus:ring-[#D99A1C]"
+                                    />
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
+                                      <input
+                                        type="file"
+                                        onChange={(e) => setReplaceFile(e.target.files?.[0] || null)}
+                                        className="text-[10px] text-slate-500 font-semibold cursor-pointer"
+                                      />
+                                      <div className="flex gap-1.5 self-end">
+                                        <button
+                                          type="button"
+                                          onClick={() => setEditingDocIdx(null)}
+                                          className="border border-slate-200 bg-white hover:bg-slate-100 text-slate-600 text-[10px] font-bold px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                                        >
+                                          Cancel
+                                        </button>
+                                        <button
+                                          type="button"
+                                          disabled={isReplacing}
+                                          onClick={() => handleSaveEditedDoc(idx)}
+                                          className="bg-[#D99A1C] hover:bg-[#C28410] disabled:opacity-50 text-white text-[10px] font-bold px-3 py-1 rounded-lg transition-colors cursor-pointer"
+                                        >
+                                          {isReplacing ? 'Saving...' : 'Save Changes'}
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             </div>
-                            <a
-                              href={doc.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="bg-[#D99A1C] hover:bg-[#F5B025] text-white font-extrabold text-[10px] px-3 py-1.5 rounded-xl transition-all shadow-3xs flex items-center gap-1 cursor-pointer"
-                            >
-                              <span>View file</span>
-                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                              </svg>
-                            </a>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingDocIdx(editingDocIdx === idx ? null : idx);
+                                  setEditDocComment(doc.comment || '');
+                                  setReplaceFile(null);
+                                }}
+                                className="border border-amber-200 bg-amber-50 hover:bg-amber-100 text-[#D99A1C] font-extrabold text-[10px] px-2.5 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1"
+                              >
+                                <span>✏️ Edit</span>
+                              </button>
+                              <a
+                                href={doc.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="bg-[#D99A1C] hover:bg-[#F5B025] text-white font-extrabold text-[10px] px-3 py-1.5 rounded-xl transition-all shadow-3xs flex items-center gap-1 cursor-pointer"
+                              >
+                                <span>View file</span>
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
+                              </a>
+                            </div>
                           </div>
                         ))
                       ) : (
