@@ -366,7 +366,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                         </p>
                         {step.date && (
                           <span className="inline-block text-[9px] text-slate-400 font-bold mt-1 bg-slate-50 border border-slate-100 px-1.5 py-0.5 rounded">
-                            ðŸ“… {step.date}
+                            <span className="inline-flex items-center gap-1"><svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>{step.date}</span>
                           </span>
                         )}
                       </div>
@@ -521,7 +521,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application }
                           }}
                         />
                         <div className="space-y-1 text-slate-500">
-                          <span className="text-lg">ðŸ“¤</span>
+                          <svg className="w-6 h-6 mx-auto text-[#D99A1C]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
                           <p className="text-xs font-semibold text-slate-700">Click to upload additional document</p>
                           <p className="text-[10px] text-slate-400 font-semibold">Attach any supporting file (PDF, PNG, JPG, Word)</p>
                         </div>
