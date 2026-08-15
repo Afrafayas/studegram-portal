@@ -477,7 +477,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                 {uploadedFiles.length > 0 && (
                   <div className="space-y-2 pt-2">
                     <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider text-left">
-                      📄 Uploaded Documents & Document-Specific Comments
+                      📄 Uploaded Documents & Descriptions
                     </label>
                     {uploadedFiles.map((file, idx) => (
                       <div key={idx} className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2 text-left">
@@ -496,7 +496,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                         </div>
                         <input
                           type="text"
-                          placeholder="Add comment for this specific document (optional)..."
+                          placeholder="Document description (e.g. Passport Front Page, Semester 1-6 Marksheet)..."
                           value={file.comment || ''}
                           onChange={(e) => {
                             const val = e.target.value;
@@ -513,12 +513,12 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
               {/* Application-Level General Comment */}
               <div className="space-y-1.5 mt-4 text-left">
                 <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
-                  💬 Application General Comment (Overall Application Notes)
+                  💬 COMMENTS
                 </label>
                 <textarea
                   rows="3"
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white font-semibold text-[#0F172A] resize-none"
-                  placeholder="Enter general comments or overall notes for this application..."
+                  placeholder="Add comments or notes for this application..."
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                 />
