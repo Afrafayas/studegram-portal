@@ -613,20 +613,32 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
 
                     {/* Additional File Uploader */}
                     {selectedUploadFile ? (
-                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-3xs">
-                        <div className="flex items-center gap-2 truncate pr-2">
-                          <svg className="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                          <span className="text-xs font-bold text-slate-800 truncate max-w-[250px]">
-                            {selectedUploadFile.name}
-                          </span>
+                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2 text-left shadow-3xs">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 truncate pr-2">
+                            <svg className="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            <span className="text-xs font-bold text-slate-800 truncate max-w-[250px]">
+                              {selectedUploadFile.name}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedUploadFile(null);
+                              setUploadComment('');
+                            }}
+                            className="text-xs text-rose-500 hover:text-rose-700 font-bold transition-colors cursor-pointer shrink-0"
+                          >
+                            ✕ Remove
+                          </button>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedUploadFile(null)}
-                          className="text-xs text-rose-500 hover:text-rose-700 font-bold transition-colors cursor-pointer shrink-0"
-                        >
-                          Remove
-                        </button>
+                        <input
+                          type="text"
+                          placeholder="Document description (e.g. Passport Front Page, Semester 1-6 Marksheet)..."
+                          value={uploadComment}
+                          onChange={(e) => setUploadComment(e.target.value)}
+                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#D99A1C] shadow-3xs"
+                        />
                       </div>
                     ) : (
                       <div className="border-2 border-dashed border-[#E2E8F0] hover:border-[#D99A1C] transition-colors rounded-xl p-4 text-center cursor-pointer relative bg-slate-50">
@@ -648,20 +660,6 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                         </div>
                       </div>
                     )}
-
-                    {/* Persistent Comment Area for new upload */}
-                    <div className="space-y-1.5 mt-2 bg-slate-50 border border-slate-200/60 p-3.5 rounded-xl">
-                      <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
-                        Comments / Notes
-                      </label>
-                      <textarea
-                        rows="2"
-                        className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] font-semibold text-[#0F172A] resize-none shadow-sm"
-                        placeholder="Add comment here..."
-                        value={uploadComment}
-                        onChange={(e) => setUploadComment(e.target.value)}
-                      />
-                    </div>
 
                     {/* Submit Button */}
                     <div className="flex justify-end pt-1">
@@ -719,7 +717,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                                 {doc.comment && (
                                   <div className="bg-slate-50 border border-slate-200/85 rounded-xl p-2.5 mt-2 space-y-1 max-w-[280px]">
                                     <h6 className="text-[9px] font-black text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                                      <span className="flex items-center gap-1"><svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg> Comments / Notes</span>
+                                      <span className="flex items-center gap-1"><svg className="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg> Document Description</span>
                                     </h6>
                                     <p className="text-[10.5px] font-semibold text-slate-805 whitespace-pre-wrap leading-normal">
                                       {doc.comment}
