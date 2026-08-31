@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
 
@@ -11,10 +11,11 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
   // Application fields
   const [universities, setUniversities] = useState([]);
   const [courses, setCourses] = useState([]);
+
+
   const [selectedUniversity, setSelectedUniversity] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('');
   const [notes, setNotes] = useState('');
-  const [selectedIntake, setSelectedIntake] = useState('September 2026');
 
   // Student fields
   const [studentName, setStudentName] = useState('');
@@ -39,31 +40,30 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
         API.get('/universities').then(res => res.data),
         API.get('/courses').then(res => res.data)
       ])
-      .then(([uniRes, courseRes]) => {
-        setUniversities(uniRes.data || []);
-        setCourses(courseRes.data || []);
+        .then(([uniRes, courseRes]) => {
+          setUniversities(uniRes.data || []);
+          setCourses(courseRes.data || []);
 
-        // Prepopulate application fields
-        setSelectedUniversity(application.university?._id || application.university || '');
-        setSelectedCourse(application.course?._id || application.course || '');
-        setNotes(application.notes || '');
-        setSelectedIntake(application.intake || 'September 2026');
+          // Prepopulate application fields
+          setSelectedUniversity(application.university?._id || application.university || '');
+          setSelectedCourse(application.course?._id || application.course || '');
+          setNotes(application.notes || '');
 
-        // Prepopulate student fields
-        const s = application.student || {};
-        setStudentName(s.name || '');
-        setStudentEmail(s.email || '');
-        setStudentPhone(s.phone || '');
-        setStudentPassport(s.passportNo || '');
-        setStudentDob(s.dob || '');
-        setStudentGender(s.gender || '');
-        setStudentAddress(s.address || '');
-      })
-      .catch(err => {
-        console.error('Error loading data:', err);
-        setError('Failed to load data from server.');
-      })
-      .finally(() => setIsLoading(false));
+          // Prepopulate student fields
+          const s = application.student || {};
+          setStudentName(s.name || '');
+          setStudentEmail(s.email || '');
+          setStudentPhone(s.phone || '');
+          setStudentPassport(s.passportNo || '');
+          setStudentDob(s.dob || '');
+          setStudentGender(s.gender || '');
+          setStudentAddress(s.address || '');
+        })
+        .catch(err => {
+          console.error('Error loading data:', err);
+          setError('Failed to load data from server.');
+        })
+        .finally(() => setIsLoading(false));
     }
   }, [isOpen, application]);
 
@@ -99,22 +99,21 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
 
       // Run both API calls in parallel
       await Promise.all([
-        API.put('/applications/' + application.id, {
+        API.put(`/applications/${application.id}`, {
           university: selectedUniversity,
           course: selectedCourse,
-          intake: selectedIntake,
-          notes: (notes || '').toString().trim(),
+          notes: notes.trim()
         }),
         studentId
-          ? API.put('/students/' + studentId, {
-              name: (studentName || '').toString().trim(),
-              email: (studentEmail || '').toString().trim(),
-              phone: (studentPhone || '').toString().trim(),
-              passportNo: (studentPassport || '').toString().trim(),
-              dob: (studentDob || '').toString().trim(),
-              gender: studentGender,
-              address: (studentAddress || '').toString().trim()
-            })
+          ? API.put(`/students/${studentId}`, {
+            name: studentName.trim(),
+            email: studentEmail.trim(),
+            phone: studentPhone.trim(),
+            passportNo: studentPassport.trim(),
+            dob: studentDob.trim(),
+            gender: studentGender,
+            address: studentAddress.trim()
+          })
           : Promise.resolve()
       ]);
 
@@ -169,7 +168,10 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`py-2.5 px-4 rounded-t-xl text-xs font-bold border-b-2 transition-all ${activeTab === tab.id ? "border-[#D99A1C] text-[#D99A1C] bg-white shadow-sm" : "border-transparent text-slate-500 hover:text-slate-800"}`}
+              className={`py-2.5 px-4 rounded-t-xl text-xs font-bold border-b-2 transition-all ${activeTab === tab.id
+                  ? 'border-[#D99A1C] text-[#D99A1C] bg-white shadow-sm'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
             >
               {tab.label}
             </button>
@@ -254,29 +256,6 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                     )}
                   </div>
 
-                  {/* Target Intake Season (Deferral option) */}
-                  <div>
-                    <label className={labelClass}>Target Intake Season (Deferral) *</label>
-                    <div className="relative">
-                      <select
-                        value={selectedIntake}
-                        onChange={e => setSelectedIntake(e.target.value)}
-                        required
-                        className={inputClass + ' appearance-none'}
-                      >
-                        <option value="September 2026">September 2026</option>
-                        <option value="January 2027">January 2027</option>
-                        <option value="May 2027">May 2027</option>
-                        <option value="September 2027">September 2027</option>
-                      </select>
-                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Notes */}
                   <div>
                     <label className={labelClass}>Comments / Notes</label>
@@ -288,8 +267,6 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                       onChange={e => setNotes(e.target.value)}
                     />
                   </div>
-
-
                 </div>
               )}
 
@@ -436,6 +413,3 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
     </div>
   );
 }
-
-
-
