@@ -1,7 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function ApplicationHistory({ onAddApplicationClick, applications = [], duplicateAlert, setDuplicateAlert, onViewDetails, onEditClick }) {
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+
+  // Reset page on search
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   const filteredApps = applications.filter((app) => {
     return (
@@ -10,6 +19,13 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
       app.passportNo.toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
+
+  // Pagination Math
+  const totalItems = filteredApps.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+  const paginatedApps = filteredApps.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div className="flex-1 p-8 space-y-6 bg-[#F0F2F5] animate-fade-in-up">
@@ -101,7 +117,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredApps.length > 0 ? (
-                filteredApps.map((app, index) => (
+                paginatedApps.map((app, index) => (
                   <tr key={index} className="hover:bg-slate-50 transition-colors duration-150">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <a href="#" onClick={(e) => { e.preventDefault(); onViewDetails && onViewDetails(app); }} className="text-[#D99A1C] font-bold hover:underline text-xs">{app.camsId}</a>
@@ -173,13 +189,62 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
         </div>
 
         {/* Pagination at bottom */}
-        <div className="px-6 py-4 bg-slate-50 border-t border-[#E2E8F0] flex items-center justify-between text-xs text-[#64748B] font-semibold select-none">
-          <span>Showing 1-{filteredApps.length} of {filteredApps.length} results</span>
-          <div className="flex gap-1.5">
-            <button className="px-3 py-1.5 border border-[#E2E8F0] bg-white rounded-lg hover:bg-slate-50 disabled:opacity-50 transition-colors" disabled>Prev</button>
-            <button className="px-3 py-1.5 border border-[#E2E8F0] bg-white rounded-lg hover:bg-slate-50 disabled:opacity-50 transition-colors" disabled>Next</button>
+        {totalItems > 0 && (
+          <div className="px-6 py-4 bg-slate-50 border-t border-[#E2E8F0] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#64748B] font-semibold select-none">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-semibold text-slate-500">Rows per page:</span>
+              <select
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-700 focus:outline-none focus:border-[#D99A1C] cursor-pointer"
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+              <span className="text-xs font-semibold text-slate-400">
+                Showing {totalItems > 0 ? startIndex + 1 : 0} to {endIndex} of {totalItems} entries
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+              >
+                ◀ Prev
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
+                    currentPage === page
+                      ? 'bg-[#D99A1C] text-white shadow-xs'
+                      : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+              >
+                Next ▶
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
