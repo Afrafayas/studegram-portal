@@ -55,7 +55,8 @@ export default function Navbar({ activePage, partnerData, onBack, onNewApplicati
         </div>
       </div>
  
-      {/* Center section: Rounded search bar */}
+      {/* Center section: Rounded search bar (Commented out) */}
+      {/* 
       <div className="relative w-full max-w-md mx-4 hidden sm:block">
         <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
           <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,6 +71,7 @@ export default function Navbar({ activePage, partnerData, onBack, onNewApplicati
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
+      */}
  
       {/* Right section: Actions & Profile */}
       <div className="flex items-center gap-4">

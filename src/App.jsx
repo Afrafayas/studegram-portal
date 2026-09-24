@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import AddApplicationModal from './components/AddApplicationModal';
@@ -131,7 +131,7 @@ export default function App() {
     if (currentPage === 'dashboard' || currentPage === 'history') {
       fetchApplications();
     }
-  }, [currentPage]);
+  }, [currentPage, activePage]);
 
   const handleAddApplicationSubmit = async (selectedData) => {
     const token = localStorage.getItem('partner_token');
@@ -174,7 +174,15 @@ export default function App() {
   const renderActivePage = () => {
     switch (activePage) {
       case 'Dashboard':
-        return <Dashboard />;
+        return (
+          <Dashboard 
+            applications={applications}
+            partnerName={partnerData?.name || partnerData?.companyName || 'Partner'}
+            onViewDetails={(app) => setSelectedAppForDetails(app)}
+            onViewHistory={() => setActivePage('ApplicationHistory')}
+            onNavigateDeadlines={() => setActivePage('UniversityDeadline')}
+          />
+        );
       case 'ApplicationHistory':
         return (
           <ApplicationHistory 
