@@ -1,6 +1,12 @@
 import React from 'react';
 
-export default function Dashboard({ applications = [], onViewDetails, onViewHistory }) {
+export default function Dashboard({ 
+  applications = [], 
+  partnerName = 'Partner', 
+  onViewDetails, 
+  onViewHistory,
+  onNavigateDeadlines
+}) {
   const stats = [
     {
       label: 'Total Applications',
@@ -14,19 +20,19 @@ export default function Dashboard({ applications = [], onViewDetails, onViewHist
       )
     },
     {
-      label: 'Applications Processed',
-      value: applications.filter(a => a.secondaryStatus === 'Processed').length.toString(),
-      color: 'text-[#10B981]',
-      bgColor: 'bg-emerald-50',
-      icon: (
-        <svg className="w-5 h-5 text-[#10B981]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      )
-    },
-    {
-      label: 'With CAS Team',
-      value: applications.filter(a => a.secondaryStatus === 'Visa Pending').length.toString(),
+      label: 'Under Review / In Progress',
+      value: applications.filter(a => {
+        const s = (a.status || a.secondaryStatus || '').toLowerCase();
+        return (
+          s.includes('submitted') || 
+          s.includes('review') || 
+          s.includes('processing') || 
+          s.includes('pending') || 
+          s.includes('draft') || 
+          s.includes('cas') || 
+          s.includes('paid')
+        );
+      }).length.toString(),
       color: 'text-[#F59E0B]',
       bgColor: 'bg-amber-50',
       icon: (
@@ -36,45 +42,86 @@ export default function Dashboard({ applications = [], onViewDetails, onViewHist
       )
     },
     {
-      label: 'Case Closed',
-      value: applications.filter(a => a.secondaryStatus === 'Approved' || a.secondaryStatus === 'Rejected').length.toString(),
-      color: 'text-[#64748B]',
-      bgColor: 'bg-slate-100',
+      label: 'Offer Issued',
+      value: applications.filter(a => {
+        const s = (a.status || a.secondaryStatus || '').toLowerCase();
+        return s.includes('offer');
+      }).length.toString(),
+      color: 'text-indigo-600',
+      bgColor: 'bg-indigo-50',
       icon: (
-        <svg className="w-5 h-5 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+        <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
         </svg>
       )
     },
     {
-      label: 'Offer Issued',
-      value: applications.filter(a => a.secondaryStatus === 'Offer Issued').length.toString(),
+      label: 'Case Closed',
+      value: applications.filter(a => {
+        const s = (a.status || a.secondaryStatus || '').toLowerCase();
+        return (
+          s.includes('closed') || 
+          s.includes('approved') || 
+          s.includes('rejected') || 
+          s.includes('withdrawn') || 
+          s.includes('enrolled')
+        );
+      }).length.toString(),
       color: 'text-[#10B981]',
       bgColor: 'bg-emerald-50',
       icon: (
         <svg className="w-5 h-5 text-[#10B981]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v5m-3-3h6m-3-10a3 3 0 110-6 3 3 0 010 6zm0 0a7 7 0 100 14 7 7 0 000-14z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       )
     }
   ];
 
-  const recentApps = applications.slice(0, 5).map(app => ({
-    name: app.studentName,
-    initials: app.studentName ? app.studentName.split(' ').map(n => n[0]).join('').toUpperCase() : 'ST',
-    passport: app.passportNo || 'N/A',
-    status: app.secondaryStatus || 'Pending',
-    badgeColor: app.secondaryStatus === 'Offer Issued'
-      ? 'bg-blue-50 text-blue-700 border-blue-100'
-      : app.secondaryStatus === 'Processed'
-        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
-        : 'bg-amber-50 text-amber-700 border-amber-100',
-    date: app.dateAdded,
-    rawApp: app
-  }));
+  const getBadgeStyle = (status = '') => {
+    const s = status.toLowerCase();
+    if (s.includes('closed') || s.includes('approved') || s.includes('enrolled')) {
+      return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    }
+    if (s.includes('offer') || s.includes('cas')) {
+      return 'bg-blue-50 text-blue-700 border-blue-200';
+    }
+    if (s.includes('rejected') || s.includes('withdrawn')) {
+      return 'bg-rose-50 text-rose-700 border-rose-200';
+    }
+    return 'bg-amber-50 text-amber-700 border-amber-200';
+  };
+
+  const getInitials = (name = '') => {
+    if (!name || name === 'N/A') return 'ST';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  const recentApps = applications.slice(0, 5).map(app => {
+    const currentStatus = app.status || app.secondaryStatus || 'Submitted';
+    return {
+      name: app.studentName || 'N/A',
+      initials: getInitials(app.studentName),
+      passport: app.passportNo || 'N/A',
+      status: currentStatus,
+      badgeColor: getBadgeStyle(currentStatus),
+      date: app.dateAdded || 'N/A',
+      rawApp: app
+    };
+  });
+
+  const todayFormatted = new Date().toLocaleDateString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+
+  const currentHour = new Date().getHours();
+  const greeting = currentHour < 12 ? 'Good morning' : currentHour < 18 ? 'Good afternoon' : 'Good evening';
 
   // Upcoming deadlines with colored dates by urgency (red within 30 days, amber within 60, green otherwise)
-  // Current date is 23 Jun 2026
   const upcomingDeadlines = [
     { university: 'Anglia Ruskin University', courseType: 'Postgraduate', date: '15 Jul 2026', urgency: 'danger', reason: 'Within 30 days' },
     { university: 'University of Surrey', courseType: 'Postgraduate', date: '10 Aug 2026', urgency: 'warning', reason: 'Within 60 days' },
@@ -121,13 +168,13 @@ export default function Dashboard({ applications = [], onViewDetails, onViewHist
           <path d="M 16 42 Q 10 40 12 46" stroke="#D99A1C" strokeWidth="2" strokeLinecap="round" fill="none" />
         </svg>
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Good morning, Partner 👋</h1>
-          <p className="text-xs text-[#64748B] font-medium">Tuesday, 23 June 2026</p>
+          <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">{greeting}, {partnerName} 👋</h1>
+          <p className="text-xs text-[#64748B] font-medium">{todayFormatted}</p>
         </div>
       </div>
 
-      {/* 5 Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+      {/* 4 Stat Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, idx) => (
           <div key={idx} className="bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-200 flex items-center justify-between group">
             <div className="flex items-center gap-4">
@@ -216,7 +263,12 @@ export default function Dashboard({ applications = [], onViewDetails, onViewHist
         <div className="lg:col-span-2 bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden flex flex-col">
           <div className="px-6 py-4 border-b border-[#E2E8F0] flex justify-between items-center">
             <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">Upcoming Deadlines</h2>
-            <button className="text-xs text-[#D99A1C] font-semibold hover:underline">View All</button>
+            <button 
+              onClick={() => onNavigateDeadlines && onNavigateDeadlines()}
+              className="text-xs text-[#D99A1C] font-semibold hover:underline"
+            >
+              View All
+            </button>
           </div>
           <div className="p-4 flex-1 space-y-3.5">
             {upcomingDeadlines.map((item, idx) => (
