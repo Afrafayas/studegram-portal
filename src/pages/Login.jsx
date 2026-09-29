@@ -12,6 +12,7 @@ export default function Login({ onNavigate, onLoginSuccess }) {
   const [passwordError, setPasswordError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
+  const [accountStatusModal, setAccountStatusModal] = useState(null); // { status: 'Pending' | 'Rejected', message: '', reason: '' }
 
   const validateForm = () => {
     let isValid = true;
@@ -60,8 +61,19 @@ export default function Login({ onNavigate, onLoginSuccess }) {
       onLoginSuccess();
     })
     .catch((err) => {
-      const serverMessage = err.response?.data?.message;
-      setLoginError(serverMessage || 'An error occurred during sign in.');
+      const serverStatus = err.response?.data?.status;
+      const serverMessage = err.response?.data?.message || err.message;
+      const rejectionReason = err.response?.data?.rejectionReason || '';
+
+      if (serverStatus === 'Pending' || serverStatus === 'Rejected') {
+        setAccountStatusModal({
+          status: serverStatus,
+          message: serverMessage,
+          reason: rejectionReason
+        });
+      } else {
+        setLoginError(serverMessage || 'An error occurred during sign in.');
+      }
     })
     .finally(() => {
       setIsLoading(false);
@@ -72,14 +84,27 @@ export default function Login({ onNavigate, onLoginSuccess }) {
     if (!loginError) return null;
     const lower = loginError.toLowerCase();
     
-    if (lower.includes('pending') || lower.includes('approval')) {
+    if (lower.includes('pending') || lower.includes('approval') || lower.includes('review')) {
       return {
         bg: 'bg-amber-50/75 border-amber-200/80 text-amber-900',
         titleColor: 'text-amber-800',
-        title: 'Awaiting Admin Approval',
+        title: 'Registration Under Review',
         icon: (
           <svg className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        )
+      };
+    }
+
+    if (lower.includes('rejected')) {
+      return {
+        bg: 'bg-rose-50/75 border-rose-200/80 text-rose-900',
+        titleColor: 'text-rose-800',
+        title: 'Registration Rejected',
+        icon: (
+          <svg className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         )
       };
@@ -353,6 +378,56 @@ export default function Login({ onNavigate, onLoginSuccess }) {
 
         </div>
       </div>
+
+      {/* Account Status Modal (Pending / Rejected) */}
+      {accountStatusModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4 text-center">
+            {accountStatusModal.status === 'Pending' ? (
+              <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto ring-8 ring-amber-50">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            ) : (
+              <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto ring-8 ring-rose-50">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <span className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${
+                accountStatusModal.status === 'Pending' ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-rose-100 text-rose-800 border-rose-200'
+              }`}>
+                {accountStatusModal.status === 'Pending' ? 'Registration Under Review' : 'Registration Rejected'}
+              </span>
+              <h3 className="text-xl font-bold text-[#0F172A] pt-1">
+                {accountStatusModal.status === 'Pending' ? 'Verification Pending' : 'Application Not Approved'}
+              </h3>
+            </div>
+
+            <p className="text-xs text-[#64748B] leading-relaxed font-medium">
+              {accountStatusModal.message}
+            </p>
+
+            {accountStatusModal.reason && (
+              <div className="bg-rose-50 border border-rose-200 rounded-xl p-3 text-left space-y-1">
+                <p className="text-[10px] font-bold text-rose-800 uppercase tracking-wider">Rejection Reason from Admin:</p>
+                <p className="text-xs text-rose-900 font-semibold">{accountStatusModal.reason}</p>
+              </div>
+            )}
+
+            <button
+              onClick={() => setAccountStatusModal(null)}
+              className="w-full bg-[#0F172A] hover:bg-black text-white font-bold py-2.5 rounded-xl text-xs transition-all uppercase tracking-wider"
+            >
+              Close Window
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   );

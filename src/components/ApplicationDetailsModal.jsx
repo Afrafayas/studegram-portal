@@ -493,6 +493,43 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                       </div>
                     </div>
 
+                    {/* Claim Commission Box */}
+                    {['Visa Approved', 'Enrolled / Closed'].includes(application.status) && application.paymentStatus === 'Paid' && (
+                      <div className="bg-gradient-to-r from-amber-50 to-amber-100 border border-amber-300 rounded-xl p-3.5 my-3 flex items-center justify-between shadow-xs">
+                        <div>
+                          <p className="text-xs font-bold text-amber-950">💸 Commission Claim Available</p>
+                          <p className="text-[10px] text-amber-800 font-semibold">Payment completed & visa/enrolment confirmed for {application.studentName}.</p>
+                        </div>
+                        {application.commissionStatus === 'Claimed' ? (
+                          <span className="bg-amber-600 text-white font-black text-[10px] uppercase px-3 py-1.5 rounded-lg shadow">
+                            Claimed (Pending Payout)
+                          </span>
+                        ) : application.commissionStatus === 'Paid' || application.commissionStatus === 'Approved' ? (
+                          <span className="bg-emerald-600 text-white font-black text-[10px] uppercase px-3 py-1.5 rounded-lg shadow">
+                            Commission Disbursed & Paid ✓
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              try {
+                                const res = await API.post(`/applications/${application.id}/claim-commission`);
+                                if (res.data.success) {
+                                  toast.success('Commission claim submitted to Admin successfully!');
+                                  if (onUpdateSuccess) onUpdateSuccess();
+                                }
+                              } catch (err) {
+                                toast.error(err.response?.data?.message || 'Failed to claim commission.');
+                              }
+                            }}
+                            className="bg-amber-600 hover:bg-amber-700 text-white font-black text-xs px-4 py-2 rounded-xl transition-all shadow cursor-pointer active:scale-95"
+                          >
+                            Claim Commission 💰
+                          </button>
+                        )}
+                      </div>
+                    )}
+
                     <div className="space-y-4">
                       <h4 className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider border-b border-slate-100 pb-2">
                         Student Personal Profile
@@ -537,6 +574,17 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
 
                     {/* Application General COMMENTS Section (Student Profile Tab) */}
                     <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4.5 space-y-3 mt-6 text-left shadow-xs">
+                      {/* Dark Blue Unreplied Highlight */}
+                      {application.hasUnrepliedMessage && application.lastRepliedBy === 'Admin' && (
+                        <div className="bg-[#1e3a8a] text-white border border-[#1d4ed8] rounded-xl p-3 shadow-md flex items-center justify-between mb-2 animate-pulse">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 bg-blue-400 rounded-full"></span>
+                            <span className="text-xs font-bold">💬 Unreplied Message from Admin (Awaiting Your Reply)</span>
+                          </div>
+                          <span className="text-[9px] bg-[#1d4ed8] text-white font-black uppercase px-2 py-0.5 rounded border border-blue-400">Dark Blue Highlight</span>
+                        </div>
+                      )}
+
                       <div className="flex items-center justify-between">
                         <h4 className="text-[10px] font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                           <svg className="w-3.5 h-3.5 text-[#D99A1C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
