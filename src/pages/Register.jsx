@@ -2,99 +2,190 @@ import React, { useState } from 'react';
 import API from '../api/axios';
 
 export default function Register({ onNavigate }) {
+  // Wizard Window Steps: 1 = Personal Details, 2 = Company Details & Legal Upload, 3 = OTP Verification, 4 = Under Review
+  const [step, setStep] = useState(1);
+
+  // Step 1: Personal Details
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [agencyName, setAgencyName] = useState('');
+  const [place, setPlace] = useState('');
+  const [address, setAddress] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [agreeTerms, setAgreeTerms] = useState(false);
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Error States
+  // Step 2: Company Details & Legal Document
+  const [agencyName, setAgencyName] = useState('');
+  const [partnerType, setPartnerType] = useState('Company');
+  const [taxId, setTaxId] = useState('');
+  const [country, setCountry] = useState('India');
+  const [city, setCity] = useState('');
+  const [documents, setDocuments] = useState([]);
+  const [docName, setDocName] = useState('');
+  const [docUrl, setDocUrl] = useState('');
+
+  // Step 3: OTP Verification
+  const [otpCode, setOtpCode] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+
+  // Status & Errors
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
   const [apiError, setApiError] = useState('');
 
-  const validateForm = () => {
+  // ==========================================
+  // VALIDATIONS
+  // ==========================================
+  const validateStep1 = () => {
     const newErrors = {};
-
     if (!fullName.trim()) newErrors.fullName = 'Full name is required';
-    
     if (!email.trim()) {
-      newErrors.email = 'Email address is required';
+      newErrors.email = 'Personal email address is required';
     } else if (!/\S+@\S+\.\S+/.test(email)) {
       newErrors.email = 'Please enter a valid email address';
     }
-
     if (!phoneNumber.trim()) {
       newErrors.phoneNumber = 'Phone number is required';
     } else if (!/^\d{10}$/.test(phoneNumber.replace(/\s+/g, ''))) {
-      newErrors.phoneNumber = 'Please enter a valid 10-digit number';
+      newErrors.phoneNumber = 'Please enter a valid 10-digit phone number';
     }
-
-    if (!agencyName.trim()) newErrors.agencyName = 'Agency name is required';
-
+    if (!place.trim()) newErrors.place = 'Place / Location is required';
+    if (!address.trim()) newErrors.address = 'Full address is required';
     if (!password) {
       newErrors.password = 'Password is required';
     } else if (password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
-
     if (!confirmPassword) {
       newErrors.confirmPassword = 'Confirm password is required';
     } else if (confirmPassword !== password) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
 
-    if (!agreeTerms) {
-      newErrors.agreeTerms = 'You must agree to the Terms and Conditions';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateStep2 = () => {
+    const newErrors = {};
+    if (!agencyName.trim()) newErrors.agencyName = 'Company / Agency name is required';
+    if (!taxId.trim()) newErrors.taxId = 'Business Registration / Tax ID is required';
+    if (!city.trim()) newErrors.city = 'City is required';
+
+    // MANDATORY DOCUMENT CHECK
+    if (documents.length === 0) {
+      newErrors.documents = 'At least 1 legal company document upload is MANDATORY for agency registration.';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  // Add Document Handler
+  const handleAddDocument = () => {
+    if (!docName.trim() || !docUrl.trim()) {
+      setErrors({ ...errors, docAdd: 'Please enter both document title and URL.' });
+      return;
+    }
+    setDocuments([...documents, { name: docName.trim(), url: docUrl.trim(), uploadedAt: new Date() }]);
+    setDocName('');
+    setDocUrl('');
+    setErrors({ ...errors, documents: '', docAdd: '' });
+  };
+
+  // Move Step 1 -> Step 2
+  const handleNextToCompanyDetails = (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (validateStep1()) {
+      setStep(2);
+      window.scrollTo(0, 0);
+    }
+  };
+
+  // Move Step 2 -> Step 3 (Send OTP)
+  const handleProceedToOtp = async (e) => {
+    e.preventDefault();
+    if (!validateStep2()) return;
 
     setIsLoading(true);
-    setSuccessMessage('');
     setApiError('');
 
-    API.post('/partners/register', {
-      name: fullName,
-      email,
-      phone: `+91${phoneNumber.trim()}`,
-      companyName: agencyName,
-      password,
-      country: 'India'
-    })
-    .then((res) => {
-      const data = res.data;
-      if (!data?.success) {
-        throw new Error(data?.message || data?.error || 'Registration failed');
+    try {
+      const res = await API.post('/partners/send-otp', { email });
+      if (res.data.success) {
+        setOtpSent(true);
+        setStep(3);
+        window.scrollTo(0, 0);
+      } else {
+        throw new Error(res.data.message || 'Failed to send OTP email.');
       }
-      setSuccessMessage('Registration successful. Please wait for admin approval before you can log in.');
-      // Clear form
-      setFullName('');
-      setEmail('');
-      setPhoneNumber('');
-      setAgencyName('');
-      setPassword('');
-      setConfirmPassword('');
-      setAgreeTerms(false);
-    })
-    .catch((err) => {
-      setApiError(err.message || 'An error occurred during registration.');
-    })
-    .finally(() => {
+    } catch (err) {
+      setApiError(err.response?.data?.message || err.message || 'Error sending OTP email.');
+    } finally {
       setIsLoading(false);
-    });
+    }
+  };
+
+  // Resend OTP
+  const handleResendOtp = async () => {
+    setIsLoading(true);
+    setApiError('');
+    try {
+      await API.post('/partners/send-otp', { email });
+      alert(`A new 6-digit OTP code has been sent to ${email}`);
+    } catch (err) {
+      setApiError(err.response?.data?.message || err.message || 'Failed to resend OTP.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Submit Final Registration (Step 3 -> Step 4)
+  const handleVerifyOtpAndRegister = async (e) => {
+    e.preventDefault();
+    if (!otpCode || otpCode.trim().length !== 6) {
+      setErrors({ otp: 'Please enter the 6-digit OTP code sent to your email.' });
+      return;
+    }
+
+    setIsLoading(true);
+    setApiError('');
+
+    try {
+      // 1. Verify OTP
+      const verifyRes = await API.post('/partners/verify-otp', { email, otp: otpCode.trim() });
+      if (!verifyRes.data.success) {
+        throw new Error(verifyRes.data.message || 'OTP verification failed');
+      }
+
+      // 2. Submit Final Partner Registration
+      const regRes = await API.post('/partners/register', {
+        name: fullName.trim(),
+        email: email.trim(),
+        phone: `+91${phoneNumber.trim()}`,
+        place: place.trim(),
+        address: address.trim(),
+        companyName: agencyName.trim(),
+        partnerType,
+        taxId: taxId.trim(),
+        country,
+        city: city.trim(),
+        password,
+        documents
+      });
+
+      if (regRes.data.success) {
+        setStep(4); // Under Review Window
+      } else {
+        throw new Error(regRes.data.message || 'Registration failed.');
+      }
+    } catch (err) {
+      setApiError(err.response?.data?.message || err.message || 'Registration failed.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -102,12 +193,10 @@ export default function Register({ onNavigate }) {
       
       {/* Left side (50%): Brand detail graphic panel */}
       <div className="hidden lg:flex lg:w-1/2 bg-[#D99A1C] text-white p-16 flex-col justify-between relative overflow-hidden">
-        {/* Transparent Icon Pattern Background with custom opacity */}
         <div 
           className="absolute inset-0 bg-cover bg-center opacity-25 mix-blend-multiply"
           style={{ backgroundImage: 'url(/assets/login_hero_pattern.png)' }}
         ></div>
-        {/* Soft layout overlay */}
         <div className="absolute inset-0 bg-black/5"></div>
 
         {/* Logo Brand */}
@@ -121,37 +210,25 @@ export default function Register({ onNavigate }) {
         {/* Center: Hero text */}
         <div className="space-y-6 max-w-md relative z-10 my-auto">
           <h2 className="text-4xl font-extrabold tracking-tight leading-tight">
-            Join Studegram Today
+            Agency Onboarding & Partnership
           </h2>
-          <p className="text-xs text-white/80 font-medium leading-relaxed">
-            Create an agency partner account to manage application pipelines, check real-time deadlines, and search university programs easily.
+          <p className="text-xs text-white/90 font-medium leading-relaxed">
+            Register your education agency with Studgram. Follow our 3-step verification process to upload legal credentials and submit for admin approval.
           </p>
 
-          {/* 3 Feature Points */}
-          <div className="space-y-3.5 pt-6 text-xs font-semibold">
-            <div className="flex items-center gap-3">
-              <span className="w-5 h-5 bg-white/10 border border-white/20 rounded-full flex items-center justify-center shadow-inner">
-                <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                </svg>
-              </span>
-              <span>Manage Student Applications</span>
+          {/* Stepper Indicator */}
+          <div className="pt-6 space-y-4">
+            <div className="flex items-center gap-3 text-xs font-bold">
+              <span className={`w-7 h-7 rounded-full flex items-center justify-center shadow-sm ${step >= 1 ? 'bg-white text-[#D99A1C]' : 'bg-white/20 text-white'}`}>1</span>
+              <span className={step === 1 ? 'text-white font-extrabold underline' : 'text-white/80'}>Personal Details & Address</span>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="w-5 h-5 bg-white/10 border border-white/20 rounded-full flex items-center justify-center shadow-inner">
-                <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                </svg>
-              </span>
-              <span>Search 100k+ Active Courses</span>
+            <div className="flex items-center gap-3 text-xs font-bold">
+              <span className={`w-7 h-7 rounded-full flex items-center justify-center shadow-sm ${step >= 2 ? 'bg-white text-[#D99A1C]' : 'bg-white/20 text-white'}`}>2</span>
+              <span className={step === 2 ? 'text-white font-extrabold underline' : 'text-white/80'}>Company Info & Mandatory Legal Document</span>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="w-5 h-5 bg-white/10 border border-white/20 rounded-full flex items-center justify-center shadow-inner">
-                <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                </svg>
-              </span>
-              <span>Track Deadlines and Schedules</span>
+            <div className="flex items-center gap-3 text-xs font-bold">
+              <span className={`w-7 h-7 rounded-full flex items-center justify-center shadow-sm ${step >= 3 ? 'bg-white text-[#D99A1C]' : 'bg-white/20 text-white'}`}>3</span>
+              <span className={step === 3 ? 'text-white font-extrabold underline' : 'text-white/80'}>Email OTP Verification</span>
             </div>
           </div>
         </div>
@@ -162,288 +239,433 @@ export default function Register({ onNavigate }) {
         </div>
       </div>
 
-      {/* Right side (50%): Form card centered */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 lg:p-12 overflow-y-auto">
-        <div className="w-full max-w-md bg-white border border-[#E2E8F0] rounded-2xl shadow-xl p-8 space-y-6 my-8">
+      {/* Right side (50%): Wizard Form Window */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 overflow-y-auto">
+        <div className="w-full max-w-lg bg-white border border-[#E2E8F0] rounded-2xl shadow-xl p-8 space-y-6 my-6">
           
-          {/* Header */}
-          <div className="text-left space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Create Account</h1>
-            <p className="text-xs text-[#64748B] font-semibold">Join Studegram today to process enrollments</p>
+          {/* Top Progress bar */}
+          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+            <div 
+              className="bg-gradient-to-r from-[#D99A1C] to-[#F5B025] h-full transition-all duration-300"
+              style={{ width: `${(step / 4) * 100}%` }}
+            ></div>
           </div>
-
-          {successMessage && (
-            <div className="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl flex gap-3 text-xs shadow-sm">
-              <svg className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              <div className="space-y-1">
-                <p className="font-bold text-[10px] text-amber-800 uppercase tracking-wider">Pending Approval</p>
-                <p className="leading-relaxed font-semibold">{successMessage}</p>
-              </div>
-            </div>
-          )}
 
           {apiError && (
             <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl flex gap-3 text-xs shadow-sm">
               <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <div className="space-y-1">
+              <div>
                 <p className="font-bold text-[10px] text-red-800 uppercase tracking-wider">Registration Error</p>
                 <p className="leading-relaxed font-semibold">{apiError}</p>
               </div>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Full Name */}
-            <div className="space-y-1">
-              <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Full Name</label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-[#64748B]">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </span>
+          {/* ========================================== */}
+          {/* WINDOW 1: PERSONAL DETAILS                 */}
+          {/* ========================================== */}
+          {step === 1 && (
+            <form onSubmit={handleNextToCompanyDetails} className="space-y-4">
+              <div className="text-left space-y-1">
+                <span className="text-[10px] font-black text-[#D99A1C] uppercase tracking-wider">Step 1 of 3</span>
+                <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Personal Details</h1>
+                <p className="text-xs text-[#64748B] font-semibold">Enter your personal identity and contact information</p>
+              </div>
+
+              {/* Full Name */}
+              <div className="space-y-1">
+                <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Full Name *</label>
                 <input
                   type="text"
-                  className={`w-full bg-slate-50 border rounded-xl pl-10 pr-4 py-2 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
+                  className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
                     errors.fullName ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
                   }`}
-                  placeholder="John Doe"
+                  placeholder="e.g. Rajesh Kumar"
                   value={fullName}
-                  onChange={(e) => {
-                    setFullName(e.target.value);
-                    if (errors.fullName) setErrors({ ...errors, fullName: '' });
-                  }}
-                  disabled={isLoading}
+                  onChange={(e) => setFullName(e.target.value)}
                 />
+                {errors.fullName && <p className="text-[10px] text-[#EF4444] font-bold mt-0.5">{errors.fullName}</p>}
               </div>
-              {errors.fullName && <p className="text-[10px] text-[#EF4444] font-bold mt-0.5">{errors.fullName}</p>}
-            </div>
 
-            {/* Email Address */}
-            <div className="space-y-1">
-              <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Email Address</label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-[#64748B]">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                </span>
+              {/* Email Address */}
+              <div className="space-y-1">
+                <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Personal Email Address (For OTP verification) *</label>
                 <input
                   type="email"
-                  autoComplete="username"
-                  className={`w-full bg-slate-50 border rounded-xl pl-10 pr-4 py-2 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
+                  className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
                     errors.email ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
                   }`}
-                  placeholder="name@agency.com"
+                  placeholder="owner@agency.com"
                   value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    if (errors.email) setErrors({ ...errors, email: '' });
-                  }}
-                  disabled={isLoading}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
+                {errors.email && <p className="text-[10px] text-[#EF4444] font-bold mt-0.5">{errors.email}</p>}
               </div>
-              {errors.email && <p className="text-[10px] text-[#EF4444] font-bold mt-0.5">{errors.email}</p>}
-            </div>
 
-            {/* Phone Number with country code +91 */}
-            <div className="space-y-1">
-              <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Phone Number</label>
-              <div className="flex gap-2">
-                <div className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-[#0F172A] select-none flex items-center shrink-0">
-                  +91
+              {/* Phone & Place Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Phone Number *</label>
+                  <div className="flex gap-2">
+                    <span className="bg-slate-100 border border-slate-200 rounded-xl px-2.5 py-2.5 text-xs font-bold text-[#0F172A] flex items-center shrink-0">+91</span>
+                    <input
+                      type="tel"
+                      className={`w-full bg-slate-50 border rounded-xl px-3 py-2.5 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
+                        errors.phoneNumber ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
+                      }`}
+                      placeholder="9876543210"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                    />
+                  </div>
+                  {errors.phoneNumber && <p className="text-[10px] text-[#EF4444] font-bold mt-0.5">{errors.phoneNumber}</p>}
                 </div>
-                <div className="relative flex-1">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-[#64748B]">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
-                  </span>
+
+                <div className="space-y-1">
+                  <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Place / Location *</label>
                   <input
-                    type="tel"
-                    className={`w-full bg-slate-50 border rounded-xl pl-10 pr-4 py-2 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
-                      errors.phoneNumber ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
+                    type="text"
+                    className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
+                      errors.place ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
                     }`}
-                    placeholder="98765 43210"
-                    value={phoneNumber}
-                    onChange={(e) => {
-                      setPhoneNumber(e.target.value);
-                      if (errors.phoneNumber) setErrors({ ...errors, phoneNumber: '' });
-                    }}
-                    disabled={isLoading}
+                    placeholder="e.g. MG Road, Kochi"
+                    value={place}
+                    onChange={(e) => setPlace(e.target.value)}
                   />
+                  {errors.place && <p className="text-[10px] text-[#EF4444] font-bold mt-0.5">{errors.place}</p>}
                 </div>
               </div>
-              {errors.phoneNumber && <p className="text-[10px] text-[#EF4444] font-bold mt-0.5">{errors.phoneNumber}</p>}
-            </div>
 
-            {/* Agency/Company Name */}
-            <div className="space-y-1">
-              <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Agency / Company Name</label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-[#64748B]">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                </span>
+              {/* Address */}
+              <div className="space-y-1">
+                <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Personal / Office Address *</label>
+                <textarea
+                  rows="2"
+                  className={`w-full bg-slate-50 border rounded-xl px-4 py-2 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
+                    errors.address ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
+                  }`}
+                  placeholder="Enter full postal address..."
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                />
+                {errors.address && <p className="text-[10px] text-[#EF4444] font-bold mt-0.5">{errors.address}</p>}
+              </div>
+
+              {/* Passwords Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Password *</label>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    className={`w-full bg-slate-50 border rounded-xl px-4 py-2 text-xs text-[#0F172A] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
+                      errors.password ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
+                    }`}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  {errors.password && <p className="text-[10px] text-[#EF4444] font-bold mt-0.5">{errors.password}</p>}
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Confirm Password *</label>
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    className={`w-full bg-slate-50 border rounded-xl px-4 py-2 text-xs text-[#0F172A] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
+                      errors.confirmPassword ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
+                    }`}
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                  {errors.confirmPassword && <p className="text-[10px] text-[#EF4444] font-bold mt-0.5">{errors.confirmPassword}</p>}
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-white font-bold py-3 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider mt-4"
+              >
+                Next: Company Details & Legal Upload →
+              </button>
+            </form>
+          )}
+
+          {/* ========================================== */}
+          {/* WINDOW 2: COMPANY DETAILS & LEGAL UPLOAD   */}
+          {/* ========================================== */}
+          {step === 2 && (
+            <form onSubmit={handleProceedToOtp} className="space-y-4">
+              <div className="text-left space-y-1">
+                <span className="text-[10px] font-black text-[#D99A1C] uppercase tracking-wider">Step 2 of 3</span>
+                <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Company Details & Document</h1>
+                <p className="text-xs text-[#64748B] font-semibold">Provide your registered company information and mandatory legal proof</p>
+              </div>
+
+              {/* Agency Name */}
+              <div className="space-y-1">
+                <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Company / Agency Name *</label>
                 <input
                   type="text"
-                  className={`w-full bg-slate-50 border rounded-xl pl-10 pr-4 py-2 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
+                  className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
                     errors.agencyName ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
                   }`}
-                  placeholder="Global Careers Ltd"
+                  placeholder="Global Overseas Careers Pvt Ltd"
                   value={agencyName}
-                  onChange={(e) => {
-                    setAgencyName(e.target.value);
-                    if (errors.agencyName) setErrors({ ...errors, agencyName: '' });
-                  }}
-                  disabled={isLoading}
+                  onChange={(e) => setAgencyName(e.target.value)}
                 />
+                {errors.agencyName && <p className="text-[10px] text-[#EF4444] font-bold mt-0.5">{errors.agencyName}</p>}
               </div>
-              {errors.agencyName && <p className="text-[10px] text-[#EF4444] font-bold mt-0.5">{errors.agencyName}</p>}
-            </div>
 
-            {/* Password */}
-            <div className="space-y-1">
-              <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Password</label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-[#64748B]">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </span>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  className={`w-full bg-slate-50 border rounded-xl pl-10 pr-10 py-2 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
-                    errors.password ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
-                  }`}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (errors.password) setErrors({ ...errors, password: '' });
-                  }}
-                  disabled={isLoading}
-                />
+              {/* Partner Type & Tax ID Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Entity Type *</label>
+                  <select
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]"
+                    value={partnerType}
+                    onChange={(e) => setPartnerType(e.target.value)}
+                  >
+                    <option value="Company">Private Limited / LLP Company</option>
+                    <option value="Individual">Individual Counselor / Sole Proprietorship</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Business Reg / Tax ID *</label>
+                  <input
+                    type="text"
+                    className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
+                      errors.taxId ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
+                    }`}
+                    placeholder="GSTIN / Corporate Reg No."
+                    value={taxId}
+                    onChange={(e) => setTaxId(e.target.value)}
+                  />
+                  {errors.taxId && <p className="text-[10px] text-[#EF4444] font-bold mt-0.5">{errors.taxId}</p>}
+                </div>
+              </div>
+
+              {/* Country & City Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Country *</label>
+                  <input
+                    type="text"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]"
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">City *</label>
+                  <input
+                    type="text"
+                    className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
+                      errors.city ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
+                    }`}
+                    placeholder="e.g. Mumbai"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                  />
+                  {errors.city && <p className="text-[10px] text-[#EF4444] font-bold mt-0.5">{errors.city}</p>}
+                </div>
+              </div>
+
+              {/* MANDATORY LEGAL DOCUMENT UPLOAD BOX */}
+              <div className="space-y-2 pt-2 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <label className="block text-[10px] font-black text-[#0F172A] uppercase tracking-wider">
+                    📜 Mandatory Company Legal Document Upload *
+                  </label>
+                  <span className="text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">Mandatory</span>
+                </div>
+                <p className="text-[11px] text-[#64748B] leading-tight">
+                  Upload at least 1 official legal document (e.g., Certificate of Incorporation, GST Certificate, Business License or Trade Card).
+                </p>
+
+                {errors.documents && (
+                  <div className="bg-red-50 border border-red-200 p-2.5 rounded-xl text-[11px] text-red-700 font-bold flex items-center gap-2">
+                    <span>⚠️</span> <span>{errors.documents}</span>
+                  </div>
+                )}
+
+                {/* Uploaded Documents List */}
+                {documents.length > 0 && (
+                  <div className="space-y-2 max-h-36 overflow-y-auto">
+                    {documents.map((doc, idx) => (
+                      <div key={idx} className="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 truncate">
+                          <span className="text-emerald-600 font-bold">📄</span>
+                          <span className="font-bold text-[#0F172A] truncate">{doc.name}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setDocuments(documents.filter((_, i) => i !== idx))}
+                          className="text-rose-500 hover:text-rose-700 font-bold text-xs shrink-0 px-2"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Document input inline form */}
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
+                  <input
+                    type="text"
+                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-[#0F172A] placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#D99A1C]"
+                    placeholder="Document Title (e.g. GST Registration Certificate)"
+                    value={docName}
+                    onChange={(e) => setDocName(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-[#0F172A] placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#D99A1C]"
+                    placeholder="Document Link / File URL (e.g. https://drive.google.com/doc.pdf)"
+                    value={docUrl}
+                    onChange={(e) => setDocUrl(e.target.value)}
+                  />
+                  {errors.docAdd && <p className="text-[10px] text-rose-500 font-bold">{errors.docAdd}</p>}
+                  <button
+                    type="button"
+                    onClick={handleAddDocument}
+                    className="w-full bg-slate-900 hover:bg-black text-white text-xs font-bold py-1.5 rounded-lg transition-all"
+                  >
+                    + Add Legal Document
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 mt-4">
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#64748B] hover:text-[#0F172A]"
-                  disabled={isLoading}
+                  onClick={() => setStep(1)}
+                  className="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl text-xs transition-all"
                 >
-                  {showPassword ? (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  )}
+                  ← Back
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-2/3 bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-white font-bold py-3 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isLoading ? 'Sending Email OTP...' : 'Next: Verify Email OTP →'}
                 </button>
               </div>
-              {errors.password && <p className="text-[10px] text-[#EF4444] font-bold mt-0.5">{errors.password}</p>}
-            </div>
+            </form>
+          )}
 
-            {/* Confirm Password */}
-            <div className="space-y-1">
-              <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Confirm Password</label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-[#64748B]">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </span>
+          {/* ========================================== */}
+          {/* WINDOW 3: EMAIL OTP VERIFICATION           */}
+          {/* ========================================== */}
+          {step === 3 && (
+            <form onSubmit={handleVerifyOtpAndRegister} className="space-y-4">
+              <div className="text-left space-y-1">
+                <span className="text-[10px] font-black text-[#D99A1C] uppercase tracking-wider">Step 3 of 3</span>
+                <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Enter Email OTP</h1>
+                <p className="text-xs text-[#64748B] font-semibold">
+                  A 6-digit verification OTP code has been sent to your email: <strong className="text-[#0F172A]">{email}</strong>
+                </p>
+              </div>
+
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-900 space-y-1">
+                <p className="font-bold text-[10px] uppercase text-amber-800 tracking-wider">OTP Verification</p>
+                <p className="leading-relaxed">Please check your inbox or spam folder for the 6-digit verification code.</p>
+              </div>
+
+              <div className="space-y-1.5 pt-2">
+                <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">6-Digit OTP Code *</label>
                 <input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  className={`w-full bg-slate-50 border rounded-xl pl-10 pr-10 py-2 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
-                    errors.confirmPassword ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
+                  type="text"
+                  maxLength="6"
+                  className={`w-full bg-slate-50 border rounded-xl px-4 py-3 text-center text-xl font-extrabold tracking-[8px] text-[#0F172A] placeholder-slate-300 focus:outline-none focus:bg-white focus:ring-1 transition-all ${
+                    errors.otp ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
                   }`}
-                  placeholder="••••••••"
-                  value={confirmPassword}
+                  placeholder="123456"
+                  value={otpCode}
                   onChange={(e) => {
-                    setConfirmPassword(e.target.value);
-                    if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: '' });
+                    setOtpCode(e.target.value);
+                    if (errors.otp) setErrors({ ...errors, otp: '' });
                   }}
-                  disabled={isLoading}
                 />
+                {errors.otp && <p className="text-[10px] text-[#EF4444] font-bold text-center mt-1">{errors.otp}</p>}
+              </div>
+
+              <div className="text-center pt-1">
                 <button
                   type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#64748B] hover:text-[#0F172A]"
+                  onClick={handleResendOtp}
                   disabled={isLoading}
+                  className="text-xs text-[#D99A1C] font-extrabold hover:underline"
                 >
-                  {showConfirmPassword ? (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  )}
+                  Didn't receive code? Resend OTP
                 </button>
               </div>
-              {errors.confirmPassword && <p className="text-[10px] text-[#EF4444] font-bold mt-0.5">{errors.confirmPassword}</p>}
-            </div>
 
-            {/* Terms checkbox */}
-            <div className="space-y-1">
-              <label className="flex items-start gap-2.5 cursor-pointer text-xs font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors leading-tight">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded text-[#D99A1C] border-slate-300 focus:ring-[#D99A1C] mt-0.5 shrink-0"
-                  checked={agreeTerms}
-                  onChange={(e) => {
-                    setAgreeTerms(e.target.checked);
-                    if (errors.agreeTerms) setErrors({ ...errors, agreeTerms: '' });
-                  }}
+              <div className="flex items-center gap-3 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
                   disabled={isLoading}
-                />
-                <span>I agree to the Terms and Conditions of Studegram</span>
-              </label>
-              {errors.agreeTerms && <p className="text-[10px] text-[#EF4444] font-bold mt-0.5">{errors.agreeTerms}</p>}
+                  className="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl text-xs transition-all"
+                >
+                  ← Back
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-2/3 bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-white font-bold py-3 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isLoading ? 'Verifying OTP & Submitting...' : 'Verify & Submit Registration'}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* ========================================== */}
+          {/* WINDOW 4: UNDER REVIEW MODE                */}
+          {/* ========================================== */}
+          {step === 4 && (
+            <div className="text-center py-6 space-y-6 animate-in fade-in zoom-in duration-200">
+              <div className="w-20 h-20 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto shadow-inner ring-8 ring-amber-50">
+                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+
+              <div className="space-y-2 max-w-sm mx-auto">
+                <span className="bg-amber-100 text-amber-800 text-[10px] font-black uppercase px-3 py-1 rounded-full border border-amber-300">
+                  Registration Under Review
+                </span>
+                <h1 className="text-2xl font-extrabold text-[#0F172A] tracking-tight">Onboarding Received</h1>
+                <p className="text-xs text-[#64748B] font-medium leading-relaxed">
+                  Thank you for registering <strong>{agencyName}</strong>! Your legal documents and company details have been submitted and are currently <strong>Under Review</strong> by the Studgram Admin team.
+                </p>
+              </div>
+
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-left text-xs space-y-2 text-slate-700">
+                <p className="font-bold text-[#0F172A]">What happens next?</p>
+                <ul className="list-disc pl-4 space-y-1 text-[11px] font-medium text-slate-600">
+                  <li>Studgram Admin verifies your uploaded legal company documents.</li>
+                  <li>Upon approval, you will receive an automated confirmation email.</li>
+                  <li>Once approved, you will get full access to add students and submit applications.</li>
+                </ul>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => onNavigate('login')}
+                className="w-full bg-[#0F172A] hover:bg-black text-white font-bold py-3 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider"
+              >
+                Back to Sign In Page
+              </button>
             </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.02] text-white font-bold py-2.5 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                  Registering...
-                </>
-              ) : (
-                'Create Account'
-              )}
-            </button>
-          </form>
-
-          {/* Bottom redirect */}
-          <div className="text-center text-xs font-semibold text-[#64748B] pt-2">
-            Already have an account?{' '}
-            <button
-              onClick={() => onNavigate('login')}
-              className="text-[#D99A1C] font-bold hover:underline"
-              disabled={isLoading}
-            >
-              Sign in
-            </button>
-          </div>
+          )}
 
         </div>
       </div>
