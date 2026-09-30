@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useToast } from '../context/ToastContext';
 
-export default function SearchCourses() {
+export default function SearchCourses({ onApplyCourse }) {
   const toast = useToast();
   const [country, setCountry] = useState('United Kingdom');
   const [nationality, setNationality] = useState('India');
@@ -253,7 +253,13 @@ export default function SearchCourses() {
                       Check Specs
                     </button>
                     <button
-                      onClick={() => toast.info(`Initiating student application file for ${course.title} at ${course.university}.`)}
+                      onClick={() => {
+                        if (onApplyCourse) {
+                          onApplyCourse();
+                        } else {
+                          toast.info(`Initiating student application file for ${course.title} at ${course.university}.`);
+                        }
+                      }}
                       className="flex-1 bg-[#D99A1C] hover:bg-[#B87C0E] hover:scale-[1.01] active:scale-95 text-xs font-bold text-white py-2.5 rounded-xl text-center transition-all duration-150 shadow-xs"
                     >
                       Apply Now
