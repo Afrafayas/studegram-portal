@@ -83,16 +83,64 @@ export default function Register({ onNavigate }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Add Document Handler
-  const handleAddDocument = () => {
-    if (!docName.trim() || !docUrl.trim()) {
-      setErrors({ ...errors, docAdd: 'Please enter both document title and URL.' });
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+
+  // File Upload Handler for Mandatory Legal Documents
+  const handleLegalDocFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 15 * 1024 * 1024) {
+      setErrors({ ...errors, docAdd: 'File size exceeds 15MB limit.' });
       return;
     }
-    setDocuments([...documents, { name: docName.trim(), url: docUrl.trim(), uploadedAt: new Date() }]);
-    setDocName('');
-    setDocUrl('');
-    setErrors({ ...errors, documents: '', docAdd: '' });
+
+    setUploadingDoc(true);
+    setErrors({ ...errors, docAdd: '' });
+
+    try {
+      let fileUrl = '';
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const uploadRes = await API.post('/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        if (uploadRes.data?.success && (uploadRes.data.url || uploadRes.data.fileUrl)) {
+          fileUrl = uploadRes.data.url || uploadRes.data.fileUrl;
+        }
+      } catch (uploadErr) {
+        console.warn('File upload fallback to Base64 preview:', uploadErr.message);
+      }
+
+      if (!fileUrl) {
+        fileUrl = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(file);
+        });
+      }
+
+      const title = docName.trim() || file.name;
+      const newDoc = {
+        name: title,
+        title: title,
+        fileName: file.name,
+        url: fileUrl,
+        previewUrl: fileUrl,
+        size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+        uploadedAt: new Date().toISOString()
+      };
+
+      setDocuments(prev => [...prev, newDoc]);
+      setDocName('');
+      setErrors(prev => ({ ...prev, documents: '', docAdd: '' }));
+    } catch (err) {
+      console.error('File upload error:', err);
+      setErrors(prev => ({ ...prev, docAdd: 'Failed to upload document file.' }));
+    } finally {
+      setUploadingDoc(false);
+    }
   };
 
   // Move Step 1 -> Step 2
@@ -514,30 +562,41 @@ export default function Register({ onNavigate }) {
                   </div>
                 )}
 
-                {/* Document input inline form */}
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2">
-                  <input
-                    type="text"
-                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-[#0F172A] placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#D99A1C]"
-                    placeholder="Document Title (e.g. GST Registration Certificate)"
-                    value={docName}
-                    onChange={(e) => setDocName(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-[#0F172A] placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#D99A1C]"
-                    placeholder="Document Link / File URL (e.g. https://drive.google.com/doc.pdf)"
-                    value={docUrl}
-                    onChange={(e) => setDocUrl(e.target.value)}
-                  />
+                {/* Document input inline file picker */}
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-3">
+                  <div>
+                    <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">
+                      Document Title (Optional Name)
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-[#0F172A] placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#D99A1C]"
+                      placeholder="e.g. GST Registration Certificate / Incorporation Proof"
+                      value={docName}
+                      onChange={(e) => setDocName(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="border-2 border-dashed border-slate-200 hover:border-[#D99A1C] transition-colors rounded-xl p-4 text-center relative bg-white cursor-pointer">
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                      onChange={handleLegalDocFileUpload}
+                      disabled={uploadingDoc}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <div className="space-y-1">
+                      <span className="text-2xl block">📤</span>
+                      <p className="text-xs font-bold text-[#0F172A]">
+                        {uploadingDoc ? 'Uploading file...' : 'Click to select legal document file'}
+                      </p>
+                      <p className="text-[10px] text-slate-400 font-semibold">
+                        PDF, DOCX, PNG, JPG up to 15MB
+                      </p>
+                    </div>
+                  </div>
+
                   {errors.docAdd && <p className="text-[10px] text-rose-500 font-bold">{errors.docAdd}</p>}
-                  <button
-                    type="button"
-                    onClick={handleAddDocument}
-                    className="w-full bg-slate-900 hover:bg-black text-white text-xs font-bold py-1.5 rounded-lg transition-all"
-                  >
-                    + Add Legal Document
-                  </button>
                 </div>
               </div>
 

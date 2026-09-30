@@ -82,6 +82,7 @@ export default function App() {
   const [applications, setApplications] = useState([]);
   const [isLoadingApps, setIsLoadingApps] = useState(false);
   const [duplicateAlert, setDuplicateAlert] = useState(null);
+  const [pendingVerificationModalOpen, setPendingVerificationModalOpen] = useState(false);
 
   const fetchApplications = async () => {
     const token = localStorage.getItem('partner_token');
@@ -128,8 +129,25 @@ export default function App() {
     }
   };
 
+  const fetchPartnerProfile = async () => {
+    const token = localStorage.getItem('partner_token');
+    if (!token) return;
+    try {
+      const res = await API.get('/partners/me');
+      if (res.data?.success && res.data?.data) {
+        setPartnerData(res.data.data);
+        localStorage.setItem('partner_data', JSON.stringify(res.data.data));
+      }
+    } catch (err) {
+      console.warn('Failed to refresh partner profile:', err.message);
+    }
+  };
+
   React.useEffect(() => {
-    if (currentPage === 'dashboard' || currentPage === 'history') {
+    if (currentPage === 'dashboard') {
+      fetchApplications();
+      fetchPartnerProfile();
+    } else if (currentPage === 'history') {
       fetchApplications();
     }
   }, [currentPage, activePage]);
@@ -187,7 +205,7 @@ export default function App() {
       case 'ApplicationHistory':
         return (
           <ApplicationHistory 
-            onAddApplicationClick={() => setShowModal(true)} 
+            onAddApplicationClick={handleOpenNewApplicationModal} 
             applications={applications}
             duplicateAlert={duplicateAlert}
             setDuplicateAlert={setDuplicateAlert}
@@ -196,7 +214,7 @@ export default function App() {
           />
         );
       case 'SearchCourses':
-        return <SearchCourses />;
+        return <SearchCourses onApplyCourse={handleOpenNewApplicationModal} />;
       case 'Notice':
         return <Notice selectedNoticeId={selectedNoticeId} setSelectedNoticeId={setSelectedNoticeId} />;
       case 'UniversityDeadline':
@@ -259,6 +277,14 @@ export default function App() {
     return <Register onNavigate={setCurrentPage} />;
   }
 
+  const handleOpenNewApplicationModal = () => {
+    if (partnerData?.status === 'Pending') {
+      setPendingVerificationModalOpen(true);
+      return;
+    }
+    setShowModal(true);
+  };
+
   // Full Portal Routing
   return (
     <div className="min-h-screen bg-[#F0F2F5] flex flex-col font-sans text-[#0F172A] select-text">
@@ -267,7 +293,7 @@ export default function App() {
         activePage={activePage}
         partnerData={partnerData}
         onBack={handleBack}
-        onNewApplicationClick={() => setShowModal(true)} 
+        onNewApplicationClick={handleOpenNewApplicationModal} 
         onLogout={handleLogout} 
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
       />
@@ -319,6 +345,39 @@ export default function App() {
           setSelectedNoticeId(noticeId);
         }}
       />
+
+      {/* Verification Pending Modal */}
+      {pendingVerificationModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200 select-none">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4 text-center">
+            <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto ring-8 ring-amber-50">
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+
+            <div className="space-y-1">
+              <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border bg-amber-100 text-amber-800 border-amber-200">
+                Registration Under Review
+              </span>
+              <h3 className="text-xl font-bold text-[#0F172A] pt-1">
+                Verification Pending
+              </h3>
+            </div>
+
+            <p className="text-xs text-[#64748B] leading-relaxed font-medium">
+              Your agency registration is currently under review by the Studgram Admin team. Please wait for verification and approval before submitting student applications or managing agency staff.
+            </p>
+
+            <button
+              onClick={() => setPendingVerificationModalOpen(false)}
+              className="w-full bg-[#0F172A] hover:bg-black text-white font-bold py-2.5 rounded-xl text-xs transition-all uppercase tracking-wider"
+            >
+              Close Window
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

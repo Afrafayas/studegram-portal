@@ -46,7 +46,13 @@ export default function StaffManagement({ partnerData }) {
     fetchStaffMembers();
   }, []);
 
+  const [showPendingModal, setShowPendingModal] = useState(false);
+
   const openAddModal = () => {
+    if (partnerData?.status === 'Pending') {
+      setShowPendingModal(true);
+      return;
+    }
     setEditingStaff(null);
     setFormData({
       name: '',
@@ -61,6 +67,10 @@ export default function StaffManagement({ partnerData }) {
   };
 
   const openEditModal = (staff) => {
+    if (partnerData?.status === 'Pending') {
+      setShowPendingModal(true);
+      return;
+    }
     setEditingStaff(staff);
     setFormData({
       name: staff.name || '',
@@ -663,6 +673,38 @@ export default function StaffManagement({ partnerData }) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Verification Pending Modal */}
+      {showPendingModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200 select-none">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4 text-center">
+            <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto ring-8 ring-amber-50">
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+
+            <div className="space-y-1">
+              <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border bg-amber-100 text-amber-800 border-amber-200">
+                Registration Under Review
+              </span>
+              <h3 className="text-xl font-bold text-[#0F172A] pt-1">
+                Verification Pending
+              </h3>
+            </div>
+
+            <p className="text-xs text-[#64748B] leading-relaxed font-medium">
+              Your agency registration is currently under review by the Studgram Admin team. Please wait for verification and approval before creating staff accounts.
+            </p>
+
+            <button
+              onClick={() => setShowPendingModal(false)}
+              className="w-full bg-[#0F172A] hover:bg-black text-white font-bold py-2.5 rounded-xl text-xs transition-all uppercase tracking-wider"
+            >
+              Close Window
+            </button>
           </div>
         </div>
       )}
