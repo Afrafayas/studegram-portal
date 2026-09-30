@@ -21,6 +21,7 @@ import KnowledgeHub from './pages/KnowledgeHub';
 import Scholarships from './pages/Scholarships';
 import Webinar from './pages/Webinar';
 import StaffManagement from './pages/StaffManagement';
+import AgentRolePermissions from './pages/AgentRolePermissions';
 import API from './api/axios';
 import { useToast } from './context/ToastContext';
 
@@ -229,6 +230,8 @@ export default function App() {
         return <Webinar />;
       case 'StaffManagement':
         return <StaffManagement partnerData={partnerData} />;
+      case 'RoleManagement':
+        return <AgentRolePermissions partnerData={partnerData} />;
       default:
         return (
           <div className="flex-1 p-8 flex items-center justify-center min-h-[calc(100vh-100px)] bg-[#F0F2F5]">

@@ -42,8 +42,37 @@ export default function StaffManagement({ partnerData }) {
     }
   };
 
+  const DEFAULT_AGENT_ROLES = [
+    { id: 'AgencyAdmin', title: 'Agency Admin', desc: 'Full portal & staff access' },
+    { id: 'Manager', title: 'Manager', desc: 'All applications & search' },
+    { id: 'Counselor', title: 'Counselor', desc: 'Student application filing' },
+    { id: 'Staff', title: 'Staff Executive', desc: 'Standard processing staff' }
+  ];
+
+  const [availableRoles, setAvailableRoles] = useState(DEFAULT_AGENT_ROLES);
+
+  const fetchAgentRoles = async () => {
+    try {
+      const res = await API.get('/roles');
+      if (res.data?.success && Array.isArray(res.data.data)) {
+        const agentRoles = res.data.data.filter(r => r.portalType === 'Agent');
+        if (agentRoles.length > 0) {
+          const mapped = agentRoles.map(r => ({
+            id: r.name,
+            title: r.displayName || r.name,
+            desc: r.description || 'Configured agency operational role'
+          }));
+          setAvailableRoles(mapped);
+        }
+      }
+    } catch (err) {
+      console.warn('Could not fetch custom agent roles:', err.message);
+    }
+  };
+
   useEffect(() => {
     fetchStaffMembers();
+    fetchAgentRoles();
   }, []);
 
   const [showPendingModal, setShowPendingModal] = useState(false);
@@ -582,13 +611,8 @@ export default function StaffManagement({ partnerData }) {
                 <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
                   Assign Staff Role <span className="text-rose-500">*</span>
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { id: 'AgencyAdmin', title: 'Agency Admin', desc: 'Full portal & staff access' },
-                    { id: 'Manager', title: 'Manager', desc: 'All applications & search' },
-                    { id: 'Counselor', title: 'Counselor', desc: 'Student application filing' },
-                    { id: 'Staff', title: 'Staff Executive', desc: 'Standard processing staff' }
-                  ].map((r) => (
+                <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                  {availableRoles.map((r) => (
                     <div
                       key={r.id}
                       onClick={() => setFormData({ ...formData, role: r.id })}
@@ -604,7 +628,7 @@ export default function StaffManagement({ partnerData }) {
                           <span className="w-2 h-2 rounded-full bg-[#D99A1C]"></span>
                         )}
                       </div>
-                      <p className="text-[10px] text-[#64748B] mt-0.5">{r.desc}</p>
+                      <p className="text-[10px] text-[#64748B] mt-0.5 line-clamp-2">{r.desc}</p>
                     </div>
                   ))}
                 </div>
