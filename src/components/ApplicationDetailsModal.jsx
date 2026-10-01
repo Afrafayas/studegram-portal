@@ -494,7 +494,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                     </div>
 
                     {/* Claim Commission Box */}
-                    {['Visa Approved', 'Enrolled / Closed'].includes(application.status) && application.paymentStatus === 'Paid' && (
+                    {['Visa Approved', 'Enrolled / Closed'].includes(application.status) && (
                       <div className="bg-gradient-to-r from-amber-50 to-amber-100 border border-amber-300 rounded-xl p-3.5 my-3 flex items-center justify-between shadow-xs">
                         <div>
                           <p className="text-xs font-bold text-amber-950">💸 Commission Claim Available</p>

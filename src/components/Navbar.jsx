@@ -1,10 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 
-export default function Navbar({ activePage, partnerData, onBack, onNewApplicationClick, onLogout, onToggleSidebar }) {
+export default function Navbar({ 
+  activePage, 
+  partnerData, 
+  onBack, 
+  onNewApplicationClick, 
+  onLogout, 
+  onToggleSidebar,
+  onNavigatePage,
+  onSelectApplication
+}) {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
+
+  // Real-time Application Comments System
+  const [commentsList, setCommentsList] = useState([]);
+  const [unreadCommentsCount, setUnreadCommentsCount] = useState(0);
+  const [showComments, setShowComments] = useState(false);
 
   const displayInitials = partnerData?.name
     ? partnerData.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
@@ -17,25 +31,62 @@ export default function Navbar({ activePage, partnerData, onBack, onNewApplicati
   const fetchNotifications = async () => {
     try {
       const res = await API.get('/notifications');
-      if (res.data.success) {
+      if (res.data?.success) {
         setNotifications(res.data.data || []);
-        setUnreadCount(res.data.unreadCount || 0);
+        setUnreadCount(res.data.unreadCount !== undefined ? res.data.unreadCount : (res.data.data ? res.data.data.filter(n => !n.isRead).length : 0));
+      }
+    } catch (e) {}
+  };
+
+  const fetchComments = async () => {
+    try {
+      const res = await API.get('/applications/recent-comments');
+      if (res.data?.success && Array.isArray(res.data.data)) {
+        setCommentsList(res.data.data);
+        const unreplied = res.data.data.filter(c => c.isUnreplied).length;
+        setUnreadCommentsCount(unreplied);
       }
     } catch (e) {}
   };
 
   useEffect(() => {
     fetchNotifications();
-    const interval = setInterval(fetchNotifications, 20000);
+    fetchComments();
+    const interval = setInterval(() => {
+      fetchNotifications();
+      fetchComments();
+    }, 15000);
     return () => clearInterval(interval);
   }, []);
 
   const handleMarkRead = async () => {
     try {
-      await API.put('/notifications/read-all');
+      await API.put('/notifications/read-all').catch(() => {});
       setUnreadCount(0);
       setNotifications(notifications.map(n => ({ ...n, isRead: true })));
     } catch (e) {}
+  };
+
+  const handleNotificationClick = async (n) => {
+    if (!n.isRead) {
+      setNotifications(prev => prev.map(item => item._id === n._id ? { ...item, isRead: true } : item));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+      try {
+        await API.put(`/notifications/${n._id}/read`).catch(() => {
+          API.put('/notifications/read-all').catch(() => {});
+        });
+      } catch (err) {}
+    }
+    setShowNotifications(false);
+
+    const extractedCams = (n.message || '').match(/CAMS-\d+/i)?.[0] || (n.title || '').match(/CAMS-\d+/i)?.[0];
+    const targetAppId = n.relatedId || n.applicationId || n.targetAppId || n.appId || extractedCams;
+
+    if (targetAppId && onSelectApplication) {
+      onSelectApplication(targetAppId);
+    } else if (onNavigatePage) {
+      onNavigatePage('ApplicationHistory');
+    }
   };
 
   return (
@@ -84,7 +135,7 @@ export default function Navbar({ activePage, partnerData, onBack, onNewApplicati
         </div>
       </div>
  
-      {/* Right section: Agency Info, Notifications & Profile */}
+      {/* Right section: Agency Info, Comments, Notifications & Profile */}
       <div className="flex items-center gap-3 md:gap-4 relative">
         
         {/* Agency and Role details */}
@@ -101,21 +152,112 @@ export default function Navbar({ activePage, partnerData, onBack, onNewApplicati
           + New Application
         </button>
 
+        {/* Application Comments Icon & Drawer */}
+        <div className="relative">
+          <button
+            onClick={() => {
+              setShowComments(!showComments);
+              if (showNotifications) setShowNotifications(false);
+            }}
+            className="p-2 text-slate-400 hover:text-white rounded-full hover:bg-white/5 transition-all relative focus:outline-none cursor-pointer"
+            title="Application Comments & Messages"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+            </svg>
+            {unreadCommentsCount > 0 && (
+              <span className="absolute top-1 right-1 bg-blue-500 text-white text-[9px] font-extrabold px-1.5 py-0.2 rounded-full min-w-[16px] text-center shadow animate-bounce">
+                {unreadCommentsCount}
+              </span>
+            )}
+          </button>
+
+          {/* Application Comments Dropdown Drawer */}
+          {showComments && (
+            <>
+              <div 
+                onClick={() => setShowComments(false)}
+                className="fixed inset-0 z-10"
+              />
+              <div className="absolute right-0 top-11 w-80 sm:w-96 bg-[#0A0A0F] border border-slate-800 rounded-2xl shadow-2xl py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="px-4 pb-2.5 border-b border-slate-900 flex justify-between items-center">
+                  <div>
+                    <h4 className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
+                      <span>Application Comments</span>
+                      {unreadCommentsCount > 0 && (
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-blue-600 text-white shadow">
+                          {unreadCommentsCount} Unreplied
+                        </span>
+                      )}
+                    </h4>
+                    <p className="text-[10px] text-slate-400">Admin responses & application messages</p>
+                  </div>
+                </div>
+
+                <div className="max-h-80 overflow-y-auto divide-y divide-slate-900/60 p-1.5 space-y-1.5">
+                  {commentsList.length > 0 ? (
+                    commentsList.map((comm, idx) => (
+                      <div 
+                        key={comm.applicationId || idx} 
+                        onClick={() => {
+                          setShowComments(false);
+                          if (onSelectApplication) {
+                            onSelectApplication(comm.applicationId);
+                          } else if (onNavigatePage) {
+                            onNavigatePage('ApplicationHistory');
+                          }
+                        }}
+                        className={`p-3 rounded-xl transition-all cursor-pointer group ${
+                          comm.isUnreplied
+                            ? 'bg-blue-950/80 border-l-4 border-l-blue-500 text-blue-100 font-bold shadow-md hover:bg-blue-900'
+                            : 'bg-slate-900/50 border-l-4 border-l-emerald-600 text-slate-300 hover:bg-slate-800/80'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start gap-2">
+                          <h5 className="text-xs font-extrabold text-white group-hover:text-[#F5B025] transition-colors flex items-center gap-1.5">
+                            {comm.isUnreplied && <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>}
+                            <span>{comm.camsId} &middot; {comm.studentName}</span>
+                          </h5>
+                          <span className="text-[9px] text-slate-400 font-semibold shrink-0">
+                            {comm.createdAt ? new Date(comm.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now'}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">{comm.universityName} - {comm.courseName}</p>
+                        <p className="text-[11px] font-semibold mt-1 leading-snug break-words">"{comm.text}"</p>
+                        <div className="mt-2 flex items-center justify-between text-[9px]">
+                          <span className={`px-2 py-0.5 rounded font-extrabold uppercase ${comm.isUnreplied ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}>
+                            {comm.isUnreplied ? '💬 Unreplied Admin Message' : '✓ Replied / Read'}
+                          </span>
+                          <span className="text-[#D99A1C] font-extrabold group-hover:underline">Open Application →</span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-6 text-center text-slate-500 text-xs font-medium">
+                      No application comments found.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
         {/* Bell Icon with Real-time Notification Dropdown */}
         <div className="relative">
           <button 
             onClick={() => {
               setShowNotifications(!showNotifications);
-              if (!showNotifications && unreadCount > 0) handleMarkRead();
+              if (showComments) setShowComments(false);
             }}
-            className="relative p-2 text-slate-400 hover:text-white rounded-full hover:bg-white/5 transition-all focus:outline-none"
+            className="relative p-2 text-slate-400 hover:text-white rounded-full hover:bg-white/5 transition-all focus:outline-none cursor-pointer"
             title="Notifications"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 bg-rose-500 text-white text-[9px] font-extrabold px-1.5 py-0.2 rounded-full min-w-[16px] text-center shadow">
+              <span className="absolute top-1 right-1 bg-rose-500 text-white text-[9px] font-extrabold px-1.5 py-0.2 rounded-full min-w-[16px] text-center shadow animate-bounce">
                 {unreadCount}
               </span>
             )}
@@ -123,28 +265,63 @@ export default function Navbar({ activePage, partnerData, onBack, onNewApplicati
 
           {/* Notifications Dropdown Drawer */}
           {showNotifications && (
-            <div className="absolute right-0 top-11 w-80 bg-[#0F172A] border border-slate-800 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
-              <div className="px-4 py-2.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
-                <span className="text-xs font-bold text-white">Notifications</span>
-                <button onClick={handleMarkRead} className="text-[10px] text-[#D99A1C] font-semibold hover:underline">Mark all read</button>
-              </div>
+            <>
+              <div 
+                onClick={() => setShowNotifications(false)}
+                className="fixed inset-0 z-10"
+              />
+              <div className="absolute right-0 top-11 w-80 sm:w-96 bg-[#0A0A0F] border border-slate-800 rounded-2xl shadow-2xl py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="px-4 pb-2.5 border-b border-slate-900 flex justify-between items-center">
+                  <div>
+                    <h4 className="text-xs font-black text-white uppercase tracking-wider">Notifications</h4>
+                    <p className="text-[10px] text-slate-400">Application updates & system alerts</p>
+                  </div>
+                  {unreadCount > 0 && (
+                    <button 
+                      onClick={handleMarkRead} 
+                      className="text-[10px] text-[#D99A1C] font-extrabold hover:underline cursor-pointer"
+                    >
+                      Mark all read
+                    </button>
+                  )}
+                </div>
 
-              <div className="max-h-80 overflow-y-auto divide-y divide-slate-800">
-                {notifications.length === 0 ? (
-                  <p className="p-4 text-xs text-slate-400 text-center">No notifications yet.</p>
-                ) : (
-                  notifications.map((n) => (
-                    <div key={n._id} className={`p-3 text-xs space-y-0.5 ${n.isRead ? 'opacity-70 bg-transparent' : 'bg-slate-950/60'}`}>
-                      <p className="font-bold text-white flex items-center justify-between">
-                        <span>{n.title}</span>
-                        <span className="text-[9px] text-slate-500 font-normal">{new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                      </p>
-                      <p className="text-slate-300 text-[11px] leading-relaxed">{n.message}</p>
-                    </div>
-                  ))
-                )}
+                <div className="max-h-80 overflow-y-auto divide-y divide-slate-900/60 p-1.5 space-y-1">
+                  {notifications.length === 0 ? (
+                    <p className="p-6 text-xs text-slate-500 text-center font-medium">No notifications yet.</p>
+                  ) : (
+                    notifications.map((n) => (
+                      <div 
+                        key={n._id || n.id} 
+                        onClick={() => handleNotificationClick(n)}
+                        className={`p-3.5 rounded-xl transition-all cursor-pointer group ${
+                          !n.isRead 
+                            ? 'bg-[#1E1B4B]/90 border-l-4 border-l-[#D99A1C] text-amber-100 font-extrabold shadow-sm hover:bg-[#2E2A72]' 
+                            : 'bg-slate-900/40 border-l-4 border-l-slate-700 text-slate-400 opacity-60 hover:bg-slate-800/50'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start gap-2">
+                          <p className="font-bold text-xs text-white group-hover:text-[#F5B025] transition-colors flex items-center gap-1.5">
+                            {!n.isRead && <span className="w-2 h-2 rounded-full bg-[#D99A1C] inline-block shrink-0 animate-pulse"></span>}
+                            <span>{n.title}</span>
+                          </p>
+                          <span className="text-[9px] text-slate-400 font-normal shrink-0">
+                            {n.createdAt ? new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now'}
+                          </span>
+                        </div>
+                        <p className="text-slate-300 text-[11px] font-medium mt-1 leading-snug">{n.message}</p>
+                        <div className="mt-2 flex items-center justify-between text-[9px]">
+                          <span className={`px-2 py-0.5 rounded font-extrabold ${!n.isRead ? 'bg-[#D99A1C] text-black' : 'bg-slate-800 text-slate-500'}`}>
+                            {!n.isRead ? 'UNREAD' : 'READ'}
+                          </span>
+                          <span className="text-[#D99A1C] font-extrabold group-hover:underline">Open Applications →</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
-            </div>
+            </>
           )}
         </div>
 

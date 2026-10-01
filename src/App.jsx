@@ -120,7 +120,10 @@ export default function App() {
         intake: app.intake || 'September 2026',
         documents: app.documents || [],
         notes: app.notes || '',
-        applicationComments: app.applicationComments || []
+        applicationComments: app.applicationComments || [],
+        commissionStatus: app.commissionStatus || 'Unclaimed',
+        paymentStatus: app.paymentStatus || 'Paid',
+        commissionAmount: app.commissionAmount || 500
       }));
       setApplications(mapped);
     } catch (err) {
@@ -212,6 +215,7 @@ export default function App() {
             setDuplicateAlert={setDuplicateAlert}
             onViewDetails={(app) => setSelectedAppForDetails(app)}
             onEditClick={(app) => setSelectedAppForEdit(app)}
+            onRefreshApplications={fetchApplications}
           />
         );
       case 'SearchCourses':
@@ -299,6 +303,16 @@ export default function App() {
         onNewApplicationClick={handleOpenNewApplicationModal} 
         onLogout={handleLogout} 
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        onNavigatePage={(page) => setActivePage(page)}
+        onSelectApplication={(appId) => {
+          setActivePage('ApplicationHistory');
+          if (typeof appId === 'object' && appId !== null) {
+            setSelectedAppForDetails(appId);
+          } else if (appId) {
+            const found = applications.find(a => a._id === appId || a.id === appId);
+            if (found) setSelectedAppForDetails(found);
+          }
+        }}
       />
 
       {/* Main Body */}
@@ -331,6 +345,7 @@ export default function App() {
         isOpen={!!selectedAppForDetails}
         onClose={() => setSelectedAppForDetails(null)}
         application={selectedAppForDetails}
+        onUpdateSuccess={fetchApplications}
       />
 
       {/* Edit Application Modal */}
