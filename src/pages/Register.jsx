@@ -622,13 +622,21 @@ export default function Register({ onNavigate }) {
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
                     <div className="space-y-1">
-                      <span className="text-2xl block">📤</span>
-                      <p className="text-xs font-bold text-[#0F172A]">
-                        {uploadingDoc ? 'Uploading file...' : 'Click to select legal document file'}
-                      </p>
-                      <p className="text-[10px] text-slate-400 font-semibold">
-                        PDF, DOCX, PNG, JPG up to 15MB
-                      </p>
+                      {uploadingDoc ? (
+                        <div className="flex flex-col items-center justify-center py-2 space-y-1.5">
+                          <svg className="animate-spin h-6 w-6 text-[#D99A1C]" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                          <p className="text-xs font-bold text-[#D99A1C] animate-pulse">Uploading legal document...</p>
+                        </div>
+                      ) : (
+                        <>
+                          <span className="text-2xl block">📤</span>
+                          <p className="text-xs font-bold text-[#0F172A]">Click to select legal document file</p>
+                          <p className="text-[10px] text-slate-400 font-semibold">PDF, DOCX, PNG, JPG up to 15MB</p>
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -646,9 +654,15 @@ export default function Register({ onNavigate }) {
                 </button>
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoading || uploadingDoc}
                   className="w-2/3 bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-white font-bold py-3 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2"
                 >
+                  {isLoading && (
+                    <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                  )}
                   {isLoading ? 'Sending Email OTP...' : 'Next: Verify Email OTP →'}
                 </button>
               </div>
@@ -716,6 +730,12 @@ export default function Register({ onNavigate }) {
                   disabled={isLoading}
                   className="w-2/3 bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-white font-bold py-3 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2"
                 >
+                  {isLoading && (
+                    <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                  )}
                   {isLoading ? 'Verifying OTP & Submitting...' : 'Verify & Submit Registration'}
                 </button>
               </div>

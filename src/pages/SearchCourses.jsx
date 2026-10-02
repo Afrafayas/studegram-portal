@@ -17,6 +17,7 @@ export default function SearchCourses({ onApplyCourse }) {
     intake: 'September 2026'
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const allCourses = [
     // United Kingdom
@@ -368,9 +369,12 @@ export default function SearchCourses({ onApplyCourse }) {
               </div>
             ) : (
               <form 
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
+                  setIsSubmitting(true);
+                  await new Promise(r => setTimeout(r, 600));
                   setIsSubmitted(true);
+                  setIsSubmitting(false);
                   setManualCourse({
                     courseUrl: '',
                     universityName: '',
@@ -440,9 +444,16 @@ export default function SearchCourses({ onApplyCourse }) {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  className="w-full bg-[#D99A1C] hover:bg-[#C28410] text-white font-bold py-2 rounded-xl text-xs transition-all duration-150 hover:scale-[1.02] shadow-md uppercase tracking-wider mt-4"
+                  disabled={isSubmitting}
+                  className="w-full bg-[#D99A1C] hover:bg-[#C28410] disabled:opacity-50 text-white font-bold py-2 rounded-xl text-xs transition-all duration-150 hover:scale-[1.02] shadow-md uppercase tracking-wider mt-4 flex items-center justify-center gap-2"
                 >
-                  Submit Request
+                  {isSubmitting && (
+                    <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                  )}
+                  {isSubmitting ? 'Submitting Request...' : 'Submit Request'}
                 </button>
               </form>
             )}
