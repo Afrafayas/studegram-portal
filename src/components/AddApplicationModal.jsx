@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 
 export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
@@ -120,6 +120,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
           throw new Error(studentResult?.message || 'Failed to create new student profile.');
         }
         studentId = studentResult.data._id;
+        setStudents(prev => [studentResult.data, ...prev]);
       }
 
       const success = await onSubmit({
@@ -232,25 +233,34 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                   </div>
 
                   {studentSelectionMode === 'existing' ? (
-                    <div className="relative">
-                      <select
-                        required={studentSelectionMode === 'existing'}
-                        value={selectedStudent}
-                        onChange={(e) => setSelectedStudent(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
-                      >
-                        <option value="">-- Choose Student --</option>
-                        {students.map((student, idx) => (
-                          <option key={student._id} value={student._id}>
-                            STD-{10001 + idx} - {student.name} ({student.passportNo || 'No Passport'})
+                    <div>
+                      <div className="relative">
+                        <select
+                          required={studentSelectionMode === 'existing'}
+                          value={selectedStudent}
+                          onChange={(e) => setSelectedStudent(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
+                        >
+                          <option value="">
+                            {students.length === 0 ? '-- No Registered Students Found --' : '-- Choose Student --'}
                           </option>
-                        ))}
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
-                        <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                        </svg>
+                          {students.map((student, idx) => (
+                            <option key={student._id} value={student._id}>
+                              STD-{10001 + idx} - {student.name} ({student.passportNo || 'No Passport'})
+                            </option>
+                          ))}
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
+                          <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
                       </div>
+                      {students.length === 0 && (
+                        <p className="text-[10px] text-amber-600 font-semibold mt-1.5 flex items-center gap-1">
+                          <span>💡</span> You haven't registered any students yet. Select <strong>Register New Student</strong> above to register your student.
+                        </p>
+                      )}
                     </div>
                   ) : (
                     <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 space-y-3 shadow-inner">
