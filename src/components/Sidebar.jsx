@@ -11,6 +11,7 @@ export default function Sidebar({ activePage, setActivePage, partnerData, onLogo
   const userPermissions = partnerData?.permissions || [];
 
   const checkPermission = (permKey) => {
+    if (permKey === 'sidebar:commissions') return true;
     if (isOwner) return true;
     if (Array.isArray(userPermissions) && userPermissions.length > 0) {
       return userPermissions.includes(permKey);
@@ -24,6 +25,7 @@ export default function Sidebar({ activePage, setActivePage, partnerData, onLogo
   const rawMainItems = [
     { id: 'Dashboard', permKey: 'sidebar:dashboard', label: 'Dashboard', icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z' },
     { id: 'ApplicationHistory', permKey: 'sidebar:applications', label: 'Application History', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+    { id: 'Commissions', permKey: 'sidebar:commissions', label: 'Commissions', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
     { id: 'Universities', permKey: 'sidebar:universities', label: 'Universities', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
     { id: 'SearchCourses', permKey: 'sidebar:courses', label: 'Search Courses', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' }
   ];
