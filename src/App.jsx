@@ -5,6 +5,7 @@ import AddApplicationModal from './components/AddApplicationModal';
 import ApplicationDetailsModal from './components/ApplicationDetailsModal';
 import EditApplicationModal from './components/EditApplicationModal';
 import NotificationPopup from './components/NotificationPopup';
+import LogoutConfirmModal from './components/LogoutConfirmModal';
 
 // Auth Pages
 import Login from './pages/Login';
@@ -38,10 +39,16 @@ export default function App() {
       return null;
     }
   });
-  const [activePage, setActivePage] = useState('Dashboard');
+  const [activePage, setActivePage] = useState(() => {
+    return localStorage.getItem('studegram_portal_active_page') || 'Dashboard';
+  });
   const [navigationHistory, setNavigationHistory] = useState([]);
-  const prevActivePageRef = useRef('Dashboard');
+  const prevActivePageRef = useRef(localStorage.getItem('studegram_portal_active_page') || 'Dashboard');
   const isBackNavRef = useRef(false);
+
+  useEffect(() => {
+    localStorage.setItem('studegram_portal_active_page', activePage);
+  }, [activePage]);
 
   useEffect(() => {
     if (isBackNavRef.current) {
@@ -84,6 +91,7 @@ export default function App() {
   const [isLoadingApps, setIsLoadingApps] = useState(false);
   const [duplicateAlert, setDuplicateAlert] = useState(null);
   const [pendingVerificationModalOpen, setPendingVerificationModalOpen] = useState(false);
+  const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
 
   const fetchApplications = async () => {
     const token = localStorage.getItem('partner_token');
@@ -189,8 +197,10 @@ export default function App() {
     localStorage.removeItem('partner_data');
     localStorage.removeItem('studegram_closed_notifications');
     localStorage.removeItem('studegram_read_notifications');
+    localStorage.removeItem('studegram_portal_active_page');
     setNavigationHistory([]);
     prevActivePageRef.current = 'Dashboard';
+    setActivePage('Dashboard');
     setCurrentPage('login');
   };
 
@@ -204,6 +214,7 @@ export default function App() {
             onViewDetails={(app) => setSelectedAppForDetails(app)}
             onViewHistory={() => setActivePage('ApplicationHistory')}
             onNavigateDeadlines={() => setActivePage('UniversityDeadline')}
+            onNewApplicationClick={handleOpenNewApplicationModal}
           />
         );
       case 'ApplicationHistory':
@@ -269,6 +280,7 @@ export default function App() {
         onLoginSuccess={() => {
           setCurrentPage('dashboard');
           setActivePage('Dashboard');
+          localStorage.setItem('studegram_portal_active_page', 'Dashboard');
           setNavigationHistory([]);
           prevActivePageRef.current = 'Dashboard';
           try {
@@ -301,7 +313,7 @@ export default function App() {
         partnerData={partnerData}
         onBack={handleBack}
         onNewApplicationClick={handleOpenNewApplicationModal} 
-        onLogout={handleLogout} 
+        onLogout={() => setShowLogoutConfirmModal(true)} 
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         onNavigatePage={(page) => setActivePage(page)}
         onSelectApplication={(appId) => {
@@ -322,9 +334,10 @@ export default function App() {
           activePage={activePage} 
           setActivePage={setActivePage} 
           partnerData={partnerData}
-          onLogout={handleLogout} 
+          onLogout={() => setShowLogoutConfirmModal(true)} 
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
+          onNewApplicationClick={handleOpenNewApplicationModal}
         />
 
         {/* Content Area */}
@@ -362,6 +375,13 @@ export default function App() {
           setActivePage('Notice');
           setSelectedNoticeId(noticeId);
         }}
+      />
+
+      {/* Logout Confirmation Modal */}
+      <LogoutConfirmModal
+        isOpen={showLogoutConfirmModal}
+        onClose={() => setShowLogoutConfirmModal(false)}
+        onConfirm={handleLogout}
       />
 
       {/* Verification Pending Modal */}

@@ -42,11 +42,51 @@ export default function Navbar({
     try {
       const res = await API.get('/applications/recent-comments');
       if (res.data?.success && Array.isArray(res.data.data)) {
-        setCommentsList(res.data.data);
-        const unreplied = res.data.data.filter(c => c.isUnreplied).length;
+        const readStorageKey = 'studegram_portal_read_comments';
+        let readIds = new Set();
+        try {
+          readIds = new Set(JSON.parse(localStorage.getItem(readStorageKey) || '[]'));
+        } catch (e) {}
+
+        const updatedList = res.data.data.map(c => {
+          const idKey = c.commentId || `${c.applicationId}_${c.createdAt}`;
+          const isMarkedRead = readIds.has(idKey);
+          return {
+            ...c,
+            isUnreplied: isMarkedRead ? false : c.isUnreplied,
+            isRead: isMarkedRead
+          };
+        });
+
+        setCommentsList(updatedList);
+        const unreplied = updatedList.filter(c => c.isUnreplied).length;
         setUnreadCommentsCount(unreplied);
       }
     } catch (e) {}
+  };
+
+  const handleCommentClick = (comm) => {
+    setShowComments(false);
+    const readStorageKey = 'studegram_portal_read_comments';
+    try {
+      const readIds = new Set(JSON.parse(localStorage.getItem(readStorageKey) || '[]'));
+      const idKey = comm.commentId || `${comm.applicationId}_${comm.createdAt}`;
+      readIds.add(idKey);
+      localStorage.setItem(readStorageKey, JSON.stringify([...readIds]));
+    } catch (e) {}
+
+    setCommentsList(prev => prev.map(c => 
+      (c.applicationId === comm.applicationId)
+        ? { ...c, isUnreplied: false, isRead: true } 
+        : c
+    ));
+    setUnreadCommentsCount(prev => Math.max(0, prev - 1));
+
+    if (onSelectApplication) {
+      onSelectApplication(comm.applicationId);
+    } else if (onNavigatePage) {
+      onNavigatePage('ApplicationHistory');
+    }
   };
 
   useEffect(() => {
@@ -144,14 +184,6 @@ export default function Navbar({
           <p className="text-[10px] text-[#D99A1C] font-semibold">{userRoleDisplay}</p>
         </div>
 
-        {/* New Application Button */}
-        <button
-          onClick={onNewApplicationClick}
-          className="bg-[#D99A1C] hover:bg-[#C28410] text-black font-extrabold text-xs px-3.5 py-1.5 rounded-lg transition-all duration-150 hover:scale-[1.02] active:scale-95 shadow-sm whitespace-nowrap"
-        >
-          + New Application
-        </button>
-
         {/* Application Comments Icon & Drawer */}
         <div className="relative">
           <button
@@ -199,14 +231,7 @@ export default function Navbar({
                     commentsList.map((comm, idx) => (
                       <div 
                         key={comm.applicationId || idx} 
-                        onClick={() => {
-                          setShowComments(false);
-                          if (onSelectApplication) {
-                            onSelectApplication(comm.applicationId);
-                          } else if (onNavigatePage) {
-                            onNavigatePage('ApplicationHistory');
-                          }
-                        }}
+                        onClick={() => handleCommentClick(comm)}
                         className={`p-3 rounded-xl transition-all cursor-pointer group ${
                           comm.isUnreplied
                             ? 'bg-blue-950/80 border-l-4 border-l-blue-500 text-blue-100 font-bold shadow-md hover:bg-blue-900'
@@ -216,7 +241,7 @@ export default function Navbar({
                         <div className="flex justify-between items-start gap-2">
                           <h5 className="text-xs font-extrabold text-white group-hover:text-[#F5B025] transition-colors flex items-center gap-1.5">
                             {comm.isUnreplied && <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>}
-                            <span>{comm.camsId} &middot; {comm.studentName}</span>
+                            <span>{comm.camsId && !/[0-9a-fA-F]{24}/.test(comm.camsId) ? `${comm.camsId} · ` : ''}{comm.studentName}</span>
                           </h5>
                           <span className="text-[9px] text-slate-400 font-semibold shrink-0">
                             {comm.createdAt ? new Date(comm.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now'}
@@ -225,8 +250,8 @@ export default function Navbar({
                         <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">{comm.universityName} - {comm.courseName}</p>
                         <p className="text-[11px] font-semibold mt-1 leading-snug break-words">"{comm.text}"</p>
                         <div className="mt-2 flex items-center justify-between text-[9px]">
-                          <span className={`px-2 py-0.5 rounded font-extrabold uppercase ${comm.isUnreplied ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}>
-                            {comm.isUnreplied ? '💬 Unreplied Admin Message' : '✓ Replied / Read'}
+                          <span className={`px-2 py-0.5 rounded font-extrabold uppercase ${comm.isUnreplied ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-800 text-slate-400'}`}>
+                            {comm.isUnreplied ? (comm.lastRepliedBy === 'Admin' ? '💬 New Admin Reply' : '💬 Not Replied') : '✓ Replied / Read'}
                           </span>
                           <span className="text-[#D99A1C] font-extrabold group-hover:underline">Open Application →</span>
                         </div>

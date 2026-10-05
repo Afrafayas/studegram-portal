@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Sidebar({ activePage, setActivePage, partnerData, onLogout, isOpen, onClose }) {
+export default function Sidebar({ activePage, setActivePage, partnerData, onLogout, isOpen, onClose, onNewApplicationClick }) {
   const displayName = partnerData?.name || 'John Doe';
   const displayInitials = partnerData?.name
     ? partnerData.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
@@ -101,7 +101,25 @@ export default function Sidebar({ activePage, setActivePage, partnerData, onLogo
         isOpen ? 'translate-x-0' : '-translate-x-full'
       } md:translate-x-0 transition-transform duration-200 ease-in-out`}>
         
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-5">
+          {/* New Application Action Button */}
+          {onNewApplicationClick && (
+            <div className="px-3 pt-1">
+              <button
+                onClick={() => {
+                  onNewApplicationClick();
+                  if (onClose) onClose();
+                }}
+                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:from-[#C28410] hover:to-[#D99A1C] text-black font-extrabold text-xs py-2.5 px-4 rounded-xl shadow-md transition-all duration-150 hover:scale-[1.02] active:scale-95 cursor-pointer"
+              >
+                <svg className="w-4 h-4 text-black shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                </svg>
+                <span className="truncate">New Application</span>
+              </button>
+            </div>
+          )}
+
           {/* MAIN section */}
           <div>
             <span className="px-6 block text-[9px] font-extrabold text-[#475569] uppercase tracking-wider mb-2">MAIN</span>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
+import ClaimCommissionConfirmModal from './ClaimCommissionConfirmModal';
 
 export default function ApplicationDetailsModal({ isOpen, onClose, application, onStatusChange, onDocumentUploaded, onUpdateSuccess }) {
   const toast = useToast();
@@ -12,6 +13,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
   // Layout tabs state: 'details' (App Details) or 'activity' (Messages & Updates)
   const [mainTab, setMainTab] = useState('details');
   const [activeTab, setActiveTab] = useState('profile');
+  const [showClaimModal, setShowClaimModal] = useState(false);
 
   const [localDocuments, setLocalDocuments] = useState([]);
   const [isUploadingDoc, setIsUploadingDoc] = useState(false);
@@ -511,17 +513,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                         ) : (
                           <button
                             type="button"
-                            onClick={async () => {
-                              try {
-                                const res = await API.post(`/applications/${application.id}/claim-commission`);
-                                if (res.data.success) {
-                                  toast.success('Commission claim submitted to Admin successfully!');
-                                  if (onUpdateSuccess) onUpdateSuccess();
-                                }
-                              } catch (err) {
-                                toast.error(err.response?.data?.message || 'Failed to claim commission.');
-                              }
-                            }}
+                            onClick={() => setShowClaimModal(true)}
                             className="bg-amber-600 hover:bg-amber-700 text-white font-black text-xs px-4 py-2 rounded-xl transition-all shadow cursor-pointer active:scale-95"
                           >
                             Claim Commission 💰
@@ -1166,6 +1158,19 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
           </div>
         )}
       </div>
+
+      {/* Claim Commission Confirmation Modal */}
+      <ClaimCommissionConfirmModal
+        isOpen={showClaimModal}
+        application={application}
+        onClose={() => setShowClaimModal(false)}
+        onConfirmed={() => {
+          if (application) {
+            application.commissionStatus = 'Claimed';
+          }
+          if (onUpdateSuccess) onUpdateSuccess();
+        }}
+      />
     </div>
   );
 }
