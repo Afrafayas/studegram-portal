@@ -11,10 +11,6 @@ export default function Register({ onNavigate }) {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [place, setPlace] = useState('');
   const [address, setAddress] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Step 2: Company Details & Legal Document
   const [agencyName, setAgencyName] = useState('');
@@ -34,6 +30,7 @@ export default function Register({ onNavigate }) {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState('');
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
 
   // ==========================================
   // VALIDATIONS
@@ -53,16 +50,6 @@ export default function Register({ onNavigate }) {
     }
     if (!place.trim()) newErrors.place = 'Place / Location is required';
     if (!address.trim()) newErrors.address = 'Full address is required';
-    if (!password) {
-      newErrors.password = 'Password is required';
-    } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
-    if (!confirmPassword) {
-      newErrors.confirmPassword = 'Confirm password is required';
-    } else if (confirmPassword !== password) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -208,7 +195,7 @@ export default function Register({ onNavigate }) {
         throw new Error(verifyRes.data.message || 'OTP verification failed');
       }
 
-      // 2. Submit Final Partner Registration
+      // 2. Submit Final Partner Registration (no password needed on registration)
       const regRes = await API.post('/partners/register', {
         name: fullName.trim(),
         email: email.trim(),
@@ -220,11 +207,11 @@ export default function Register({ onNavigate }) {
         taxId: taxId.trim(),
         country,
         city: city.trim(),
-        password,
         documents
       });
 
       if (regRes.data.success) {
+        setShowApprovalModal(true);
         setStep(4); // Under Review Window
       } else {
         throw new Error(regRes.data.message || 'Registration failed.');
@@ -401,79 +388,36 @@ export default function Register({ onNavigate }) {
                 {errors.address && <p className="text-[10px] text-[#EF4444] font-bold mt-0.5">{errors.address}</p>}
               </div>
 
-              {/* Passwords Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Password *</label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      className={`w-full bg-slate-50 border rounded-xl pl-4 pr-10 py-2.5 text-xs text-[#0F172A] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
-                        errors.password ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
-                      }`}
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#64748B] hover:text-[#0F172A] focus:outline-none"
-                    >
-                      {showPassword ? (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                        </svg>
-                      ) : (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                      )}
-                    </button>
-                  </div>
-                  {errors.password && <p className="text-[10px] text-[#EF4444] font-bold mt-0.5">{errors.password}</p>}
-                </div>
-
-                <div className="space-y-1">
-                  <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Confirm Password *</label>
-                  <div className="relative">
-                    <input
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      className={`w-full bg-slate-50 border rounded-xl pl-4 pr-10 py-2.5 text-xs text-[#0F172A] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
-                        errors.confirmPassword ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
-                      }`}
-                      placeholder="••••••••"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#64748B] hover:text-[#0F172A] focus:outline-none"
-                    >
-                      {showConfirmPassword ? (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
-                        </svg>
-                      ) : (
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                      )}
-                    </button>
-                  </div>
-                  {errors.confirmPassword && <p className="text-[10px] text-[#EF4444] font-bold mt-0.5">{errors.confirmPassword}</p>}
+              {/* Notice that password will be generated upon admin approval */}
+              <div className="bg-amber-50 border border-amber-200/90 rounded-xl p-3.5 text-xs text-amber-950 flex items-start gap-3 shadow-xs">
+                <span className="text-xl shrink-0 mt-0.5">🔑</span>
+                <div className="space-y-0.5">
+                  <p className="text-[11px] font-black uppercase text-amber-900 tracking-wider">No Password Required Now</p>
+                  <p className="text-[11px] text-amber-900/90 font-medium leading-relaxed">
+                    A randomly generated <strong>6-digit login password</strong> will be mailed to your email address once your registration details and documents are approved by the Admin team.
+                  </p>
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-white font-bold py-3 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider mt-4"
+                className="w-full bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-white font-bold py-3 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider mt-4 cursor-pointer"
               >
                 Next: Company Details & Legal Upload →
               </button>
+
+              <div className="pt-3 text-center border-t border-slate-100 mt-4">
+                <p className="text-xs text-[#64748B] font-medium">
+                  Already have an agency account?{' '}
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('login')}
+                    className="text-[#D99A1C] font-extrabold hover:underline cursor-pointer"
+                  >
+                    Go to Login Page →
+                  </button>
+                </p>
+              </div>
             </form>
           )}
 
@@ -648,14 +592,14 @@ export default function Register({ onNavigate }) {
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl text-xs transition-all"
+                  className="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl text-xs transition-all cursor-pointer"
                 >
                   ← Back
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading || uploadingDoc}
-                  className="w-2/3 bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-white font-bold py-3 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-2/3 bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-white font-bold py-3 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {isLoading && (
                     <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
@@ -665,6 +609,19 @@ export default function Register({ onNavigate }) {
                   )}
                   {isLoading ? 'Sending Email OTP...' : 'Next: Verify Email OTP →'}
                 </button>
+              </div>
+
+              <div className="pt-3 text-center border-t border-slate-100 mt-4">
+                <p className="text-xs text-[#64748B] font-medium">
+                  Already have an agency account?{' '}
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('login')}
+                    className="text-[#D99A1C] font-extrabold hover:underline cursor-pointer"
+                  >
+                    Go to Login Page →
+                  </button>
+                </p>
               </div>
             </form>
           )}
@@ -721,14 +678,14 @@ export default function Register({ onNavigate }) {
                   type="button"
                   onClick={() => setStep(2)}
                   disabled={isLoading}
-                  className="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl text-xs transition-all"
+                  className="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl text-xs transition-all cursor-pointer"
                 >
                   ← Back
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-2/3 bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-white font-bold py-3 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-2/3 bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-white font-bold py-3 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {isLoading && (
                     <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
@@ -738,6 +695,19 @@ export default function Register({ onNavigate }) {
                   )}
                   {isLoading ? 'Verifying OTP & Submitting...' : 'Verify & Submit Registration'}
                 </button>
+              </div>
+
+              <div className="pt-3 text-center border-t border-slate-100 mt-4">
+                <p className="text-xs text-[#64748B] font-medium">
+                  Already have an agency account?{' '}
+                  <button
+                    type="button"
+                    onClick={() => onNavigate('login')}
+                    className="text-[#D99A1C] font-extrabold hover:underline cursor-pointer"
+                  >
+                    Back to Login Page →
+                  </button>
+                </p>
               </div>
             </form>
           )}
@@ -749,7 +719,7 @@ export default function Register({ onNavigate }) {
             <div className="text-center py-6 space-y-6 animate-in fade-in zoom-in duration-200">
               <div className="w-20 h-20 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto shadow-inner ring-8 ring-amber-50">
                 <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
 
@@ -758,32 +728,111 @@ export default function Register({ onNavigate }) {
                   Registration Under Review
                 </span>
                 <h1 className="text-2xl font-extrabold text-[#0F172A] tracking-tight">Onboarding Received</h1>
-                <p className="text-xs text-[#64748B] font-medium leading-relaxed">
-                  Thank you for registering <strong>{agencyName}</strong>! Your legal documents and company details have been submitted and are currently <strong>Under Review</strong> by the Studgram Admin team.
+                <p className="text-xs text-[#0F172A] font-bold leading-relaxed">
+                  Your registration details for <strong>{agencyName}</strong> have been submitted!
                 </p>
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 font-semibold text-center mt-2">
+                  ✉️ <strong>Password will be mailed to your email ({email}) after admin approval.</strong>
+                </div>
               </div>
 
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-left text-xs space-y-2 text-slate-700">
                 <p className="font-bold text-[#0F172A]">What happens next?</p>
-                <ul className="list-disc pl-4 space-y-1 text-[11px] font-medium text-slate-600">
-                  <li>Studgram Admin verifies your uploaded legal company documents.</li>
-                  <li>Upon approval, you will receive an automated confirmation email.</li>
-                  <li>Once approved, you will get full access to add students and submit applications.</li>
+                <ul className="list-disc pl-4 space-y-1.5 text-[11px] font-medium text-slate-600">
+                  <li>Studgram Admin verifies your uploaded legal company documents and profile.</li>
+                  <li><strong>When approved:</strong> A random 6-digit password will be generated and emailed directly to <strong>{email}</strong>.</li>
+                  <li>You can then sign in with that 6-digit password and edit or reset your password in your Profile.</li>
                 </ul>
               </div>
 
               <button
                 type="button"
                 onClick={() => onNavigate('login')}
-                className="w-full bg-[#0F172A] hover:bg-black text-white font-bold py-3 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider"
+                className="w-full bg-[#0F172A] hover:bg-black text-white font-bold py-3.5 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider cursor-pointer"
               >
                 Back to Sign In Page
               </button>
+
+              <div className="text-center pt-1">
+                <button
+                  type="button"
+                  onClick={() => onNavigate('login')}
+                  className="text-xs text-[#D99A1C] font-extrabold hover:underline cursor-pointer inline-flex items-center gap-1"
+                >
+                  <span>← Go to Login Page</span>
+                </button>
+              </div>
             </div>
           )}
 
         </div>
       </div>
+
+      {/* MODAL: Password Will Mail to Email After Admin Approval */}
+      {showApprovalModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200 select-none">
+          <div className="bg-white border border-slate-200 rounded-3xl p-8 max-w-md w-full shadow-2xl text-center space-y-6 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-2.5 bg-gradient-to-r from-[#D99A1C] to-[#F5B025]"></div>
+            
+            <div className="w-20 h-20 bg-amber-50 text-[#D99A1C] rounded-full flex items-center justify-center mx-auto ring-8 ring-amber-50 shadow-inner">
+              <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+
+            <div className="space-y-2">
+              <span className="inline-block bg-amber-100 text-amber-900 text-[10px] font-black uppercase px-3 py-1 rounded-full border border-amber-200">
+                Application Submitted
+              </span>
+              <h3 className="text-xl font-black text-[#0F172A] tracking-tight">
+                Password Notification
+              </h3>
+              <p className="text-xs text-[#0F172A] font-bold leading-relaxed px-2">
+                Your password will be mailed to your email address after admin approval.
+              </p>
+            </div>
+
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-left space-y-2.5 text-xs text-slate-700">
+              <div className="flex items-start gap-2.5">
+                <span className="text-emerald-600 font-bold shrink-0">✓</span>
+                <span className="font-semibold">Application & documents submitted for <strong>{agencyName}</strong>.</span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <span className="text-[#D99A1C] font-bold shrink-0">✉</span>
+                <span className="font-semibold">Once verified, a randomly generated <strong>6-digit login password</strong> will be emailed to <strong>{email}</strong>.</span>
+              </div>
+              <div className="flex items-start gap-2.5 text-[11px] text-slate-500">
+                <span className="text-slate-400 font-bold shrink-0">🔒</span>
+                <span>You will use that password to log in and can reset it in your profile at any time.</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setShowApprovalModal(false);
+                onNavigate('login');
+              }}
+              className="w-full bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-white font-extrabold py-3.5 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider cursor-pointer"
+            >
+              Understand & Go to Sign In →
+            </button>
+
+            <div className="pt-2 text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowApprovalModal(false);
+                  onNavigate('login');
+                }}
+                className="text-xs text-slate-500 hover:text-[#D99A1C] font-bold underline transition-colors cursor-pointer inline-flex items-center gap-1.5"
+              >
+                <span>← Back to Login Page</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

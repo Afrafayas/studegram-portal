@@ -13,6 +13,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
   const [error, setError] = useState('');
 
   const [selectedStudent, setSelectedStudent] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedUniversity, setSelectedUniversity] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('');
 
@@ -56,6 +57,28 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
       });
     }
   }, [isOpen]);
+
+  const availableCountries = Array.from(
+    new Set([
+      ...universities.map(u => (u.country || '').trim()).filter(Boolean),
+      'United Kingdom',
+      'Canada',
+      'United States',
+      'Australia',
+      'Ireland',
+      'Germany',
+      'New Zealand'
+    ])
+  ).sort();
+
+  const filteredUniversities = universities.filter(univ => {
+    if (!selectedCountry) return false;
+    const uCountry = (univ.country || '').trim().toLowerCase();
+    const sel = selectedCountry.trim().toLowerCase();
+    return uCountry === sel ||
+      (sel === 'united kingdom' && (uCountry === 'uk' || uCountry === 'england')) ||
+      (sel === 'united states' && (uCountry === 'usa' || uCountry === 'us'));
+  });
 
   const handleAddDocumentRow = () => {
     setDocumentsList(prev => [
@@ -145,6 +168,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
 
   const handleResetAndClose = () => {
     setSelectedStudent('');
+    setSelectedCountry('');
     setSelectedUniversity('');
     setSelectedCourse('');
     setStudentSelectionMode('existing');
@@ -174,6 +198,10 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
         setError('Please fill in all required new student details (Name, Email, Phone).');
         return;
       }
+    }
+    if (!selectedCountry) {
+      setError('Please select a destination country.');
+      return;
     }
     if (!selectedUniversity || !selectedCourse) {
       setError('Please select a university and course.');
@@ -443,23 +471,68 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                   )}
                 </div>
 
-                {/* University Dropdown */}
+                {/* Destination Country Dropdown */}
                 <div>
-                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Select University</label>
+                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">
+                    Destination Country *
+                  </label>
                   <div className="relative">
                     <select
                       required
+                      value={selectedCountry}
+                      onChange={(e) => {
+                        setSelectedCountry(e.target.value);
+                        setSelectedUniversity('');
+                        setSelectedCourse('');
+                      }}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
+                    >
+                      <option value="">-- Choose Country First --</option>
+                      {availableCountries.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
+                      <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* University Dropdown (filtered by selected country) */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
+                      Select University *
+                    </label>
+                    {selectedCountry && (
+                      <span className="text-[10px] font-bold text-[#D99A1C]">
+                        {filteredUniversities.length} institution{filteredUniversities.length !== 1 ? 's' : ''} in {selectedCountry}
+                      </span>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <select
+                      required
+                      disabled={!selectedCountry}
                       value={selectedUniversity}
                       onChange={(e) => {
                         setSelectedUniversity(e.target.value);
                         setSelectedCourse(''); // Reset course
                       }}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <option value="">-- Choose University --</option>
-                      {universities.map((univ, idx) => (
+                      <option value="">
+                        {!selectedCountry 
+                          ? '-- Select Country First --' 
+                          : filteredUniversities.length === 0 
+                            ? `-- No Universities in ${selectedCountry} --` 
+                            : '-- Choose University --'}
+                      </option>
+                      {filteredUniversities.map((univ, idx) => (
                         <option key={univ._id} value={univ._id}>
-                          UNIV-{10001 + idx} - {univ.name} ({univ.country || 'Unknown'})
+                          UNIV-{10001 + idx} - {univ.name} ({univ.city ? `${univ.city}, ` : ''}{univ.country})
                         </option>
                       ))}
                     </select>
@@ -469,6 +542,11 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                       </svg>
                     </div>
                   </div>
+                  {selectedCountry && filteredUniversities.length === 0 && (
+                    <p className="text-[10px] text-amber-600 font-semibold mt-1">
+                      ⚠️ No institutions found for {selectedCountry}. Please select another country.
+                    </p>
+                  )}
                 </div>
 
                 {/* Course Dropdown */}

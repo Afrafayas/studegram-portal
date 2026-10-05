@@ -6,6 +6,7 @@ import ApplicationDetailsModal from './components/ApplicationDetailsModal';
 import EditApplicationModal from './components/EditApplicationModal';
 import NotificationPopup from './components/NotificationPopup';
 import LogoutConfirmModal from './components/LogoutConfirmModal';
+import ProfileModal from './components/ProfileModal';
 
 // Auth Pages
 import Login from './pages/Login';
@@ -92,6 +93,7 @@ export default function App() {
   const [duplicateAlert, setDuplicateAlert] = useState(null);
   const [pendingVerificationModalOpen, setPendingVerificationModalOpen] = useState(false);
   const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   const fetchApplications = async () => {
     const token = localStorage.getItem('partner_token');
@@ -316,6 +318,7 @@ export default function App() {
         onLogout={() => setShowLogoutConfirmModal(true)} 
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         onNavigatePage={(page) => setActivePage(page)}
+        onOpenProfile={() => setShowProfileModal(true)}
         onSelectApplication={(appId) => {
           setActivePage('ApplicationHistory');
           if (typeof appId === 'object' && appId !== null) {
@@ -338,6 +341,7 @@ export default function App() {
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
           onNewApplicationClick={handleOpenNewApplicationModal}
+          onOpenProfile={() => setShowProfileModal(true)}
         />
 
         {/* Content Area */}
@@ -382,6 +386,14 @@ export default function App() {
         isOpen={showLogoutConfirmModal}
         onClose={() => setShowLogoutConfirmModal(false)}
         onConfirm={handleLogout}
+      />
+
+      {/* Agent Profile & Password Reset Modal */}
+      <ProfileModal
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        partnerData={partnerData}
+        onProfileUpdated={fetchPartnerProfile}
       />
 
       {/* Verification Pending Modal */}

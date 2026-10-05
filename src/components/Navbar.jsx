@@ -9,7 +9,8 @@ export default function Navbar({
   onLogout, 
   onToggleSidebar,
   onNavigatePage,
-  onSelectApplication
+  onSelectApplication,
+  onOpenProfile
 }) {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -19,6 +20,7 @@ export default function Navbar({
   const [commentsList, setCommentsList] = useState([]);
   const [unreadCommentsCount, setUnreadCommentsCount] = useState(0);
   const [showComments, setShowComments] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const displayInitials = partnerData?.name
     ? partnerData.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
@@ -350,17 +352,69 @@ export default function Navbar({
           )}
         </div>
 
-        {/* User Avatar with Sign Out */}
-        <button
-          onClick={onLogout}
-          title="Sign Out / Logout"
-          className="relative cursor-pointer group focus:outline-none"
-        >
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#D99A1C] to-[#F5B025] flex items-center justify-center font-bold text-black text-xs shadow-md border-2 border-[#0A0A0F] group-hover:border-rose-500 transition-all">
-            {displayInitials}
-          </div>
-          <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#10B981] rounded-full ring-2 ring-[#0A0A0F]"></span>
-        </button>
+        {/* User Avatar with Profile Dropdown Menu */}
+        <div className="relative">
+          <button
+            onClick={() => {
+              setShowUserMenu(!showUserMenu);
+              if (showNotifications) setShowNotifications(false);
+              if (showComments) setShowComments(false);
+            }}
+            title="Account & Profile Settings"
+            className="relative cursor-pointer group focus:outline-none flex items-center gap-2 p-1 rounded-xl hover:bg-white/5 transition-all"
+          >
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#D99A1C] to-[#F5B025] flex items-center justify-center font-bold text-black text-xs shadow-md border-2 border-[#0A0A0F] group-hover:scale-105 transition-all">
+              {displayInitials}
+            </div>
+            <span className="absolute bottom-1 left-7 w-2.5 h-2.5 bg-[#10B981] rounded-full ring-2 ring-[#0A0A0F]"></span>
+          </button>
+
+          {showUserMenu && (
+            <>
+              <div 
+                onClick={() => setShowUserMenu(false)}
+                className="fixed inset-0 z-10"
+              />
+              <div className="absolute right-0 top-11 w-64 bg-[#0A0A0F] border border-slate-800 rounded-2xl shadow-2xl py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="px-4 pb-3 border-b border-slate-900">
+                  <p className="text-xs font-bold text-white truncate">{partnerData?.name || 'Agent User'}</p>
+                  <p className="text-[10px] text-slate-400 truncate">{partnerData?.email}</p>
+                  <span className="inline-block mt-1.5 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-[#D99A1C]/10 text-[#D99A1C] border border-[#D99A1C]/20">
+                    {userRoleDisplay}
+                  </span>
+                </div>
+
+                <div className="p-1.5 space-y-1">
+                  <button
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      if (onOpenProfile) onOpenProfile();
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-2.5 cursor-pointer"
+                  >
+                    <svg className="w-4 h-4 text-[#D99A1C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span>My Profile & Password</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      if (onLogout) onLogout();
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors flex items-center gap-2.5 cursor-pointer"
+                  >
+                    <svg className="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );

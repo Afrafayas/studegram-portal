@@ -12,7 +12,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
   const [universities, setUniversities] = useState([]);
   const [courses, setCourses] = useState([]);
 
-
+  const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedUniversity, setSelectedUniversity] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('');
   const [notes, setNotes] = useState('');
@@ -45,7 +45,11 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
           setCourses(courseRes.data || []);
 
           // Prepopulate application fields
-          setSelectedUniversity(application.university?._id || application.university || '');
+          const uniId = application.university?._id || application.university || '';
+          const foundUni = (uniRes.data || []).find(u => (u._id || u.id) === uniId);
+          const initialCountry = foundUni?.country || application.university?.country || application.country || '';
+          setSelectedCountry(initialCountry);
+          setSelectedUniversity(uniId);
           setSelectedCourse(application.course?._id || application.course || '');
           setNotes(application.notes || '');
 
@@ -67,6 +71,34 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
     }
   }, [isOpen, application]);
 
+  const availableCountries = Array.from(
+    new Set([
+      ...universities.map(u => (u.country || '').trim()).filter(Boolean),
+      'United Kingdom',
+      'Canada',
+      'United States',
+      'Australia',
+      'Ireland',
+      'Germany',
+      'New Zealand'
+    ])
+  ).sort();
+
+  const filteredUniversities = universities.filter(univ => {
+    if (!selectedCountry) return false;
+    const uCountry = (univ.country || '').trim().toLowerCase();
+    const sel = selectedCountry.trim().toLowerCase();
+    return uCountry === sel ||
+      (sel === 'united kingdom' && (uCountry === 'uk' || uCountry === 'england')) ||
+      (sel === 'united states' && (uCountry === 'usa' || uCountry === 'us'));
+  });
+
+  const handleCountryChange = (e) => {
+    setSelectedCountry(e.target.value);
+    setSelectedUniversity('');
+    setSelectedCourse('');
+  };
+
   const handleUniversityChange = (e) => {
     setSelectedUniversity(e.target.value);
     setSelectedCourse('');
@@ -80,6 +112,11 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!selectedCountry) {
+      setError('Please select a destination country.');
+      setActiveTab('application');
+      return;
+    }
     if (!selectedUniversity || !selectedCourse) {
       setError('Please select a university and course.');
       setActiveTab('application');
@@ -200,19 +237,19 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
               {activeTab === 'application' && (
                 <div className="space-y-4">
 
-                  {/* University */}
+                  {/* Destination Country */}
                   <div>
-                    <label className={labelClass}>Destination University *</label>
+                    <label className={labelClass}>Destination Country *</label>
                     <div className="relative">
                       <select
-                        value={selectedUniversity}
-                        onChange={handleUniversityChange}
+                        value={selectedCountry}
+                        onChange={handleCountryChange}
                         required
-                        className={inputClass + ' appearance-none'}
+                        className={inputClass + ' appearance-none cursor-pointer'}
                       >
-                        <option value="" disabled>Select University</option>
-                        {universities.map(uni => (
-                          <option key={uni._id} value={uni._id}>{uni.name}</option>
+                        <option value="">-- Select Country --</option>
+                        {availableCountries.map(c => (
+                          <option key={c} value={c}>{c}</option>
                         ))}
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
@@ -221,6 +258,48 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                         </svg>
                       </div>
                     </div>
+                  </div>
+
+                  {/* University */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className={labelClass}>Destination University *</label>
+                      {selectedCountry && (
+                        <span className="text-[10px] font-bold text-[#D99A1C]">
+                          {filteredUniversities.length} institution{filteredUniversities.length !== 1 ? 's' : ''} in {selectedCountry}
+                        </span>
+                      )}
+                    </div>
+                    <div className="relative">
+                      <select
+                        value={selectedUniversity}
+                        onChange={handleUniversityChange}
+                        required
+                        disabled={!selectedCountry}
+                        className={inputClass + ' appearance-none disabled:opacity-50 cursor-pointer'}
+                      >
+                        <option value="">
+                          {!selectedCountry 
+                            ? '-- Select Country First --' 
+                            : filteredUniversities.length === 0 
+                              ? `-- No Universities in ${selectedCountry} --` 
+                              : '-- Select University --'}
+                        </option>
+                        {filteredUniversities.map(uni => (
+                          <option key={uni._id} value={uni._id}>{uni.name} ({uni.city ? `${uni.city}, ` : ''}{uni.country})</option>
+                        ))}
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
+                    {selectedCountry && filteredUniversities.length === 0 && (
+                      <p className="text-[10px] text-amber-600 font-semibold mt-1">
+                        ⚠️ No partner institutions found in {selectedCountry}. Please select another country.
+                      </p>
+                    )}
                   </div>
 
                   {/* Course */}
