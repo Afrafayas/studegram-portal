@@ -720,7 +720,7 @@ export default function StaffManagement({ partnerData }) {
             </div>
 
             <p className="text-xs text-[#64748B] leading-relaxed font-medium">
-              Your agency registration is currently under review by the Studgram Admin team. Please wait for verification and approval before creating staff accounts.
+              Your agency registration is currently under review by the Unigather Admin team. Please wait for verification and approval before creating staff accounts.
             </p>
 
             <button

@@ -78,7 +78,7 @@ export const notices = [
   },
   {
     id: 'notice-6',
-    title: 'Important System Maintenance Notice: Studegram Portal downtime on 5th June 2026',
+    title: 'Important System Maintenance Notice: Unigather Portal downtime on 5th June 2026',
     message: 'Scheduled maintenance will be performed on June 5th between 2 AM and 4 AM GMT. The portal will be unavailable during this period for database schema upgrades. Plan your work accordingly.',
     date: '30 May 2026',
     type: 'System',

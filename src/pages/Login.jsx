@@ -198,9 +198,9 @@ export default function Login({ onNavigate, onLoginSuccess }) {
         {/* Top: Logo Brand */}
         <div className="flex items-center gap-3 relative z-10">
           <div className="w-10 h-10 rounded-xl bg-white text-[#D99A1C] flex items-center justify-center font-extrabold text-xl shadow-lg">
-            S
+            U
           </div>
-          <span className="font-extrabold text-2xl tracking-wider uppercase">Studegram</span>
+          <span className="font-extrabold text-2xl tracking-wider uppercase">Unigather</span>
         </div>
 
         {/* Center: Hero Statement */}
@@ -268,7 +268,7 @@ export default function Login({ onNavigate, onLoginSuccess }) {
 
         {/* Bottom: Footer copyright */}
         <div className="text-[10px] text-white/60 font-semibold relative z-10">
-          © 2026 Studegram Inc. All rights reserved.
+          © 2026 Unigather Inc. All rights reserved.
         </div>
       </div>
 

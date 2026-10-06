@@ -219,7 +219,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
 
   const [notes, setNotes] = useState([
     {
-      author: 'Studegram Verification Team',
+      author: 'Unigather Verification Team',
       role: 'Compliance',
       text: 'Verified passport bio-page and academic transcripts. Eligibility confirmed for admission processing.',
       date: '12 Jun 2026, 11:30 AM',
@@ -297,7 +297,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
     },
     { 
       label: 'Document Verification', 
-      desc: 'Studegram team & admissions office reviewing eligibility', 
+      desc: 'Unigather team & admissions office reviewing eligibility', 
       date: findStatusDate(['review', 'verification', 'sent', 'processed']) 
     },
     { 

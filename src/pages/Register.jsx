@@ -237,9 +237,9 @@ export default function Register({ onNavigate }) {
         {/* Logo Brand */}
         <div className="flex items-center gap-3 relative z-10">
           <div className="w-10 h-10 rounded-xl bg-white text-[#D99A1C] flex items-center justify-center font-extrabold text-xl shadow-lg">
-            S
+            U
           </div>
-          <span className="font-extrabold text-2xl tracking-wider uppercase">Studegram</span>
+          <span className="font-extrabold text-2xl tracking-wider uppercase">Unigather</span>
         </div>
 
         {/* Center: Hero text */}
@@ -248,7 +248,7 @@ export default function Register({ onNavigate }) {
             Agency Onboarding & Partnership
           </h2>
           <p className="text-xs text-white/90 font-medium leading-relaxed">
-            Register your education agency with Studgram. Follow our 3-step verification process to upload legal credentials and submit for admin approval.
+            Register your education agency with Unigather. Follow our 3-step verification process to upload legal credentials and submit for admin approval.
           </p>
 
           {/* Stepper Indicator */}
@@ -270,7 +270,7 @@ export default function Register({ onNavigate }) {
 
         {/* Footer */}
         <div className="text-[10px] text-white/60 font-semibold relative z-10">
-          © 2026 Studegram Inc. All rights reserved.
+          © 2026 Unigather Inc. All rights reserved.
         </div>
       </div>
 
@@ -739,7 +739,7 @@ export default function Register({ onNavigate }) {
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-left text-xs space-y-2 text-slate-700">
                 <p className="font-bold text-[#0F172A]">What happens next?</p>
                 <ul className="list-disc pl-4 space-y-1.5 text-[11px] font-medium text-slate-600">
-                  <li>Studgram Admin verifies your uploaded legal company documents and profile.</li>
+                  <li>Unigather Admin verifies your uploaded legal company documents and profile.</li>
                   <li><strong>When approved:</strong> A random 6-digit password will be generated and emailed directly to <strong>{email}</strong>.</li>
                   <li>You can then sign in with that 6-digit password and edit or reset your password in your Profile.</li>
                 </ul>
