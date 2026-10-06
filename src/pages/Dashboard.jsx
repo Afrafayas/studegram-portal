@@ -2,11 +2,30 @@ import React from 'react';
 
 export default function Dashboard({ 
   applications = [], 
+  commissions = [],
   partnerName = 'Partner', 
   onViewDetails, 
   onViewHistory,
-  onNavigateDeadlines
+  onNavigateDeadlines,
+  onNewApplicationClick
 }) {
+    // Calculate Commission statistics
+  const claimedCommissions = commissions.length > 0 
+    ? commissions.filter(c => c.status === 'Claimed' || c.status === 'Pending Approval' || c.status === 'Paid')
+    : applications.filter(a => a.commissionClaimed || a.commissionStatus === 'Claimed' || a.commissionStatus === 'Paid');
+
+  const commissionClaimedCount = claimedCommissions.length;
+
+  const earnedCommissionAmount = commissions.length > 0
+    ? commissions.filter(c => c.status === 'Paid').reduce((sum, c) => sum + (Number(c.amount) || 0), 0)
+    : applications.filter(a => a.commissionStatus === 'Paid').reduce((sum, a) => sum + (Number(a.commissionAmount) || 0), 0);
+
+  const pendingCommissions = commissions.length > 0
+    ? commissions.filter(c => c.status === 'Claimed' || c.status === 'Pending Approval' || c.status === 'Under Review')
+    : applications.filter(a => a.commissionStatus === 'Claimed' || (['Visa Approved', 'Enrolled / Closed'].includes(a.status) && a.commissionStatus !== 'Paid'));
+
+  const commissionPendingCount = pendingCommissions.length;
+
   const stats = [
     {
       label: 'Total Applications',
@@ -42,16 +61,34 @@ export default function Dashboard({
       )
     },
     {
-      label: 'Offer Issued',
-      value: applications.filter(a => {
-        const s = (a.status || a.secondaryStatus || '').toLowerCase();
-        return s.includes('offer');
-      }).length.toString(),
-      color: 'text-indigo-600',
-      bgColor: 'bg-indigo-50',
+      label: 'Commissions Claimed',
+      value: commissionClaimedCount.toString(),
+      color: 'text-emerald-600',
+      bgColor: 'bg-emerald-50',
+      extra: (
+        <div className="mt-1 flex items-center gap-1 text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+          <span>Earned: ₹{earnedCommissionAmount.toLocaleString()}</span>
+        </div>
+      ),
       icon: (
-        <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+        <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      )
+    },
+    {
+      label: 'Commission Pending',
+      value: commissionPendingCount.toString(),
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-50',
+      extra: (
+        <div className="mt-1 flex items-center gap-1 text-[10px] font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+          <span>Awaiting Payout</span>
+        </div>
+      ),
+      icon: (
+        <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       )
     },
@@ -67,10 +104,10 @@ export default function Dashboard({
           s.includes('enrolled')
         );
       }).length.toString(),
-      color: 'text-[#10B981]',
-      bgColor: 'bg-emerald-50',
+      color: 'text-indigo-600',
+      bgColor: 'bg-indigo-50',
       icon: (
-        <svg className="w-5 h-5 text-[#10B981]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       )
@@ -144,48 +181,68 @@ export default function Dashboard({
   return (
     <div className="flex-1 p-8 space-y-8 bg-[#F0F2F5] animate-fade-in-up">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        {/* Cute Elephant SVG */}
-        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
-          {/* Back Legs */}
-          <rect x="22" y="52" width="8" height="16" rx="4" fill="#B87C0E" />
-          <rect x="42" y="52" width="8" height="16" rx="4" fill="#B87C0E" />
-          {/* Body */}
-          <circle cx="35" cy="42" r="20" fill="#D99A1C" />
-          {/* Head */}
-          <circle cx="52" cy="38" r="14" fill="#D99A1C" />
-          {/* Front Legs */}
-          <rect x="28" y="52" width="8" height="16" rx="4" fill="#D99A1C" />
-          <rect x="48" y="52" width="8" height="16" rx="4" fill="#D99A1C" />
-          {/* Ear */}
-          <circle cx="46" cy="34" r="6" fill="#FFFDF5" />
-          <circle cx="46" cy="34" r="4" fill="#E2A925" />
-          {/* Eye */}
-          <circle cx="56" cy="34" r="1.5" fill="#0F172A" />
-          {/* Trunk curling right */}
-          <path d="M 64 42 C 72 42 76 46 76 50 C 76 54 72 54 70 51" stroke="#D99A1C" strokeWidth="5" strokeLinecap="round" fill="none" />
-          {/* Tail */}
-          <path d="M 16 42 Q 10 40 12 46" stroke="#D99A1C" strokeWidth="2" strokeLinecap="round" fill="none" />
-        </svg>
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">{greeting}, {partnerName} 👋</h1>
-          <p className="text-xs text-[#64748B] font-medium">{todayFormatted}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-4">
+          {/* Cute Elephant SVG */}
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
+            {/* Back Legs */}
+            <rect x="22" y="52" width="8" height="16" rx="4" fill="#B87C0E" />
+            <rect x="42" y="52" width="8" height="16" rx="4" fill="#B87C0E" />
+            {/* Body */}
+            <circle cx="35" cy="42" r="20" fill="#D99A1C" />
+            {/* Head */}
+            <circle cx="52" cy="38" r="14" fill="#D99A1C" />
+            {/* Front Legs */}
+            <rect x="28" y="52" width="8" height="16" rx="4" fill="#D99A1C" />
+            <rect x="48" y="52" width="8" height="16" rx="4" fill="#D99A1C" />
+            {/* Ear */}
+            <circle cx="46" cy="34" r="6" fill="#FFFDF5" />
+            <circle cx="46" cy="34" r="4" fill="#E2A925" />
+            {/* Eye */}
+            <circle cx="56" cy="34" r="1.5" fill="#0F172A" />
+            {/* Trunk curling right */}
+            <path d="M 64 42 C 72 42 76 46 76 50 C 76 54 72 54 70 51" stroke="#D99A1C" strokeWidth="5" strokeLinecap="round" fill="none" />
+            {/* Tail */}
+            <path d="M 16 42 Q 10 40 12 46" stroke="#D99A1C" strokeWidth="2" strokeLinecap="round" fill="none" />
+          </svg>
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">{greeting}, {partnerName} 👋</h1>
+            <p className="text-xs text-[#64748B] font-medium">{todayFormatted}</p>
+          </div>
         </div>
+
+        {/* New Application CTA Button */}
+        {onNewApplicationClick && (
+          <button
+            onClick={onNewApplicationClick}
+            className="bg-[#D99A1C] hover:bg-[#C28410] text-black font-extrabold text-xs px-4 py-2.5 rounded-xl transition-all duration-150 hover:scale-[1.02] active:scale-95 shadow-md flex items-center gap-2 self-start sm:self-auto cursor-pointer"
+          >
+            <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+            </svg>
+            <span>+ New Application</span>
+          </button>
+        )}
       </div>
 
       {/* 4 Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {stats.map((stat, idx) => (
-          <div key={idx} className="bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-200 flex items-center justify-between group">
-            <div className="flex items-center gap-4">
-              <div className={`w-12 h-12 ${stat.bgColor} rounded-full flex items-center justify-center shrink-0`}>
+          <div key={idx} className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between group">
+            <div className="flex items-center gap-3">
+              <div className={`w-11 h-11 ${stat.bgColor} rounded-full flex items-center justify-center shrink-0`}>
                 {stat.icon}
               </div>
-              <div className="space-y-0.5">
-                <span className="text-[32px] font-bold tracking-tight text-[#0F172A] block leading-tight">{stat.value}</span>
-                <span className="text-xs text-[#64748B] font-semibold block">{stat.label}</span>
+              <div className="space-y-0.5 min-w-0">
+                <span className="text-[28px] font-black tracking-tight text-[#0F172A] block leading-tight">{stat.value}</span>
+                <span className="text-xs text-[#64748B] font-bold block truncate">{stat.label}</span>
               </div>
             </div>
+            {stat.extra && (
+              <div className="mt-2.5 pt-2 border-t border-slate-100">
+                {stat.extra}
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -197,12 +254,22 @@ export default function Dashboard({
           <div>
             <div className="px-6 py-4 border-b border-[#E2E8F0] flex justify-between items-center">
               <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">Recent Applications</h2>
-              <button 
-                onClick={() => onViewHistory && onViewHistory()}
-                className="text-xs text-[#D99A1C] font-semibold hover:underline"
-              >
-                View History
-              </button>
+              <div className="flex items-center gap-3">
+                {onNewApplicationClick && (
+                  <button 
+                    onClick={onNewApplicationClick}
+                    className="text-xs text-[#D99A1C] font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>+ New Application</span>
+                  </button>
+                )}
+                <button 
+                  onClick={() => onViewHistory && onViewHistory()}
+                  className="text-xs text-[#64748B] hover:text-[#0F172A] font-semibold hover:underline"
+                >
+                  View History
+                </button>
+              </div>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">

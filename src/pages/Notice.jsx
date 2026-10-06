@@ -39,6 +39,8 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
   const [formPosterUrl, setFormPosterUrl] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const [fileName, setFileName] = useState('');
+  const [isUploadingPoster, setIsUploadingPoster] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Lock background scrolling when modal is open
   useEffect(() => {
@@ -59,10 +61,16 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
   // Handle Poster File Upload & Convert to Base64
   const processFile = (file) => {
     if (file && file.type.startsWith('image/')) {
+      setIsUploadingPoster(true);
       setFileName(file.name);
       const reader = new FileReader();
       reader.onload = (e) => {
         setFormPosterUrl(e.target.result);
+        setIsUploadingPoster(false);
+      };
+      reader.onerror = () => {
+        setIsUploadingPoster(false);
+        toast.error('Failed to read image file.');
       };
       reader.readAsDataURL(file);
     } else {
@@ -99,6 +107,8 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
       return;
     }
 
+    setIsSubmitting(true);
+
     const dateStr = new Date().toLocaleDateString('en-GB', {
       day: '2-digit',
       month: 'short',
@@ -126,6 +136,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
     setFormMessage('');
     setFormPosterUrl('');
     setFileName('');
+    setIsSubmitting(false);
     setShowUploadModal(false);
   };
 
@@ -414,18 +425,26 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
                       type="file"
                       id="notice-file-upload"
                       accept="image/*"
+                      disabled={isUploadingPoster}
                       onChange={handleFileChange}
                       className="hidden"
                     />
                     <label htmlFor="notice-file-upload" className="flex flex-col items-center cursor-pointer space-y-2 w-full text-center">
                       <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center shadow-inner text-slate-500 mx-auto">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
+                        {isUploadingPoster ? (
+                          <svg className="animate-spin h-5 w-5 text-[#D99A1C]" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                        ) : (
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        )}
                       </div>
                       <div>
                         <p className="text-xs font-bold text-[#0F172A]">
-                          {fileName ? `File Selected: ${fileName}` : 'Click to Upload or Drag Poster here'}
+                          {isUploadingPoster ? 'Processing poster image...' : fileName ? `File Selected: ${fileName}` : 'Click to Upload or Drag Poster here'}
                         </p>
                         <p className="text-[10px] text-[#64748B] font-medium mt-0.5">Supports PNG, JPG, JPEG (will be compressed locally)</p>
                       </div>
@@ -454,9 +473,16 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 bg-[#D99A1C] hover:bg-[#C28410] text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-md hover:scale-[1.01]"
+                    disabled={isSubmitting || isUploadingPoster}
+                    className="flex-1 bg-[#D99A1C] hover:bg-[#C28410] disabled:opacity-50 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-md hover:scale-[1.01] flex items-center justify-center gap-2"
                   >
-                    Publish Notice Announcement
+                    {isSubmitting && (
+                      <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                    )}
+                    {isSubmitting ? 'Publishing Notice...' : 'Publish Notice Announcement'}
                   </button>
                 </div>
               </form>

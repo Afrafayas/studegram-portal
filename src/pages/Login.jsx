@@ -14,6 +14,13 @@ export default function Login({ onNavigate, onLoginSuccess }) {
   const [loginError, setLoginError] = useState('');
   const [accountStatusModal, setAccountStatusModal] = useState(null); // { status: 'Pending' | 'Rejected', message: '', reason: '' }
 
+  // Forgot password modal state
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotError, setForgotError] = useState('');
+  const [forgotSuccess, setForgotSuccess] = useState('');
+
   const validateForm = () => {
     let isValid = true;
     
@@ -78,6 +85,44 @@ export default function Login({ onNavigate, onLoginSuccess }) {
     .finally(() => {
       setIsLoading(false);
     });
+  };
+
+  const handleOpenForgotModal = (e) => {
+    e.preventDefault();
+    setForgotEmail(email || '');
+    setForgotError('');
+    setForgotSuccess('');
+    setShowForgotModal(true);
+  };
+
+  const handleForgotPasswordSubmit = async (e) => {
+    e.preventDefault();
+    setForgotError('');
+    setForgotSuccess('');
+
+    if (!forgotEmail.trim()) {
+      setForgotError('Please enter your registered email address.');
+      return;
+    }
+    if (!/\S+@\S+\.\S+/.test(forgotEmail)) {
+      setForgotError('Please enter a valid email address.');
+      return;
+    }
+
+    setForgotLoading(true);
+    try {
+      const res = await API.post('/partners/forgot-password', { email: forgotEmail.trim() });
+      if (res.data?.success) {
+        setForgotSuccess(res.data.message || 'A new 6-digit password has been sent to your registered email address.');
+        setEmail(forgotEmail.trim());
+      } else {
+        throw new Error(res.data?.message || 'Failed to send reset password.');
+      }
+    } catch (err) {
+      setForgotError(err.response?.data?.message || err.message || 'Failed to reset password. Please check your email.');
+    } finally {
+      setForgotLoading(false);
+    }
   };
 
   const getAlertConfig = () => {
@@ -341,7 +386,13 @@ export default function Login({ onNavigate, onLoginSuccess }) {
                 />
                 Remember me
               </label>
-              <a href="#" className="text-[#D99A1C] font-bold hover:underline">Forgot password?</a>
+              <button
+                type="button"
+                onClick={handleOpenForgotModal}
+                className="text-[#D99A1C] font-bold hover:underline cursor-pointer focus:outline-none"
+              >
+                Forgot password?
+              </button>
             </div>
 
             {/* Submit button with loading state */}
@@ -421,10 +472,139 @@ export default function Login({ onNavigate, onLoginSuccess }) {
 
             <button
               onClick={() => setAccountStatusModal(null)}
-              className="w-full bg-[#0F172A] hover:bg-black text-white font-bold py-2.5 rounded-xl text-xs transition-all uppercase tracking-wider"
+              className="w-full bg-[#0F172A] hover:bg-black text-white font-bold py-2.5 rounded-xl text-xs transition-all uppercase tracking-wider cursor-pointer"
             >
               Close Window
             </button>
+
+            <div className="pt-1 text-center">
+              <button
+                type="button"
+                onClick={() => setAccountStatusModal(null)}
+                className="text-xs text-slate-500 hover:text-[#D99A1C] font-bold underline transition-colors cursor-pointer"
+              >
+                Back to Login Page
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Forgot Password Modal */}
+      {showForgotModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200 select-none">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center space-y-5 relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#D99A1C] to-[#F5B025]"></div>
+
+            <div className="flex justify-between items-center pb-2 border-b border-slate-100">
+              <div className="text-left">
+                <span className="text-[10px] font-black text-[#D99A1C] uppercase tracking-wider">Account Recovery</span>
+                <h3 className="text-lg font-bold text-[#0F172A]">Forgot Password</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowForgotModal(false)}
+                className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition-colors focus:outline-none cursor-pointer"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 text-left leading-relaxed">
+              Enter your registered agency email address. A randomly generated <strong>6-digit password</strong> will be sent to your email immediately.
+            </p>
+
+            {forgotError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-xs p-3 rounded-xl text-left font-medium">
+                {forgotError}
+              </div>
+            )}
+
+            {forgotSuccess ? (
+              <div className="space-y-4 py-2 animate-in zoom-in-95 duration-200">
+                <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
+                  <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-sm font-bold text-slate-900">New Password Dispatched!</h4>
+                  <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                    {forgotSuccess}
+                  </p>
+                  <p className="text-[11px] text-amber-800 font-semibold bg-amber-50 border border-amber-200/80 p-2.5 rounded-xl mt-2 text-left">
+                    Check your email inbox or spam folder for your 6-digit login password, then sign in below. You can change your password anytime in your Profile.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowForgotModal(false)}
+                  className="w-full bg-[#0F172A] hover:bg-black text-white font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md"
+                >
+                  Return to Sign In
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleForgotPasswordSubmit} className="space-y-4 text-left">
+                <div className="space-y-1.5">
+                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
+                    Registered Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-[#0F172A] placeholder-slate-400 focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#D99A1C] transition-all"
+                    placeholder="partner@agency.com"
+                    value={forgotEmail}
+                    onChange={(e) => {
+                      setForgotEmail(e.target.value);
+                      if (forgotError) setForgotError('');
+                    }}
+                    disabled={forgotLoading}
+                    autoFocus
+                  />
+                </div>
+
+                <div className="flex items-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotModal(false)}
+                    className="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition-all cursor-pointer"
+                    disabled={forgotLoading}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={forgotLoading}
+                    className="w-2/3 bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    {forgotLoading ? (
+                      <>
+                        <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        <span>Sending...</span>
+                      </>
+                    ) : (
+                      <span>Send 6-Digit Password →</span>
+                    )}
+                  </button>
+                </div>
+
+                <div className="pt-2 text-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotModal(false)}
+                    className="text-xs text-slate-500 hover:text-[#D99A1C] font-bold underline transition-colors cursor-pointer"
+                  >
+                    ← Back to Login Page
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}

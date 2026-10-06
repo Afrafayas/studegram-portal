@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
+import ClaimCommissionConfirmModal from '../components/ClaimCommissionConfirmModal';
 
 export default function ApplicationHistory({ onAddApplicationClick, applications = [], duplicateAlert, setDuplicateAlert, onViewDetails, onEditClick, onRefreshApplications }) {
   const toast = useToast();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedAppForClaim, setSelectedAppForClaim] = useState(null);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -192,17 +194,9 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
                           ) : (
                             <button
                               type="button"
-                              onClick={async (e) => {
+                              onClick={(e) => {
                                 e.stopPropagation();
-                                try {
-                                  const res = await API.post(`/applications/${app.id}/claim-commission`);
-                                  if (res.data?.success) {
-                                    toast.success(`Commission claim submitted for ${app.camsId || app.studentName}!`);
-                                    if (onRefreshApplications) onRefreshApplications();
-                                  }
-                                } catch (err) {
-                                  toast.error(err.response?.data?.message || 'Failed to claim commission');
-                                }
+                                setSelectedAppForClaim(app);
                               }}
                               className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-[10px] uppercase px-3 py-1.5 rounded-xl transition-all shadow-sm active:scale-95 inline-flex items-center gap-1 cursor-pointer"
                               title="Claim Agency Commission Payout"
@@ -284,6 +278,16 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
           </div>
         )}
       </div>
+
+      {/* Claim Commission Confirmation Modal */}
+      <ClaimCommissionConfirmModal
+        isOpen={!!selectedAppForClaim}
+        application={selectedAppForClaim}
+        onClose={() => setSelectedAppForClaim(null)}
+        onConfirmed={() => {
+          if (onRefreshApplications) onRefreshApplications();
+        }}
+      />
     </div>
   );
 }

@@ -9,7 +9,8 @@ export default function Navbar({
   onLogout, 
   onToggleSidebar,
   onNavigatePage,
-  onSelectApplication
+  onSelectApplication,
+  onOpenProfile
 }) {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -19,6 +20,7 @@ export default function Navbar({
   const [commentsList, setCommentsList] = useState([]);
   const [unreadCommentsCount, setUnreadCommentsCount] = useState(0);
   const [showComments, setShowComments] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const displayInitials = partnerData?.name
     ? partnerData.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
@@ -42,11 +44,51 @@ export default function Navbar({
     try {
       const res = await API.get('/applications/recent-comments');
       if (res.data?.success && Array.isArray(res.data.data)) {
-        setCommentsList(res.data.data);
-        const unreplied = res.data.data.filter(c => c.isUnreplied).length;
+        const readStorageKey = 'studegram_portal_read_comments';
+        let readIds = new Set();
+        try {
+          readIds = new Set(JSON.parse(localStorage.getItem(readStorageKey) || '[]'));
+        } catch (e) {}
+
+        const updatedList = res.data.data.map(c => {
+          const idKey = c.commentId || `${c.applicationId}_${c.createdAt}`;
+          const isMarkedRead = readIds.has(idKey);
+          return {
+            ...c,
+            isUnreplied: isMarkedRead ? false : c.isUnreplied,
+            isRead: isMarkedRead
+          };
+        });
+
+        setCommentsList(updatedList);
+        const unreplied = updatedList.filter(c => c.isUnreplied).length;
         setUnreadCommentsCount(unreplied);
       }
     } catch (e) {}
+  };
+
+  const handleCommentClick = (comm) => {
+    setShowComments(false);
+    const readStorageKey = 'studegram_portal_read_comments';
+    try {
+      const readIds = new Set(JSON.parse(localStorage.getItem(readStorageKey) || '[]'));
+      const idKey = comm.commentId || `${comm.applicationId}_${comm.createdAt}`;
+      readIds.add(idKey);
+      localStorage.setItem(readStorageKey, JSON.stringify([...readIds]));
+    } catch (e) {}
+
+    setCommentsList(prev => prev.map(c => 
+      (c.applicationId === comm.applicationId)
+        ? { ...c, isUnreplied: false, isRead: true } 
+        : c
+    ));
+    setUnreadCommentsCount(prev => Math.max(0, prev - 1));
+
+    if (onSelectApplication) {
+      onSelectApplication(comm.applicationId);
+    } else if (onNavigatePage) {
+      onNavigatePage('ApplicationHistory');
+    }
   };
 
   useEffect(() => {
@@ -144,14 +186,6 @@ export default function Navbar({
           <p className="text-[10px] text-[#D99A1C] font-semibold">{userRoleDisplay}</p>
         </div>
 
-        {/* New Application Button */}
-        <button
-          onClick={onNewApplicationClick}
-          className="bg-[#D99A1C] hover:bg-[#C28410] text-black font-extrabold text-xs px-3.5 py-1.5 rounded-lg transition-all duration-150 hover:scale-[1.02] active:scale-95 shadow-sm whitespace-nowrap"
-        >
-          + New Application
-        </button>
-
         {/* Application Comments Icon & Drawer */}
         <div className="relative">
           <button
@@ -199,14 +233,7 @@ export default function Navbar({
                     commentsList.map((comm, idx) => (
                       <div 
                         key={comm.applicationId || idx} 
-                        onClick={() => {
-                          setShowComments(false);
-                          if (onSelectApplication) {
-                            onSelectApplication(comm.applicationId);
-                          } else if (onNavigatePage) {
-                            onNavigatePage('ApplicationHistory');
-                          }
-                        }}
+                        onClick={() => handleCommentClick(comm)}
                         className={`p-3 rounded-xl transition-all cursor-pointer group ${
                           comm.isUnreplied
                             ? 'bg-blue-950/80 border-l-4 border-l-blue-500 text-blue-100 font-bold shadow-md hover:bg-blue-900'
@@ -216,7 +243,7 @@ export default function Navbar({
                         <div className="flex justify-between items-start gap-2">
                           <h5 className="text-xs font-extrabold text-white group-hover:text-[#F5B025] transition-colors flex items-center gap-1.5">
                             {comm.isUnreplied && <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>}
-                            <span>{comm.camsId} &middot; {comm.studentName}</span>
+                            <span>{comm.camsId && !/[0-9a-fA-F]{24}/.test(comm.camsId) ? `${comm.camsId} · ` : ''}{comm.studentName}</span>
                           </h5>
                           <span className="text-[9px] text-slate-400 font-semibold shrink-0">
                             {comm.createdAt ? new Date(comm.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now'}
@@ -225,8 +252,8 @@ export default function Navbar({
                         <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">{comm.universityName} - {comm.courseName}</p>
                         <p className="text-[11px] font-semibold mt-1 leading-snug break-words">"{comm.text}"</p>
                         <div className="mt-2 flex items-center justify-between text-[9px]">
-                          <span className={`px-2 py-0.5 rounded font-extrabold uppercase ${comm.isUnreplied ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}>
-                            {comm.isUnreplied ? '💬 Unreplied Admin Message' : '✓ Replied / Read'}
+                          <span className={`px-2 py-0.5 rounded font-extrabold uppercase ${comm.isUnreplied ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-800 text-slate-400'}`}>
+                            {comm.isUnreplied ? (comm.lastRepliedBy === 'Admin' ? '💬 New Admin Reply' : '💬 Not Replied') : '✓ Replied / Read'}
                           </span>
                           <span className="text-[#D99A1C] font-extrabold group-hover:underline">Open Application →</span>
                         </div>
@@ -325,17 +352,69 @@ export default function Navbar({
           )}
         </div>
 
-        {/* User Avatar with Sign Out */}
-        <button
-          onClick={onLogout}
-          title="Sign Out / Logout"
-          className="relative cursor-pointer group focus:outline-none"
-        >
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#D99A1C] to-[#F5B025] flex items-center justify-center font-bold text-black text-xs shadow-md border-2 border-[#0A0A0F] group-hover:border-rose-500 transition-all">
-            {displayInitials}
-          </div>
-          <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[#10B981] rounded-full ring-2 ring-[#0A0A0F]"></span>
-        </button>
+        {/* User Avatar with Profile Dropdown Menu */}
+        <div className="relative">
+          <button
+            onClick={() => {
+              setShowUserMenu(!showUserMenu);
+              if (showNotifications) setShowNotifications(false);
+              if (showComments) setShowComments(false);
+            }}
+            title="Account & Profile Settings"
+            className="relative cursor-pointer group focus:outline-none flex items-center gap-2 p-1 rounded-xl hover:bg-white/5 transition-all"
+          >
+            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#D99A1C] to-[#F5B025] flex items-center justify-center font-bold text-black text-xs shadow-md border-2 border-[#0A0A0F] group-hover:scale-105 transition-all">
+              {displayInitials}
+            </div>
+            <span className="absolute bottom-1 left-7 w-2.5 h-2.5 bg-[#10B981] rounded-full ring-2 ring-[#0A0A0F]"></span>
+          </button>
+
+          {showUserMenu && (
+            <>
+              <div 
+                onClick={() => setShowUserMenu(false)}
+                className="fixed inset-0 z-10"
+              />
+              <div className="absolute right-0 top-11 w-64 bg-[#0A0A0F] border border-slate-800 rounded-2xl shadow-2xl py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="px-4 pb-3 border-b border-slate-900">
+                  <p className="text-xs font-bold text-white truncate">{partnerData?.name || 'Agent User'}</p>
+                  <p className="text-[10px] text-slate-400 truncate">{partnerData?.email}</p>
+                  <span className="inline-block mt-1.5 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-[#D99A1C]/10 text-[#D99A1C] border border-[#D99A1C]/20">
+                    {userRoleDisplay}
+                  </span>
+                </div>
+
+                <div className="p-1.5 space-y-1">
+                  <button
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      if (onOpenProfile) onOpenProfile();
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-200 hover:text-white hover:bg-white/10 transition-colors flex items-center gap-2.5 cursor-pointer"
+                  >
+                    <svg className="w-4 h-4 text-[#D99A1C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span>My Profile & Password</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      if (onLogout) onLogout();
+                    }}
+                    className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors flex items-center gap-2.5 cursor-pointer"
+                  >
+                    <svg className="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );

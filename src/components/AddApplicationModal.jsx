@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 
 export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
@@ -13,6 +13,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
   const [error, setError] = useState('');
 
   const [selectedStudent, setSelectedStudent] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedUniversity, setSelectedUniversity] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('');
 
@@ -26,9 +27,9 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
   const [newStudentGender, setNewStudentGender] = useState('');
   const [newStudentAddress, setNewStudentAddress] = useState('');
 
-  const [uploadedFiles, setUploadedFiles] = useState([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadError, setUploadError] = useState('');
+  const [documentsList, setDocumentsList] = useState([
+    { id: 1, name: '', fileName: '', url: '', isUploading: false, error: '' }
+  ]);
   const [notes, setNotes] = useState('');
   const [selectedIntake, setSelectedIntake] = useState('September 2026');
 
@@ -57,8 +58,117 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
     }
   }, [isOpen]);
 
+  const availableCountries = Array.from(
+    new Set([
+      ...universities.map(u => (u.country || '').trim()).filter(Boolean),
+      'United Kingdom',
+      'Canada',
+      'United States',
+      'Australia',
+      'Ireland',
+      'Germany',
+      'New Zealand'
+    ])
+  ).sort();
+
+  const filteredUniversities = universities.filter(univ => {
+    if (!selectedCountry) return false;
+    const uCountry = (univ.country || '').trim().toLowerCase();
+    const sel = selectedCountry.trim().toLowerCase();
+    return uCountry === sel ||
+      (sel === 'united kingdom' && (uCountry === 'uk' || uCountry === 'england')) ||
+      (sel === 'united states' && (uCountry === 'usa' || uCountry === 'us'));
+  });
+
+  const handleAddDocumentRow = () => {
+    setDocumentsList(prev => [
+      ...prev,
+      { id: Date.now() + Math.random(), name: '', fileName: '', url: '', isUploading: false, error: '' }
+    ]);
+  };
+
+  const handleRemoveDocumentRow = (id) => {
+    if (documentsList.length <= 1) {
+      setDocumentsList([{ id: Date.now(), name: '', fileName: '', url: '', isUploading: false, error: '' }]);
+    } else {
+      setDocumentsList(prev => prev.filter(doc => doc.id !== id));
+    }
+  };
+
+  const handleDocNameChange = (id, newName) => {
+    setDocumentsList(prev => prev.map(doc => doc.id === id ? { ...doc, name: newName, error: '' } : doc));
+  };
+
+  const handleClearFileForDoc = (id) => {
+    setDocumentsList(prev => prev.map(doc => 
+      doc.id === id ? { ...doc, fileName: '', url: '', isUploading: false, error: '' } : doc
+    ));
+  };
+
+  const handleFileUploadForDoc = async (id, file) => {
+    if (!file) return;
+
+    if (file.size > 15 * 1024 * 1024) {
+      setDocumentsList(prev => prev.map(doc => 
+        doc.id === id ? { ...doc, error: 'File size exceeds 15MB limit.' } : doc
+      ));
+      return;
+    }
+
+    setDocumentsList(prev => prev.map(doc => 
+      doc.id === id ? { ...doc, isUploading: true, error: '' } : doc
+    ));
+
+    try {
+      let fileUrl = '';
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const uploadRes = await API.post('/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        if (uploadRes.data?.success && (uploadRes.data.url || uploadRes.data.fileUrl)) {
+          fileUrl = uploadRes.data.url || uploadRes.data.fileUrl;
+        } else if (uploadRes.data?.url) {
+          fileUrl = uploadRes.data.url;
+        }
+      } catch (uploadErr) {
+        console.warn('API /upload fallback to FileReader:', uploadErr.message);
+      }
+
+      if (!fileUrl) {
+        fileUrl = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(file);
+        });
+      }
+
+      setDocumentsList(prev => prev.map(doc => {
+        if (doc.id === id) {
+          const cleanName = doc.name.trim() || file.name.replace(/\.[^/.]+$/, '');
+          return {
+            ...doc,
+            name: cleanName,
+            fileName: file.name,
+            url: fileUrl,
+            isUploading: false,
+            error: ''
+          };
+        }
+        return doc;
+      }));
+    } catch (err) {
+      console.error('File upload error:', err);
+      setDocumentsList(prev => prev.map(doc => 
+        doc.id === id ? { ...doc, isUploading: false, error: 'Failed to upload document file.' } : doc
+      ));
+    }
+  };
+
   const handleResetAndClose = () => {
     setSelectedStudent('');
+    setSelectedCountry('');
     setSelectedUniversity('');
     setSelectedCourse('');
     setStudentSelectionMode('existing');
@@ -69,9 +179,9 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
     setNewStudentDob('');
     setNewStudentGender('');
     setNewStudentAddress('');
-    setUploadedFiles([]);
-    setIsUploading(false);
-    setUploadError('');
+    setDocumentsList([
+      { id: 1, name: '', fileName: '', url: '', isUploading: false, error: '' }
+    ]);
     setNotes('');
     setStepNumber(1);
     onClose();
@@ -89,11 +199,16 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
         return;
       }
     }
+    if (!selectedCountry) {
+      setError('Please select a destination country.');
+      return;
+    }
     if (!selectedUniversity || !selectedCourse) {
       setError('Please select a university and course.');
       return;
     }
-    if (uploadedFiles.length === 0) {
+    const validDocs = documentsList.filter(d => d.url);
+    if (validDocs.length === 0) {
       setError('Please upload at least one document (e.g. Passport Bio-Page, Transcripts) to submit the application.');
       return;
     }
@@ -120,17 +235,24 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
           throw new Error(studentResult?.message || 'Failed to create new student profile.');
         }
         studentId = studentResult.data._id;
+        setStudents(prev => [studentResult.data, ...prev]);
       }
+
+      const finalDocuments = validDocs.map(d => ({
+        name: d.name.trim() || d.fileName || 'Supporting Document',
+        title: d.name.trim() || d.fileName || 'Supporting Document',
+        fileName: d.fileName || (d.url ? d.url.split('/').pop().split('?')[0] : '') || d.name.trim(),
+        url: d.url,
+        comment: d.name.trim(),
+        uploadedAt: new Date().toISOString()
+      }));
 
       const success = await onSubmit({
         studentId: studentId,
         universityId: selectedUniversity,
         courseId: selectedCourse,
         intake: selectedIntake,
-        documents: uploadedFiles.map(file => ({
-          ...file,
-          comment: notes.trim()
-        })),
+        documents: finalDocuments,
         notes: notes
       });
       if (success) {
@@ -232,25 +354,34 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                   </div>
 
                   {studentSelectionMode === 'existing' ? (
-                    <div className="relative">
-                      <select
-                        required={studentSelectionMode === 'existing'}
-                        value={selectedStudent}
-                        onChange={(e) => setSelectedStudent(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
-                      >
-                        <option value="">-- Choose Student --</option>
-                        {students.map((student, idx) => (
-                          <option key={student._id} value={student._id}>
-                            STD-{10001 + idx} - {student.name} ({student.passportNo || 'No Passport'})
+                    <div>
+                      <div className="relative">
+                        <select
+                          required={studentSelectionMode === 'existing'}
+                          value={selectedStudent}
+                          onChange={(e) => setSelectedStudent(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
+                        >
+                          <option value="">
+                            {students.length === 0 ? '-- No Registered Students Found --' : '-- Choose Student --'}
                           </option>
-                        ))}
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
-                        <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                        </svg>
+                          {students.map((student, idx) => (
+                            <option key={student._id} value={student._id}>
+                              STD-{10001 + idx} - {student.name} ({student.passportNo || 'No Passport'})
+                            </option>
+                          ))}
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
+                          <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
                       </div>
+                      {students.length === 0 && (
+                        <p className="text-[10px] text-amber-600 font-semibold mt-1.5 flex items-center gap-1">
+                          <span>💡</span> You haven't registered any students yet. Select <strong>Register New Student</strong> above to register your student.
+                        </p>
+                      )}
                     </div>
                   ) : (
                     <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 space-y-3 shadow-inner">
@@ -340,23 +471,68 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                   )}
                 </div>
 
-                {/* University Dropdown */}
+                {/* Destination Country Dropdown */}
                 <div>
-                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Select University</label>
+                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">
+                    Destination Country *
+                  </label>
                   <div className="relative">
                     <select
                       required
+                      value={selectedCountry}
+                      onChange={(e) => {
+                        setSelectedCountry(e.target.value);
+                        setSelectedUniversity('');
+                        setSelectedCourse('');
+                      }}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
+                    >
+                      <option value="">-- Choose Country First --</option>
+                      {availableCountries.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
+                      <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* University Dropdown (filtered by selected country) */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
+                      Select University *
+                    </label>
+                    {selectedCountry && (
+                      <span className="text-[10px] font-bold text-[#D99A1C]">
+                        {filteredUniversities.length} institution{filteredUniversities.length !== 1 ? 's' : ''} in {selectedCountry}
+                      </span>
+                    )}
+                  </div>
+                  <div className="relative">
+                    <select
+                      required
+                      disabled={!selectedCountry}
                       value={selectedUniversity}
                       onChange={(e) => {
                         setSelectedUniversity(e.target.value);
                         setSelectedCourse(''); // Reset course
                       }}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A]"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold text-[#0F172A] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <option value="">-- Choose University --</option>
-                      {universities.map((univ, idx) => (
+                      <option value="">
+                        {!selectedCountry 
+                          ? '-- Select Country First --' 
+                          : filteredUniversities.length === 0 
+                            ? `-- No Universities in ${selectedCountry} --` 
+                            : '-- Choose University --'}
+                      </option>
+                      {filteredUniversities.map((univ, idx) => (
                         <option key={univ._id} value={univ._id}>
-                          UNIV-{10001 + idx} - {univ.name} ({univ.country || 'Unknown'})
+                          UNIV-{10001 + idx} - {univ.name} ({univ.city ? `${univ.city}, ` : ''}{univ.country})
                         </option>
                       ))}
                     </select>
@@ -366,6 +542,11 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                       </svg>
                     </div>
                   </div>
+                  {selectedCountry && filteredUniversities.length === 0 && (
+                    <p className="text-[10px] text-amber-600 font-semibold mt-1">
+                      ⚠️ No institutions found for {selectedCountry}. Please select another country.
+                    </p>
+                  )}
                 </div>
 
                 {/* Course Dropdown */}
@@ -425,89 +606,136 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                 </div>
               </div>
 
-              {/* Document upload section */}
-              <div className="space-y-3">
-                <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
-                  Supporting Documents *
-                </label>
-                <div className="border-2 border-dashed border-[#E2E8F0] hover:border-[#D99A1C] transition-colors rounded-xl p-4 text-center cursor-pointer relative bg-slate-50">
-                  <input
-                    type="file"
-                    multiple
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    onChange={async (e) => {
-                      const files = Array.from(e.target.files || []);
-                      if (files.length === 0) return;
-                      setIsUploading(true);
-                      setUploadError('');
-                      try {
-                        const uploadPromises = files.map(async (file) => {
-                          const formData = new FormData();
-                          formData.append('file', file);
-                          const res = await API.post('/upload', formData, {
-                            headers: { 'Content-Type': 'multipart/form-data' }
-                          });
-                          return { name: file.name, url: res.data.url };
-                        });
-                        const results = await Promise.all(uploadPromises);
-                        setUploadedFiles(prev => [...prev, ...results]);
-                      } catch (err) {
-                        console.error('File upload failed:', err);
-                        setUploadError('Failed to upload some documents. Please check your connection.');
-                      } finally {
-                        setIsUploading(false);
-                      }
-                    }}
-                  />
-                  <div className="space-y-1 text-slate-500">
-                    <svg className="w-6 h-6 mx-auto text-[#D99A1C]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                    <p className="text-xs font-semibold text-slate-700">Click or drag files here to upload</p>
-                    <p className="text-[10px] text-slate-400 font-semibold">Upload at least one document (PDF, PNG, JPG, Word)</p>
-                  </div>
+              {/* Supporting Documents Section */}
+              <div className="space-y-3 text-left">
+                <div className="flex items-center justify-between">
+                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
+                    Supporting Documents *
+                  </label>
+                  <span className="text-[10px] text-slate-400 font-semibold">
+                    {documentsList.filter(d => d.url).length} uploaded
+                  </span>
                 </div>
 
-                {isUploading && (
-                  <p className="text-[10px] text-[#D99A1C] font-semibold animate-pulse">â³ Uploading files, please wait...</p>
-                )}
-                {uploadError && (
-                  <p className="text-[10px] text-red-500 font-semibold">âŒ {uploadError}</p>
-                )}
-
-                {/* Uploaded Documents & Per-Document Comments */}
-                {uploadedFiles.length > 0 && (
-                  <div className="space-y-2 pt-2">
-                    <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider text-left">
-                      📄 Uploaded Documents & Descriptions
-                    </label>
-                    {uploadedFiles.map((file, idx) => (
-                      <div key={idx} className="bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-2 text-left">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
-                            <svg className="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            <span className="truncate max-w-[220px]">{file.name}</span>
-                          </div>
+                <div className="space-y-3">
+                  {documentsList.map((doc, idx) => (
+                    <div 
+                      key={doc.id}
+                      className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-3 transition-all"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-extrabold text-[#D99A1C] uppercase tracking-wider">
+                          Document #{idx + 1}
+                        </span>
+                        {documentsList.length > 1 && (
                           <button
                             type="button"
-                            onClick={() => setUploadedFiles(prev => prev.filter((_, i) => i !== idx))}
-                            className="text-xs text-red-500 hover:text-red-700 font-bold cursor-pointer"
+                            onClick={() => handleRemoveDocumentRow(doc.id)}
+                            className="text-[11px] text-rose-500 hover:text-rose-700 font-bold flex items-center gap-1 cursor-pointer transition-colors"
                           >
                             ✕ Remove
                           </button>
-                        </div>
+                        )}
+                      </div>
+
+                      {/* File Name / Document Title Input Box */}
+                      <div className="space-y-1">
+                        <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">
+                          Document Name *
+                        </label>
                         <input
                           type="text"
-                          placeholder="Document description (e.g. Passport Front Page, Semester 1-6 Marksheet)..."
-                          value={file.comment || ''}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setUploadedFiles(prev => prev.map((f, i) => i === idx ? { ...f, comment: val } : f));
-                          }}
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#D99A1C]"
+                          value={doc.name}
+                          onChange={(e) => handleDocNameChange(doc.id, e.target.value)}
+                          placeholder="e.g. Passport Bio Page, Degree Certificate, 12th Marksheet..."
+                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-[#0F172A] placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#D99A1C]"
                         />
                       </div>
-                    ))}
-                  </div>
-                )}
+
+                      {/* File Upload Selector */}
+                      <div className="space-y-1">
+                        <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">
+                          Upload File (PDF, PNG, JPG, Word) *
+                        </label>
+                        {!doc.url ? (
+                          <div className="border-2 border-dashed border-slate-200 hover:border-[#D99A1C] transition-colors rounded-xl p-3.5 text-center relative bg-white cursor-pointer">
+                            <input
+                              type="file"
+                              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                              disabled={doc.isUploading}
+                              onChange={(e) => handleFileUploadForDoc(doc.id, e.target.files?.[0])}
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                            />
+                            {doc.isUploading ? (
+                              <div className="flex items-center justify-center gap-2 py-1 text-xs text-[#D99A1C] font-bold">
+                                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                </svg>
+                                <span>Uploading file, please wait...</span>
+                              </div>
+                            ) : (
+                              <div className="space-y-0.5 py-1">
+                                <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-[#0F172A]">
+                                  <svg className="w-4 h-4 text-[#D99A1C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                  </svg>
+                                  <span>Choose File to Upload</span>
+                                </div>
+                                <p className="text-[10px] text-slate-400 font-semibold">
+                                  PDF, PNG, JPG, Word up to 15MB
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-2 truncate">
+                              <span className="text-emerald-600 font-bold text-base">📄</span>
+                              <div className="truncate text-left">
+                                <p className="font-bold text-slate-800 truncate">{doc.fileName}</p>
+                                <p className="text-[10px] text-emerald-700 font-semibold">✓ Uploaded successfully</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <label className="text-xs text-[#D99A1C] hover:text-[#B77E15] font-bold cursor-pointer">
+                                Change
+                                <input
+                                  type="file"
+                                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                  className="hidden"
+                                  onChange={(e) => handleFileUploadForDoc(doc.id, e.target.files?.[0])}
+                                />
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => handleClearFileForDoc(doc.id)}
+                                className="text-xs text-rose-500 hover:text-rose-700 font-bold ml-1 cursor-pointer"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                        {doc.error && (
+                          <p className="text-[10px] text-rose-500 font-bold mt-1">{doc.error}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Add Another Document Button */}
+                <button
+                  type="button"
+                  onClick={handleAddDocumentRow}
+                  className="w-full py-2.5 border-2 border-dashed border-[#D99A1C]/50 hover:border-[#D99A1C] hover:bg-amber-50/40 rounded-xl text-xs font-bold text-[#D99A1C] flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>+ Add Another Document</span>
+                </button>
               </div>
 
               {/* Application-Level General Comment */}
@@ -529,8 +757,8 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                 type="submit"
                 disabled={
                   isSubmitting ||
-                  isUploading ||
-                  uploadedFiles.length === 0 ||
+                  documentsList.some(d => d.isUploading) ||
+                  !documentsList.some(d => d.url) ||
                   (studentSelectionMode === 'existing' && !selectedStudent) ||
                   (studentSelectionMode === 'new' && (!newStudentName || !newStudentEmail || !newStudentPhone)) ||
                   !selectedUniversity ||
@@ -567,7 +795,9 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                 <path d="M 64 42 C 72 42 76 46 76 50 C 76 54 72 54 70 51" stroke="#94A3B8" strokeWidth="5" strokeLinecap="round" fill="none" />
                 <path d="M 16 42 Q 10 40 12 46" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" fill="none" />
               </svg>
-              <h3 className="text-base font-bold text-[#10B981] mt-2">ðŸŽ‰ Application Submitted!</h3>
+              <h3 className="text-base font-bold text-[#10B981] mt-2 flex items-center justify-center gap-1.5">
+                <span>🎉</span> Application Submitted!
+              </h3>
               <p className="text-xs text-[#64748B] font-semibold max-w-xs leading-relaxed">
                 Your application has been logged in the Studegram system. Our handlers will verify the information.
               </p>

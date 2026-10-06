@@ -5,6 +5,8 @@ import AddApplicationModal from './components/AddApplicationModal';
 import ApplicationDetailsModal from './components/ApplicationDetailsModal';
 import EditApplicationModal from './components/EditApplicationModal';
 import NotificationPopup from './components/NotificationPopup';
+import LogoutConfirmModal from './components/LogoutConfirmModal';
+import ProfileModal from './components/ProfileModal';
 
 // Auth Pages
 import Login from './pages/Login';
@@ -13,6 +15,7 @@ import Register from './pages/Register';
 // Portal Pages
 import Dashboard from './pages/Dashboard';
 import ApplicationHistory from './pages/ApplicationHistory';
+import Commissions from './pages/Commissions';
 import SearchCourses from './pages/SearchCourses';
 import Notice from './pages/Notice';
 import UniversityDeadline from './pages/UniversityDeadline';
@@ -38,10 +41,16 @@ export default function App() {
       return null;
     }
   });
-  const [activePage, setActivePage] = useState('Dashboard');
+  const [activePage, setActivePage] = useState(() => {
+    return localStorage.getItem('studegram_portal_active_page') || 'Dashboard';
+  });
   const [navigationHistory, setNavigationHistory] = useState([]);
-  const prevActivePageRef = useRef('Dashboard');
+  const prevActivePageRef = useRef(localStorage.getItem('studegram_portal_active_page') || 'Dashboard');
   const isBackNavRef = useRef(false);
+
+  useEffect(() => {
+    localStorage.setItem('studegram_portal_active_page', activePage);
+  }, [activePage]);
 
   useEffect(() => {
     if (isBackNavRef.current) {
@@ -81,9 +90,25 @@ export default function App() {
   const [selectedNoticeId, setSelectedNoticeId] = useState(null);
 
   const [applications, setApplications] = useState([]);
+  const [commissions, setCommissions] = useState([]);
+
+  const fetchCommissions = async () => {
+    const token = localStorage.getItem('partner_token') || localStorage.getItem('token');
+    if (!token) return;
+    try {
+      const res = await API.get('/commissions');
+      if (res.data?.success && Array.isArray(res.data.data)) {
+        setCommissions(res.data.data);
+      }
+    } catch (err) {
+      console.warn('Failed to load commissions:', err.message);
+    }
+  };
   const [isLoadingApps, setIsLoadingApps] = useState(false);
   const [duplicateAlert, setDuplicateAlert] = useState(null);
   const [pendingVerificationModalOpen, setPendingVerificationModalOpen] = useState(false);
+  const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   const fetchApplications = async () => {
     const token = localStorage.getItem('partner_token');
@@ -123,7 +148,12 @@ export default function App() {
         applicationComments: app.applicationComments || [],
         commissionStatus: app.commissionStatus || 'Unclaimed',
         paymentStatus: app.paymentStatus || 'Paid',
-        commissionAmount: app.commissionAmount || 500
+        commissionAmount: app.commissionAmount || 0,
+        commissionRate: app.commissionRate || 10,
+        commissionType: app.commissionType || 'percentage',
+        isCommissionSet: Boolean(app.isCommissionSet),
+        universityPaid: Boolean(app.universityPaid),
+        universityPaymentStatus: app.universityPaymentStatus || 'Waiting for University to Pay'
       }));
       setApplications(mapped);
     } catch (err) {
@@ -150,6 +180,7 @@ export default function App() {
   React.useEffect(() => {
     if (currentPage === 'dashboard') {
       fetchApplications();
+      fetchCommissions();
       fetchPartnerProfile();
     } else if (currentPage === 'history') {
       fetchApplications();
@@ -189,8 +220,10 @@ export default function App() {
     localStorage.removeItem('partner_data');
     localStorage.removeItem('studegram_closed_notifications');
     localStorage.removeItem('studegram_read_notifications');
+    localStorage.removeItem('studegram_portal_active_page');
     setNavigationHistory([]);
     prevActivePageRef.current = 'Dashboard';
+    setActivePage('Dashboard');
     setCurrentPage('login');
   };
 
@@ -200,10 +233,12 @@ export default function App() {
         return (
           <Dashboard 
             applications={applications}
+            commissions={commissions}
             partnerName={partnerData?.name || partnerData?.companyName || 'Partner'}
             onViewDetails={(app) => setSelectedAppForDetails(app)}
             onViewHistory={() => setActivePage('ApplicationHistory')}
             onNavigateDeadlines={() => setActivePage('UniversityDeadline')}
+            onNewApplicationClick={handleOpenNewApplicationModal}
           />
         );
       case 'ApplicationHistory':
@@ -215,7 +250,22 @@ export default function App() {
             setDuplicateAlert={setDuplicateAlert}
             onViewDetails={(app) => setSelectedAppForDetails(app)}
             onEditClick={(app) => setSelectedAppForEdit(app)}
-            onRefreshApplications={fetchApplications}
+            onRefreshApplications={() => {
+              fetchApplications();
+              fetchCommissions();
+            }}
+          />
+        );
+      case 'Commissions':
+        return (
+          <Commissions 
+            applications={applications}
+            commissions={commissions}
+            onRefresh={() => {
+              fetchApplications();
+              fetchCommissions();
+            }}
+            onViewDetails={(app) => setSelectedAppForDetails(app)}
           />
         );
       case 'SearchCourses':
@@ -269,6 +319,7 @@ export default function App() {
         onLoginSuccess={() => {
           setCurrentPage('dashboard');
           setActivePage('Dashboard');
+          localStorage.setItem('studegram_portal_active_page', 'Dashboard');
           setNavigationHistory([]);
           prevActivePageRef.current = 'Dashboard';
           try {
@@ -301,9 +352,10 @@ export default function App() {
         partnerData={partnerData}
         onBack={handleBack}
         onNewApplicationClick={handleOpenNewApplicationModal} 
-        onLogout={handleLogout} 
+        onLogout={() => setShowLogoutConfirmModal(true)} 
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         onNavigatePage={(page) => setActivePage(page)}
+        onOpenProfile={() => setShowProfileModal(true)}
         onSelectApplication={(appId) => {
           setActivePage('ApplicationHistory');
           if (typeof appId === 'object' && appId !== null) {
@@ -322,9 +374,11 @@ export default function App() {
           activePage={activePage} 
           setActivePage={setActivePage} 
           partnerData={partnerData}
-          onLogout={handleLogout} 
+          onLogout={() => setShowLogoutConfirmModal(true)} 
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
+          onNewApplicationClick={handleOpenNewApplicationModal}
+          onOpenProfile={() => setShowProfileModal(true)}
         />
 
         {/* Content Area */}
@@ -362,6 +416,21 @@ export default function App() {
           setActivePage('Notice');
           setSelectedNoticeId(noticeId);
         }}
+      />
+
+      {/* Logout Confirmation Modal */}
+      <LogoutConfirmModal
+        isOpen={showLogoutConfirmModal}
+        onClose={() => setShowLogoutConfirmModal(false)}
+        onConfirm={handleLogout}
+      />
+
+      {/* Agent Profile & Password Reset Modal */}
+      <ProfileModal
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+        partnerData={partnerData}
+        onProfileUpdated={fetchPartnerProfile}
       />
 
       {/* Verification Pending Modal */}
