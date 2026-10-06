@@ -1,5 +1,5 @@
 /**
- * API Helper for Studegram Portal
+ * API Helper for Unigather Portal
  */
 
 export function getAuthHeaders(extraHeaders = {}) {

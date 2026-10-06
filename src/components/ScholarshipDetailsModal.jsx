@@ -160,7 +160,7 @@ export default function ScholarshipDetailsModal({ isOpen, onClose, scholarship }
                   <div className="space-y-2 text-[#475569]">
                     <h5 className="text-[9px] font-extrabold text-[#0F172A] uppercase tracking-wider">Default Requirements:</h5>
                     <ul className="list-disc list-inside space-y-1">
-                      <li>Must hold an active application profile on the Studegram agent database.</li>
+                      <li>Must hold an active application profile on the Unigather agent database.</li>
                       <li>Must qualify as an international student paying overseas tuition fees.</li>
                       <li>Excellent behavioral recommendations and zero visa refusal history.</li>
                     </ul>
@@ -205,7 +205,7 @@ export default function ScholarshipDetailsModal({ isOpen, onClose, scholarship }
                       { step: 'Step 1', title: 'Secure Academic Admission Offer', desc: 'Apply and receive a valid conditional or unconditional offer letter from the university.' },
                       { step: 'Step 2', title: 'Prepare Scholarship Document Suite', desc: 'Draft your Scholarship SOP, obtain LOR references, and organize your academic transcript files.' },
                       { step: 'Step 3', title: 'Access Scholarship Application Portal', desc: 'Use the university applicant login or submit via the dedicated regional sponsor portal.' },
-                      { step: 'Step 4', title: 'File Application & Track Status', desc: 'Submit the application online and notify the Studegram processing desk to log reference numbers.' }
+                      { step: 'Step 4', title: 'File Application & Track Status', desc: 'Submit the application online and notify the Unigather processing desk to log reference numbers.' }
                     ].map((s, idx) => (
                       <div key={idx} className="relative flex gap-4 text-left text-xs font-semibold">
                         <span className="absolute -left-[20.5px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-indigo-600 bg-white z-10" />

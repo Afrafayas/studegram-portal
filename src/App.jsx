@@ -297,7 +297,7 @@ export default function App() {
               </div>
               <div className="space-y-1">
                 <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">{activePage.replace(/([A-Z])/g, ' $1').trim()}</h2>
-                <p className="text-[11px] text-[#64748B] font-semibold leading-relaxed">This section is being synchronized under the new Studegram data framework.</p>
+                <p className="text-[11px] text-[#64748B] font-semibold leading-relaxed">This section is being synchronized under the new Unigather data framework.</p>
               </div>
               <button 
                 onClick={() => setActivePage('Dashboard')}
@@ -453,7 +453,7 @@ export default function App() {
             </div>
 
             <p className="text-xs text-[#64748B] leading-relaxed font-medium">
-              Your agency registration is currently under review by the Studgram Admin team. Please wait for verification and approval before submitting student applications or managing agency staff.
+              Your agency registration is currently under review by the Unigather Admin team. Please wait for verification and approval before submitting student applications or managing agency staff.
             </p>
 
             <button

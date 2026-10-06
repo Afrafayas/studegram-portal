@@ -799,7 +799,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                 <span>🎉</span> Application Submitted!
               </h3>
               <p className="text-xs text-[#64748B] font-semibold max-w-xs leading-relaxed">
-                Your application has been logged in the Studegram system. Our handlers will verify the information.
+                Your application has been logged in the Unigather system. Our handlers will verify the information.
               </p>
               <button
                 type="button"

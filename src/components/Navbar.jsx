@@ -158,11 +158,11 @@ export default function Navbar({
         )}
  
         <div className="w-8 h-8 md:w-9 h-9 rounded-xl bg-gradient-to-tr from-[#D99A1C] to-[#F5B025] flex items-center justify-center font-extrabold text-black text-sm md:text-lg shadow-sm">
-          S
+          U
         </div>
         <div className="flex items-center gap-1.5">
           <span className="font-extrabold text-base md:text-xl tracking-tight text-white">
-            Studegram
+            Unigather
           </span>
           {activePage && (
             <>

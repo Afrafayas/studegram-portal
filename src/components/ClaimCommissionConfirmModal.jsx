@@ -118,7 +118,7 @@ export default function ClaimCommissionConfirmModal({ isOpen, onClose, applicati
 
         {/* Informational Message */}
         <p className="text-xs text-slate-500 leading-relaxed font-medium">
-          Are you sure you want to submit this commission claim? Once confirmed, your claim will be forwarded to the Studgram Admin team for review and disbursement.
+          Are you sure you want to submit this commission claim? Once confirmed, your claim will be forwarded to the Unigather Admin team for review and disbursement.
         </p>
 
         {/* Actions */}
