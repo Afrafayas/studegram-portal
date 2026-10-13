@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import { notices } from '../data/notices';
 import { useToast } from '../context/ToastContext';
@@ -325,9 +326,9 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
       </div>
 
       {/* Add Notice Modal Sheet */}
-      {showUploadModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 animate-fadeIn">
-          <div className="bg-white border border-slate-100 rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden animate-scaleIn">
+      {showUploadModal && createPortal(
+        <div className="fixed inset-0 z-[9999] overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 animate-fadeIn">
+          <div className="bg-white border border-slate-100 rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden animate-scaleIn max-h-[90vh] flex flex-col my-auto">
             
             {/* Modal Header */}
             <div className="bg-slate-950 p-6 text-white border-b border-slate-900 flex justify-between items-center">
@@ -488,7 +489,8 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

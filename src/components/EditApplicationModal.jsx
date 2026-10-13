@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
@@ -168,14 +169,13 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
   const inputClass = "w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-[#0F172A] font-semibold focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white transition-all";
   const labelClass = "block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1";
 
-  return (
+  return createPortal(
     <div
-      onClick={onClose}
-      className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-[9999] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <div
         onClick={e => e.stopPropagation()}
-        className="bg-white border border-slate-100 rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden transform transition-all duration-300"
+        className="bg-white border border-slate-100 rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden transform transition-all duration-300 max-h-[90vh] flex flex-col my-auto"
       >
         {/* Header */}
         <div className="bg-slate-950 px-6 py-5 text-white flex justify-between items-center">
@@ -489,6 +489,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

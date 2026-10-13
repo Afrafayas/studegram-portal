@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useState } from 'react';
 import { useToast } from '../context/ToastContext';
 
@@ -316,16 +317,10 @@ export default function SearchCourses({ onApplyCourse }) {
       </div>
 
       {/* Manual Course Request Modal */}
-      {showManualModal && (
-        <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" 
-          onClick={() => {
-            setShowManualModal(false);
-            setIsSubmitted(false);
-          }}
-        >
+      {showManualModal && createPortal(
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 overflow-y-auto">
           <div 
-            className="bg-white rounded-2xl w-full max-w-md shadow-2xl relative flex flex-col p-6 space-y-4" 
+            className="bg-white rounded-2xl w-full max-w-md shadow-2xl relative flex flex-col p-6 space-y-4 max-h-[90vh] overflow-y-auto my-auto" 
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -458,7 +453,8 @@ export default function SearchCourses({ onApplyCourse }) {
               </form>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

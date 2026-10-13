@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
@@ -270,9 +271,9 @@ export default function AgentRolePermissions({ partnerData }) {
       </div>
 
       {/* MODAL */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs select-none p-4">
-          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      {isModalOpen && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-xs select-none p-4 overflow-y-auto">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] my-auto">
             <div className="flex justify-between items-center p-4 bg-[#0F172A] text-white">
               <div>
                 <h3 className="text-sm font-bold uppercase tracking-wider">
@@ -413,7 +414,8 @@ export default function AgentRolePermissions({ partnerData }) {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

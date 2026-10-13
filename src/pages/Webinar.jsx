@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
@@ -442,10 +443,10 @@ export default function Webinar() {
       </div>
 
       {/* Host Webinar / Upload Poster Modal */}
-      {showUploadModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-xs select-none p-4">
+      {showUploadModal && createPortal(
+        <div className="fixed inset-0 z-[9999] overflow-y-auto bg-black/60 backdrop-blur-xs select-none p-4">
           <div className="flex min-h-full items-center justify-center">
-            <div className="bg-white border border-[#E2E8F0] rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl animate-scaleUp">
+            <div className="bg-white border border-[#E2E8F0] rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl animate-scaleUp max-h-[90vh] flex flex-col my-auto">
               
               {/* Modal Header */}
               <div className="px-6 py-4 bg-[#0F172A] text-white flex items-center justify-between text-left">
@@ -464,7 +465,7 @@ export default function Webinar() {
               </div>
 
               {/* Modal Body / Scrollable Form */}
-              <form onSubmit={handleUploadSubmit} className="p-6 space-y-6 text-left">
+              <form onSubmit={handleUploadSubmit} className="p-6 space-y-6 text-left overflow-y-auto flex-1">
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Title */}
@@ -617,7 +618,8 @@ export default function Webinar() {
               </form>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

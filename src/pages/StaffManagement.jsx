@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
@@ -525,11 +526,11 @@ export default function StaffManagement({ partnerData }) {
       </div>
 
       {/* Add / Edit Staff Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      {isModalOpen && createPortal(
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[9999] flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col my-auto">
             {/* Modal Header */}
-            <div className="bg-[#0A0A0F] px-6 py-4 text-white flex items-center justify-between border-b border-white/10">
+            <div className="bg-[#0A0A0F] px-6 py-4 text-white flex items-center justify-between border-b border-white/10 shrink-0">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-[#D99A1C] text-black flex items-center justify-center font-bold">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -556,7 +557,7 @@ export default function StaffManagement({ partnerData }) {
             </div>
 
             {/* Form Body */}
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
               {/* Full Name */}
               <div className="space-y-1">
                 <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
@@ -698,12 +699,13 @@ export default function StaffManagement({ partnerData }) {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
       {/* Verification Pending Modal */}
-      {showPendingModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200 select-none">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4 text-center">
+      {showPendingModal && createPortal(
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200 select-none overflow-y-auto">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4 text-center max-h-[90vh] overflow-y-auto my-auto">
             <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto ring-8 ring-amber-50">
               <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -730,7 +732,8 @@ export default function StaffManagement({ partnerData }) {
               Close Window
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

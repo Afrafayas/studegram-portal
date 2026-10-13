@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 
@@ -18,7 +19,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
   const [selectedCourse, setSelectedCourse] = useState('');
 
   // Mode and form inputs for registering a new student
-  const [studentSelectionMode, setStudentSelectionMode] = useState('existing'); // 'existing' or 'new'
+  const [studentSelectionMode, setStudentSelectionMode] = useState('new'); // 'existing' or 'new'
   const [newStudentName, setNewStudentName] = useState('');
   const [newStudentEmail, setNewStudentEmail] = useState('');
   const [newStudentPhone, setNewStudentPhone] = useState('');
@@ -171,7 +172,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
     setSelectedCountry('');
     setSelectedUniversity('');
     setSelectedCourse('');
-    setStudentSelectionMode('existing');
+    setStudentSelectionMode('new');
     setNewStudentName('');
     setNewStudentEmail('');
     setNewStudentPhone('');
@@ -272,10 +273,9 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
     return courseUnivId === selectedUniversity;
   });
 
-  return (
+  return createPortal(
     <div
-      onClick={handleResetAndClose}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 overflow-y-auto"
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -379,7 +379,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                       </div>
                       {students.length === 0 && (
                         <p className="text-[10px] text-amber-600 font-semibold mt-1.5 flex items-center gap-1">
-                          <span>💡</span> You haven't registered any students yet. Select <strong>Register New Student</strong> above to register your student.
+                          <span>💡</span> You haven't registered any students yet.
                         </p>
                       )}
                     </div>
@@ -812,7 +812,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
-

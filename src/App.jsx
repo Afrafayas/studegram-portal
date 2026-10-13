@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
@@ -434,9 +435,9 @@ export default function App() {
       />
 
       {/* Verification Pending Modal */}
-      {pendingVerificationModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200 select-none">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4 text-center">
+      {pendingVerificationModalOpen && createPortal(
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200 select-none overflow-y-auto">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4 text-center max-h-[90vh] overflow-y-auto my-auto">
             <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto ring-8 ring-amber-50">
               <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -463,11 +464,9 @@ export default function App() {
               Close Window
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
 }
-
-
-

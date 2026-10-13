@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
@@ -46,12 +47,9 @@ export default function ClaimCommissionConfirmModal({ isOpen, onClose, applicati
     }
   };
 
-  return (
+  return createPortal(
     <div
-      onClick={() => {
-        if (!isSubmitting) onClose();
-      }}
-      className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200 select-none"
+      className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200 select-none overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby="claim-commission-title"
@@ -154,6 +152,7 @@ export default function ClaimCommissionConfirmModal({ isOpen, onClose, applicati
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

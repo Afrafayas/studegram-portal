@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
@@ -125,9 +126,9 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
     }
   };
 
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200 select-none">
-      <div className="bg-white border border-slate-200 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+  return createPortal(
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200 select-none overflow-y-auto">
+      <div className="bg-white border border-slate-200 rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[90vh] my-auto">
         
         {/* Header Bar */}
         <div className="bg-gradient-to-r from-[#0A0A0F] to-[#1E1B4B] text-white p-6 relative">
@@ -470,6 +471,7 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

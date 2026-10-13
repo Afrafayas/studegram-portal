@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useState } from 'react';
 
 export default function ScholarshipDetailsModal({ isOpen, onClose, scholarship }) {
@@ -37,10 +38,9 @@ export default function ScholarshipDetailsModal({ isOpen, onClose, scholarship }
 
   const statusInfo = getDeadlineStatus(scholarship.deadline);
 
-  return (
+  return createPortal(
     <div
-      onClick={onClose}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 overflow-y-auto"
     >
       {/* Modal Container */}
       <div
@@ -224,6 +224,7 @@ export default function ScholarshipDetailsModal({ isOpen, onClose, scholarship }
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
