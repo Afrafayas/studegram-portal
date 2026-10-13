@@ -1171,7 +1171,8 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
           if (onUpdateSuccess) onUpdateSuccess();
         }}
       />
-    </div>
+    </div>,
+    document.body
   );
 }
 
