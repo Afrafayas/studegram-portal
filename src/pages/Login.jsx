@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useState } from 'react';
 import API from '../api/axios';
 
@@ -431,9 +432,9 @@ export default function Login({ onNavigate, onLoginSuccess }) {
       </div>
 
       {/* Account Status Modal (Pending / Rejected) */}
-      {accountStatusModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4 text-center">
+      {accountStatusModal && createPortal(
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200 overflow-y-auto">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4 text-center max-h-[90vh] overflow-y-auto my-auto">
             {accountStatusModal.status === 'Pending' ? (
               <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto ring-8 ring-amber-50">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -487,13 +488,14 @@ export default function Login({ onNavigate, onLoginSuccess }) {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Forgot Password Modal */}
-      {showForgotModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200 select-none">
-          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center space-y-5 relative overflow-hidden">
+      {showForgotModal && createPortal(
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200 select-none overflow-y-auto">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center space-y-5 relative overflow-hidden max-h-[90vh] overflow-y-auto my-auto">
             <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#D99A1C] to-[#F5B025]"></div>
 
             <div className="flex justify-between items-center pb-2 border-b border-slate-100">
@@ -606,9 +608,9 @@ export default function Login({ onNavigate, onLoginSuccess }) {
               </form>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
-
     </div>
   );
 }

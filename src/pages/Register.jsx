@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useState } from 'react';
 import API from '../api/axios';
 
@@ -769,9 +770,9 @@ export default function Register({ onNavigate }) {
       </div>
 
       {/* MODAL: Password Will Mail to Email After Admin Approval */}
-      {showApprovalModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200 select-none">
-          <div className="bg-white border border-slate-200 rounded-3xl p-8 max-w-md w-full shadow-2xl text-center space-y-6 relative overflow-hidden">
+      {showApprovalModal && createPortal(
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200 select-none overflow-y-auto">
+          <div className="bg-white border border-slate-200 rounded-3xl p-8 max-w-md w-full shadow-2xl text-center space-y-6 relative overflow-hidden max-h-[90vh] overflow-y-auto my-auto">
             <div className="absolute top-0 left-0 right-0 h-2.5 bg-gradient-to-r from-[#D99A1C] to-[#F5B025]"></div>
             
             <div className="w-20 h-20 bg-amber-50 text-[#D99A1C] rounded-full flex items-center justify-center mx-auto ring-8 ring-amber-50 shadow-inner">
@@ -831,9 +832,9 @@ export default function Register({ onNavigate }) {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
-
     </div>
   );
 }

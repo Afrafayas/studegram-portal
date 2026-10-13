@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useEffect } from 'react';
 
 export default function LogoutConfirmModal({ isOpen, onClose, onConfirm }) {
@@ -12,10 +13,9 @@ export default function LogoutConfirmModal({ isOpen, onClose, onConfirm }) {
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div
-      onClick={onClose}
-      className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200 select-none"
+      className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-[9999] animate-in fade-in duration-200 select-none overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby="logout-modal-title"
@@ -82,6 +82,7 @@ export default function LogoutConfirmModal({ isOpen, onClose, onConfirm }) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

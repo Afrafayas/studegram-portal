@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 
@@ -272,10 +273,9 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
     return courseUnivId === selectedUniversity;
   });
 
-  return (
+  return createPortal(
     <div
-      onClick={handleResetAndClose}
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 overflow-y-auto"
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -812,7 +812,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
-
