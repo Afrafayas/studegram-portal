@@ -133,7 +133,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-xs font-bold text-[#0F172A]">{app.universityName}</div>
-                      <div className="text-[10px] text-[#64748B] font-semibold leading-relaxed truncate max-w-xs">{app.courseName}</div>
+                      <div className="text-[10px] text-[#64748B] font-semibold leading-relaxed truncate max-w-xs">{app.courseName}{app.level ? ` • ${app.level}` : ''}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-1.5">

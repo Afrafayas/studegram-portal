@@ -16,6 +16,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
   const [selectedCountry, setSelectedCountry] = useState('');
   const [selectedUniversity, setSelectedUniversity] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('');
+  const [selectedLevel, setSelectedLevel] = useState('Undergraduate (UG)');
   const [notes, setNotes] = useState('');
 
   // Student fields
@@ -52,6 +53,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
           setSelectedCountry(initialCountry);
           setSelectedUniversity(uniId);
           setSelectedCourse(application.course?._id || application.course || '');
+          setSelectedLevel(application.level || 'Undergraduate (UG)');
           setNotes(application.notes || '');
 
           // Prepopulate student fields
@@ -140,6 +142,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
         API.put(`/applications/${application.id}`, {
           university: selectedUniversity,
           course: selectedCourse,
+          level: selectedLevel,
           notes: notes.trim()
         }),
         studentId
@@ -333,6 +336,28 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                         ⚠️ No courses found for this university.
                       </p>
                     )}
+                  </div>
+
+                  {/* Level of Study */}
+                  <div>
+                    <label className={labelClass}>Level of Study *</label>
+                    <div className="relative">
+                      <select
+                        value={selectedLevel}
+                        onChange={e => setSelectedLevel(e.target.value)}
+                        required
+                        className={inputClass + ' appearance-none cursor-pointer'}
+                      >
+                        <option value="Undergraduate (UG)">Undergraduate (UG)</option>
+                        <option value="Postgraduate (PG)">Postgraduate (PG)</option>
+                        <option value="PhD">PhD</option>
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Notes */}
