@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
 
@@ -27,6 +27,7 @@ export default function StaffManagement({ partnerData }) {
     status: 'Active'
   });
   const [formErrors, setFormErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
 
   const fetchStaffMembers = async () => {
     setIsLoading(true);
@@ -153,7 +154,11 @@ export default function StaffManagement({ partnerData }) {
 
         const res = await API.put(`/partners/staff/${editingStaff._id}`, updatePayload);
         if (res.data?.success) {
-          toast.success(`Staff member '${formData.name}' updated successfully!`);
+          toast.success(
+            formData.password
+              ? `Staff member '${formData.name}' updated! New login credentials emailed to ${formData.email}.`
+              : `Staff member '${formData.name}' updated successfully!`
+          );
           setIsModalOpen(false);
           fetchStaffMembers();
         }
@@ -161,7 +166,7 @@ export default function StaffManagement({ partnerData }) {
         // Create new staff
         const res = await API.post('/partners/staff', formData);
         if (res.data?.success) {
-          toast.success(`New staff member '${formData.name}' created successfully!`);
+          toast.success(`New staff member '${formData.name}' created! Login credentials emailed to ${formData.email}.`);
           setIsModalOpen(false);
           fetchStaffMembers();
         }
@@ -637,19 +642,48 @@ export default function StaffManagement({ partnerData }) {
 
               {/* Password */}
               <div className="space-y-1">
-                <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
-                  Password {editingStaff ? '(Leave blank to keep unchanged)' : <span className="text-rose-500">*</span>}
-                </label>
-                <input
-                  type="password"
-                  placeholder={editingStaff ? '••••••••' : 'Set account password'}
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className={`w-full bg-slate-50 border rounded-xl px-3.5 py-2.5 text-xs text-[#0F172A] focus:outline-none transition-all ${
-                    formErrors.password ? 'border-rose-500 focus:ring-1 focus:ring-rose-500' : 'border-slate-200 focus:border-[#D99A1C] focus:bg-white'
-                  }`}
-                />
+                <div className="flex justify-between items-center">
+                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
+                    Password {editingStaff ? '(Leave blank to keep unchanged)' : <span className="text-rose-500">*</span>}
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%';
+                      let pass = '';
+                      for (let i = 0; i < 10; i++) {
+                        pass += chars.charAt(Math.floor(Math.random() * chars.length));
+                      }
+                      setFormData({ ...formData, password: pass });
+                      setShowPassword(true);
+                    }}
+                    className="text-[10px] text-[#D99A1C] hover:underline font-extrabold cursor-pointer"
+                  >
+                    🎲 Auto Generate
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder={editingStaff ? '•••••••• (leave blank to keep unchanged)' : 'Set account password'}
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className={`w-full bg-slate-50 border rounded-xl px-3.5 py-2.5 text-xs text-[#0F172A] focus:outline-none transition-all ${
+                      formErrors.password ? 'border-rose-500 focus:ring-1 focus:ring-rose-500' : 'border-slate-200 focus:border-[#D99A1C] focus:bg-white'
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-2.5 text-[10px] text-slate-400 hover:text-slate-600 font-bold cursor-pointer"
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
                 {formErrors.password && <p className="text-[10px] text-rose-500 font-bold">{formErrors.password}</p>}
+                <p className="text-[10px] text-slate-400 font-medium">
+                  ✉️ An email with login credentials will be automatically sent to the staff member's registered email address upon saving.
+                </p>
               </div>
 
               {/* Status Select */}

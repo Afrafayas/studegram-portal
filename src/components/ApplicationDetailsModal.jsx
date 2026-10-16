@@ -347,7 +347,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                 Application details for {application.studentName}
               </h2>
               <p className="text-[10px] text-[#64748B] font-semibold mt-0.5">
-                CAMS ID: <span className="text-[#D99A1C] font-bold">{application.camsId}</span> &middot; Passport: <span className="font-bold text-[#0F172A]">{application.passportNo}</span>
+                CAMS ID: <span className="text-[#D99A1C] font-bold">{application.camsId}</span> &middot; Passport: <span className="font-bold text-[#0F172A]">{application.passportNo}</span> &middot; Level: <span className="font-bold text-indigo-600">{application.level || 'Undergraduate (UG)'}</span>
               </p>
             </div>
           </div>
@@ -481,10 +481,14 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                           <span className="text-xs font-bold text-[#0F172A] leading-relaxed">{application.courseName}</span>
                         </div>
                         <div>
+                          <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Level of Study</span>
+                          <span className="text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 inline-block">{application.level || 'Undergraduate (UG)'}</span>
+                        </div>
+                        <div>
                           <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Requested Intake</span>
                           <span className="text-xs font-bold text-[#0F172A]">{application.intake || 'September 2026'}</span>
                         </div>
-                        <div>
+                        <div className="col-span-2">
                           <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Application Status</span>
                           <div className="flex items-center gap-1.5 mt-0.5">
                             <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-100 text-emerald-700 text-[8px] font-extrabold rounded-full uppercase">

@@ -32,6 +32,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
     { id: 1, name: '', fileName: '', url: '', isUploading: false, error: '' }
   ]);
   const [notes, setNotes] = useState('');
+  const [selectedLevel, setSelectedLevel] = useState('Undergraduate (UG)');
   const [selectedIntake, setSelectedIntake] = useState('September 2026');
 
   useEffect(() => {
@@ -184,6 +185,8 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
       { id: 1, name: '', fileName: '', url: '', isUploading: false, error: '' }
     ]);
     setNotes('');
+    setSelectedLevel('Undergraduate (UG)');
+    setSelectedIntake('September 2026');
     setStepNumber(1);
     onClose();
   };
@@ -252,6 +255,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
         studentId: studentId,
         universityId: selectedUniversity,
         courseId: selectedCourse,
+        level: selectedLevel || 'Undergraduate (UG)',
         intake: selectedIntake,
         documents: finalDocuments,
         notes: notes
@@ -578,6 +582,30 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                   {selectedUniversity && filteredCourses.length === 0 && (
                     <p className="text-[10px] text-amber-600 font-bold mt-1">âš ï¸ No courses registered under this university in the database.</p>
                   )}
+                </div>
+
+                {/* Level of Study */}
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
+                    Level of Study *
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={selectedLevel}
+                      onChange={(e) => setSelectedLevel(e.target.value)}
+                      required
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white font-semibold text-[#0F172A] appearance-none cursor-pointer"
+                    >
+                      <option value="Undergraduate (UG)">Undergraduate (UG)</option>
+                      <option value="Postgraduate (PG)">Postgraduate (PG)</option>
+                      <option value="PhD">PhD</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
+                      <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Requested Intake Season */}
