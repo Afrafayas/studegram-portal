@@ -33,18 +33,24 @@ export default function Navbar({
   const fetchNotifications = async () => {
     try {
       const res = await API.get('/notifications');
-      if (res.data?.success) {
-        setNotifications(res.data.data || []);
-        setUnreadCount(res.data.unreadCount !== undefined ? res.data.unreadCount : (res.data.data ? res.data.data.filter(n => !n.isRead).length : 0));
+      if (res.data?.success && Array.isArray(res.data.data)) {
+        setNotifications(res.data.data);
+        const actualUnread = res.data.data.filter(n => !n.isRead).length;
+        setUnreadCount(actualUnread);
       }
     } catch (e) {}
+  };
+
+  const getCommentsStorageKey = () => {
+    const userId = partnerData?._id || partnerData?.id || localStorage.getItem('partner_id') || 'portal_user';
+    return `studegram_portal_read_comments_${userId}`;
   };
 
   const fetchComments = async () => {
     try {
       const res = await API.get('/applications/recent-comments');
       if (res.data?.success && Array.isArray(res.data.data)) {
-        const readStorageKey = 'studegram_portal_read_comments';
+        const readStorageKey = getCommentsStorageKey();
         let readIds = new Set();
         try {
           readIds = new Set(JSON.parse(localStorage.getItem(readStorageKey) || '[]'));
@@ -52,7 +58,7 @@ export default function Navbar({
 
         const updatedList = res.data.data.map(c => {
           const idKey = c.commentId || `${c.applicationId}_${c.createdAt}`;
-          const isMarkedRead = readIds.has(idKey);
+          const isMarkedRead = Boolean(c.isRead || readIds.has(idKey) || readIds.has(String(c.applicationId)));
           return {
             ...c,
             isUnreplied: isMarkedRead ? false : c.isUnreplied,
@@ -61,28 +67,40 @@ export default function Navbar({
         });
 
         setCommentsList(updatedList);
-        const unreplied = updatedList.filter(c => c.isUnreplied).length;
-        setUnreadCommentsCount(unreplied);
+        const actualUnreplied = updatedList.filter(c => c.isUnreplied).length;
+        setUnreadCommentsCount(actualUnreplied);
       }
     } catch (e) {}
   };
 
   const handleCommentClick = (comm) => {
     setShowComments(false);
-    const readStorageKey = 'studegram_portal_read_comments';
-    try {
-      const readIds = new Set(JSON.parse(localStorage.getItem(readStorageKey) || '[]'));
-      const idKey = comm.commentId || `${comm.applicationId}_${comm.createdAt}`;
-      readIds.add(idKey);
-      localStorage.setItem(readStorageKey, JSON.stringify([...readIds]));
-    } catch (e) {}
 
-    setCommentsList(prev => prev.map(c => 
-      (c.applicationId === comm.applicationId)
-        ? { ...c, isUnreplied: false, isRead: true } 
-        : c
-    ));
-    setUnreadCommentsCount(prev => Math.max(0, prev - 1));
+    const isUnread = Boolean(comm.isUnreplied && !comm.isRead);
+
+    if (isUnread) {
+      const readStorageKey = getCommentsStorageKey();
+      try {
+        const readIds = new Set(JSON.parse(localStorage.getItem(readStorageKey) || '[]'));
+        const idKey = comm.commentId || `${comm.applicationId}_${comm.createdAt}`;
+        readIds.add(idKey);
+        readIds.add(String(comm.applicationId));
+        localStorage.setItem(readStorageKey, JSON.stringify([...readIds]));
+      } catch (e) {}
+
+      // Only decrement count for the specific read comment
+      setCommentsList(prev => prev.map(c => 
+        (c.applicationId === comm.applicationId || (comm.commentId && c.commentId === comm.commentId))
+          ? { ...c, isUnreplied: false, isRead: true } 
+          : c
+      ));
+      setUnreadCommentsCount(prev => Math.max(0, prev - 1));
+
+      if (comm.applicationId) {
+        const commentIdParam = comm.commentId || 'latest';
+        API.put(`/applications/${comm.applicationId}/comments/${commentIdParam}/read`).catch(() => {});
+      }
+    }
 
     if (onSelectApplication) {
       onSelectApplication(comm.applicationId);
@@ -105,19 +123,24 @@ export default function Navbar({
     try {
       await API.put('/notifications/read-all').catch(() => {});
       setUnreadCount(0);
-      setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
     } catch (e) {}
   };
 
   const handleNotificationClick = async (n) => {
+    const notifId = n._id || n.id;
+    if (!notifId) return;
+
     if (!n.isRead) {
-      setNotifications(prev => prev.map(item => item._id === n._id ? { ...item, isRead: true } : item));
+      setNotifications(prev => prev.map(item => 
+        (item._id === notifId || item.id === notifId) ? { ...item, isRead: true } : item
+      ));
       setUnreadCount(prev => Math.max(0, prev - 1));
       try {
-        await API.put(`/notifications/${n._id}/read`).catch(() => {
-          API.put('/notifications/read-all').catch(() => {});
-        });
-      } catch (err) {}
+        await API.put(`/notifications/${notifId}/read`);
+      } catch (err) {
+        console.warn('Could not mark notification read on backend:', err.message);
+      }
     }
     setShowNotifications(false);
 
