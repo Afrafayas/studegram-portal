@@ -58,7 +58,7 @@ export default function Navbar({
 
         const updatedList = res.data.data.map(c => {
           const idKey = c.commentId || `${c.applicationId}_${c.createdAt}`;
-          const isMarkedRead = Boolean(c.isRead || readIds.has(idKey) || readIds.has(String(c.applicationId)));
+          const isMarkedRead = Boolean(c.isRead || readIds.has(idKey));
           return {
             ...c,
             isUnreplied: isMarkedRead ? false : c.isUnreplied,
@@ -84,7 +84,6 @@ export default function Navbar({
         const readIds = new Set(JSON.parse(localStorage.getItem(readStorageKey) || '[]'));
         const idKey = comm.commentId || `${comm.applicationId}_${comm.createdAt}`;
         readIds.add(idKey);
-        readIds.add(String(comm.applicationId));
         localStorage.setItem(readStorageKey, JSON.stringify([...readIds]));
       } catch (e) {}
 
@@ -117,7 +116,7 @@ export default function Navbar({
       fetchComments();
     }, 15000);
     return () => clearInterval(interval);
-  }, []);
+  }, [partnerData?.id, partnerData?._id]);
 
   const handleMarkRead = async () => {
     try {
