@@ -37,8 +37,8 @@ export function ToastProvider({ children }) {
     <ToastContext.Provider value={toast}>
       {children}
       
-      {/* Toast Portal Container */}
-      <div className="fixed top-6 right-6 z-[9999] space-y-3.5 w-full max-w-sm pointer-events-none select-none">
+      {/* Toast Portal Container - Elevated above modals */}
+      <div className="fixed top-6 right-6 z-[99999] space-y-3.5 w-full max-w-sm pointer-events-none select-none">
         {toasts.map((t) => {
           let bgClass = 'bg-emerald-50/95 border-emerald-200/80 text-emerald-900';
           let title = 'Success';

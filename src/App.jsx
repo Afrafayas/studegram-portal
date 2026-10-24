@@ -264,6 +264,7 @@ export default function App() {
           <Commissions 
             applications={applications}
             commissions={commissions}
+            partnerData={partnerData}
             onRefresh={() => {
               fetchApplications();
               fetchCommissions();
