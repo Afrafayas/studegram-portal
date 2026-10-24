@@ -1,15 +1,29 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import ClaimCommissionConfirmModal from '../components/ClaimCommissionConfirmModal';
 
 export default function Commissions({
   applications = [],
   commissions = [],
+  partnerData,
   onRefresh,
   onViewDetails
 }) {
+  const isOwner = !partnerData?.isStaff || partnerData?.role === 'AgencyAdmin';
+  const userPermissions = Array.isArray(partnerData?.permissions) ? partnerData.permissions : [];
+  const canClaim = isOwner || partnerData?.role === 'Manager' || userPermissions.includes('commissions:claim') || userPermissions.includes('commissions:manage');
+
   const [filterTab, setFilterTab] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAppForClaim, setSelectedAppForClaim] = useState(null);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // Auto-reset to page 1 whenever filter tab or search query changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterTab, searchQuery]);
 
   // Combine application data strictly matching each individual application ID
   const combinedStudentCommissions = useMemo(() => {
@@ -144,6 +158,13 @@ export default function Commissions({
       return true;
     });
   }, [combinedStudentCommissions, filterTab, searchQuery]);
+
+  // Pagination Math
+  const totalItems = filteredStudents.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+  const paginatedStudents = filteredStudents.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div className="flex-1 p-6 space-y-6 bg-[#F0F2F5] min-h-[calc(100vh-60px)]">
@@ -318,13 +339,13 @@ export default function Commissions({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
-                {filteredStudents.map((app) => {
+                {paginatedStudents.map((app, index) => {
                   const initials = app.studentName
                     ? app.studentName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
                     : 'ST';
 
                   return (
-                    <tr key={app.id} className="hover:bg-slate-50/60 transition-colors">
+                    <tr key={app.id || app._id || index} className="hover:bg-slate-50/60 transition-colors">
                       {/* Student Profile */}
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
@@ -432,15 +453,24 @@ export default function Commissions({
                         <div className="flex items-center justify-end gap-2">
                           {/* Claim Commission Button */}
                           {app.isVisaApprovedOrEnrolled && !app.isClaimed && !app.isPaid ? (
-                            <button
-                              type="button"
-                              onClick={() => setSelectedAppForClaim(app)}
-                              className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-[10px] uppercase px-3 py-1.5 rounded-xl transition-all shadow-sm active:scale-95 inline-flex items-center gap-1 cursor-pointer"
-                              title="Claim Agency Commission Payout"
-                            >
-                              <span>💰</span>
-                              <span>Claim Commission</span>
-                            </button>
+                            canClaim ? (
+                              <button
+                                type="button"
+                                onClick={() => setSelectedAppForClaim(app)}
+                                className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-[10px] uppercase px-3 py-1.5 rounded-xl transition-all shadow-sm active:scale-95 inline-flex items-center gap-1 cursor-pointer"
+                                title="Claim Agency Commission Payout"
+                              >
+                                <span>💰</span>
+                                <span>Claim Commission</span>
+                              </button>
+                            ) : (
+                              <span
+                                className="px-2.5 py-1 text-[9px] font-bold text-slate-400 bg-slate-100 rounded-lg border border-slate-200 select-none cursor-not-allowed"
+                                title="Claiming commission is restricted to Agency Admin / Manager"
+                              >
+                                Ready to Claim (Admin)
+                              </span>
+                            )
                           ) : null}
 
                           {/* View Application Details */}
@@ -470,6 +500,64 @@ export default function Commissions({
             </div>
           )}
         </div>
+
+        {/* Pagination at bottom */}
+        {totalItems > 0 && (
+          <div className="px-6 py-4 bg-slate-50 border-t border-[#E2E8F0] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#64748B] font-semibold select-none">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-semibold text-slate-500">Rows per page:</span>
+              <select
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-700 focus:outline-none focus:border-[#D99A1C] cursor-pointer"
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+              <span className="text-xs font-semibold text-slate-400">
+                Showing {totalItems > 0 ? startIndex + 1 : 0} to {endIndex} of {totalItems} entries
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+              >
+                ◀ Prev
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
+                    currentPage === page
+                      ? 'bg-[#D99A1C] text-white shadow-xs'
+                      : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+              >
+                Next ▶
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Claim Commission Modal */}

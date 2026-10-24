@@ -8,21 +8,157 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAppForClaim, setSelectedAppForClaim] = useState(null);
 
+  // Filter States
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [universityFilter, setUniversityFilter] = useState('All');
+  const [intakeFilter, setIntakeFilter] = useState('All');
+
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
 
-  // Reset page on search
+  // Auto-reset pagination to page 1 on filter or search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, statusFilter, universityFilter, intakeFilter]);
+
+  // Unique filter option lists derived from actual applications
+  const standardStatuses = [
+    'Submitted',
+    'Under Review',
+    'Conditional Offer',
+    'Unconditional Offer',
+    'CAS Issued',
+    'Visa Approved',
+    'Enrolled / Closed',
+    'Rejected'
+  ];
+  const dynamicStatuses = Array.from(
+    new Set(applications.map(a => a.status || a.secondaryStatus).filter(Boolean))
+  );
+  const availableStatuses = Array.from(new Set([...standardStatuses, ...dynamicStatuses]));
+
+  const availableUniversities = Array.from(
+    new Set(applications.map(a => a.universityName || (typeof a.university === 'object' ? a.university?.name : '')).filter(Boolean))
+  ).sort();
+
+  const availableIntakes = Array.from(
+    new Set(applications.map(a => a.intake).filter(Boolean))
+  ).sort();
+
+  const hasActiveFilters = statusFilter !== 'All' || universityFilter !== 'All' || intakeFilter !== 'All' || searchQuery !== '';
+
+  const handleResetFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('All');
+    setUniversityFilter('All');
+    setIntakeFilter('All');
+    setCurrentPage(1);
+  };
+
+  // Export filtered applications to UTF-8 CSV
+  const handleExportCSV = () => {
+    if (!filteredApps.length) {
+      if (toast?.info) toast.info('No applications available to export.');
+      else if (toast?.error) toast.error('No applications available to export.');
+      return;
+    }
+
+    const headers = [
+      'CAMS ID',
+      'Student Name',
+      'Passport Number',
+      'Email',
+      'Phone',
+      'University',
+      'Course',
+      'Level',
+      'Intake',
+      'Status',
+      'Commission Status',
+      'Date Added'
+    ];
+
+    const escapeCSV = (val) => {
+      if (val === null || val === undefined) return '""';
+      const str = String(val).replace(/"/g, '""');
+      return `"${str}"`;
+    };
+
+    const csvRows = [
+      headers.join(','),
+      ...filteredApps.map(app => [
+        escapeCSV(app.camsId || ''),
+        escapeCSV(app.studentName || ''),
+        escapeCSV(app.passportNo || ''),
+        escapeCSV(app.email || ''),
+        escapeCSV(app.phone || ''),
+        escapeCSV(app.universityName || (typeof app.university === 'object' ? app.university?.name : '') || ''),
+        escapeCSV(app.courseName || ''),
+        escapeCSV(app.level || ''),
+        escapeCSV(app.intake || ''),
+        escapeCSV(app.status || app.secondaryStatus || 'Submitted'),
+        escapeCSV(app.commissionStatus || 'Not Claimed'),
+        escapeCSV(app.dateAdded || '')
+      ].join(','))
+    ];
+
+    const csvContent = '\uFEFF' + csvRows.join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `applications_export_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    if (toast?.success) {
+      toast.success(`Successfully exported ${filteredApps.length} application records.`);
+    }
+  };
 
   const filteredApps = applications.filter((app) => {
-    return (
-      app.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.camsId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.passportNo.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    // Search query match
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const studentMatch = (app.studentName || '').toLowerCase().includes(q);
+      const camsMatch = (app.camsId || '').toLowerCase().includes(q);
+      const passMatch = (app.passportNo || '').toLowerCase().includes(q);
+      const uniName = app.universityName || (typeof app.university === 'object' ? app.university?.name : '') || '';
+      const uniMatch = uniName.toLowerCase().includes(q);
+      const courseMatch = (app.courseName || '').toLowerCase().includes(q);
+      if (!studentMatch && !camsMatch && !passMatch && !uniMatch && !courseMatch) {
+        return false;
+      }
+    }
+
+    // Status filter
+    if (statusFilter !== 'All') {
+      const currentStatus = app.status || app.secondaryStatus || 'Submitted';
+      if (currentStatus !== statusFilter) {
+        return false;
+      }
+    }
+
+    // University filter
+    if (universityFilter !== 'All') {
+      const uniName = app.universityName || (typeof app.university === 'object' ? app.university?.name : '') || '';
+      if (uniName !== universityFilter) {
+        return false;
+      }
+    }
+
+    // Intake filter
+    if (intakeFilter !== 'All') {
+      if (app.intake !== intakeFilter) {
+        return false;
+      }
+    }
+
+    return true;
   });
 
   // Pagination Math
@@ -79,14 +215,31 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
         {/* Buttons */}
         <div className="flex items-center gap-2 flex-wrap">
           {/* Filter icon button */}
-          <button className="p-2.5 bg-white border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50 rounded-xl transition-all duration-150 hover:scale-[1.02] shadow-sm">
+          <button 
+            type="button"
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            className={`p-2.5 border rounded-xl transition-all duration-150 hover:scale-[1.02] shadow-sm cursor-pointer relative ${
+              isFilterOpen || hasActiveFilters
+                ? 'bg-amber-50 border-[#D99A1C] text-[#D99A1C]'
+                : 'bg-white border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] hover:bg-slate-50'
+            }`}
+            title="Toggle Filter Options"
+          >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
+            {hasActiveFilters && (
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#D99A1C] rounded-full border-2 border-white"></span>
+            )}
           </button>
 
           {/* Export CSV button */}
-          <button className="border border-[#D99A1C] text-[#D99A1C] hover:bg-indigo-50 font-semibold px-4 py-2 rounded-xl text-xs transition-all duration-150 hover:scale-[1.02] shadow-sm flex items-center gap-1.5">
+          <button 
+            type="button"
+            onClick={handleExportCSV}
+            className="border border-[#D99A1C] text-[#D99A1C] hover:bg-amber-50 font-semibold px-4 py-2 rounded-xl text-xs transition-all duration-150 hover:scale-[1.02] shadow-sm flex items-center gap-1.5 cursor-pointer"
+            title="Export filtered records to CSV"
+          >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
@@ -105,6 +258,87 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
           </button>
         </div>
       </div>
+
+      {/* Collapsible Filter Bar */}
+      {isFilterOpen && (
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl p-4 shadow-sm space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">Filter Applications</span>
+              {hasActiveFilters && (
+                <span className="text-[10px] bg-amber-50 text-[#D99A1C] font-extrabold px-2 py-0.5 rounded-full border border-amber-200">
+                  Filters Active
+                </span>
+              )}
+            </div>
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="text-xs text-[#D99A1C] hover:text-[#C28410] font-bold hover:underline cursor-pointer flex items-center gap-1"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Reset Filters
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* Status Filter */}
+            <div>
+              <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">
+                Status
+              </label>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full bg-slate-50 border border-[#E2E8F0] rounded-xl px-3 py-2 text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:border-[#D99A1C] cursor-pointer"
+              >
+                <option value="All">All Statuses</option>
+                {availableStatuses.map(st => (
+                  <option key={st} value={st}>{st}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* University Filter */}
+            <div>
+              <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">
+                University
+              </label>
+              <select
+                value={universityFilter}
+                onChange={(e) => setUniversityFilter(e.target.value)}
+                className="w-full bg-slate-50 border border-[#E2E8F0] rounded-xl px-3 py-2 text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:border-[#D99A1C] cursor-pointer"
+              >
+                <option value="All">All Universities</option>
+                {availableUniversities.map(univ => (
+                  <option key={univ} value={univ}>{univ}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Intake Filter */}
+            <div>
+              <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">
+                Intake
+              </label>
+              <select
+                value={intakeFilter}
+                onChange={(e) => setIntakeFilter(e.target.value)}
+                className="w-full bg-slate-50 border border-[#E2E8F0] rounded-xl px-3 py-2 text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:border-[#D99A1C] cursor-pointer"
+              >
+                <option value="All">All Intakes</option>
+                {availableIntakes.map(intake => (
+                  <option key={intake} value={intake}>{intake}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Data Table */}
       <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden">
@@ -211,8 +445,17 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-xs text-[#64748B] font-semibold">
-                    No applications matched your search parameters.
+                  <td colSpan="6" className="px-6 py-12 text-center text-xs text-[#64748B] font-semibold space-y-2">
+                    <div>No applications matched your search or filter parameters.</div>
+                    {hasActiveFilters && (
+                      <button
+                        type="button"
+                        onClick={handleResetFilters}
+                        className="text-xs text-[#D99A1C] hover:text-[#C28410] font-bold hover:underline cursor-pointer"
+                      >
+                        Reset All Filters
+                      </button>
+                    )}
                   </td>
                 </tr>
               )}

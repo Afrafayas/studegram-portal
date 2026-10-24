@@ -16,6 +16,8 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
   const [city, setCity] = useState('');
   const [country, setCountry] = useState('India');
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [profileError, setProfileError] = useState('');
+  const [profileSuccess, setProfileSuccess] = useState('');
 
   // Password Form State
   const [currentPassword, setCurrentPassword] = useState('');
@@ -39,6 +41,10 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
       setCity(partnerData.city || '');
       setCountry(partnerData.country || 'India');
     }
+    setProfileError('');
+    setProfileSuccess('');
+    setPasswordError('');
+    setPasswordSuccess('');
   }, [partnerData, isOpen]);
 
   if (!isOpen) return null;
@@ -52,7 +58,11 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
+    setProfileError('');
+    setProfileSuccess('');
+
     if (!name.trim()) {
+      setProfileError('Full name is required.');
       toast.error('Full name is required.');
       return;
     }
@@ -69,13 +79,17 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
       });
 
       if (res.data?.success) {
-        toast.success(res.data.message || 'Profile updated successfully!');
+        const successMsg = res.data.message || 'Profile updated successfully!';
+        setProfileSuccess(successMsg);
+        toast.success(successMsg);
         if (onProfileUpdated) onProfileUpdated();
       } else {
         throw new Error(res.data?.message || 'Failed to update profile.');
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || err.message || 'Error updating profile.');
+      const errMsg = err.response?.data?.message || err.message || 'Error updating profile.';
+      setProfileError(errMsg);
+      toast.error(errMsg);
     } finally {
       setIsSavingProfile(false);
     }
@@ -87,19 +101,27 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
     setPasswordSuccess('');
 
     if (!currentPassword) {
-      setPasswordError('Please enter your current password.');
+      const msg = 'Please enter your current password.';
+      setPasswordError(msg);
+      toast.error(msg);
       return;
     }
     if (!newPassword) {
-      setPasswordError('Please enter your new password.');
+      const msg = 'Please enter your new password.';
+      setPasswordError(msg);
+      toast.error(msg);
       return;
     }
     if (newPassword.length < 6) {
-      setPasswordError('New password must be at least 6 characters long.');
+      const msg = 'New password must be at least 6 characters long.';
+      setPasswordError(msg);
+      toast.error(msg);
       return;
     }
     if (newPassword !== confirmPassword) {
-      setPasswordError('New passwords do not match. Please verify.');
+      const msg = 'New passwords do not match. Please verify.';
+      setPasswordError(msg);
+      toast.error(msg);
       return;
     }
 
@@ -111,7 +133,8 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
       });
 
       if (res.data?.success) {
-        setPasswordSuccess(res.data.message || 'Password updated successfully! You can now use this new password.');
+        const successMsg = res.data.message || 'Password updated successfully! You can now use this new password.';
+        setPasswordSuccess(successMsg);
         toast.success('Password updated successfully!');
         setCurrentPassword('');
         setNewPassword('');
@@ -120,7 +143,9 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
         throw new Error(res.data?.message || 'Failed to change password.');
       }
     } catch (err) {
-      setPasswordError(err.response?.data?.message || err.message || 'Failed to change password.');
+      const errMsg = err.response?.data?.message || err.message || 'Failed to change password.';
+      setPasswordError(errMsg);
+      toast.error(errMsg);
     } finally {
       setIsSavingPassword(false);
     }
@@ -165,7 +190,11 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
           {/* Navigation Tabs */}
           <div className="flex items-center gap-2 mt-6 pt-2 border-t border-white/10">
             <button
-              onClick={() => setActiveTab('profile')}
+              onClick={() => {
+                setActiveTab('profile');
+                setProfileError('');
+                setProfileSuccess('');
+              }}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
                 activeTab === 'profile'
                   ? 'bg-gradient-to-r from-[#D99A1C] to-[#F5B025] text-black shadow-md'
@@ -206,6 +235,20 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
                 <h4 className="text-xs font-black uppercase text-[#0F172A] tracking-wider flex items-center gap-2">
                   <span>General Information</span>
                 </h4>
+
+                {profileError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 text-xs p-3 rounded-xl font-semibold flex items-center gap-2">
+                    <span>⚠️</span>
+                    <span>{profileError}</span>
+                  </div>
+                )}
+
+                {profileSuccess && (
+                  <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs p-3.5 rounded-xl font-semibold flex items-center gap-2">
+                    <span>✓</span>
+                    <span>{profileSuccess}</span>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Name */}

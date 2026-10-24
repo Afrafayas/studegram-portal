@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 export default function Dashboard({ 
   applications = [], 
@@ -158,13 +158,89 @@ export default function Dashboard({
   const currentHour = new Date().getHours();
   const greeting = currentHour < 12 ? 'Good morning' : currentHour < 18 ? 'Good afternoon' : 'Good evening';
 
-  // Upcoming deadlines with colored dates by urgency (red within 30 days, amber within 60, green otherwise)
-  const upcomingDeadlines = [
-    { university: 'Anglia Ruskin University', courseType: 'Postgraduate', date: '15 Jul 2026', urgency: 'danger', reason: 'Within 30 days' },
-    { university: 'University of Surrey', courseType: 'Postgraduate', date: '10 Aug 2026', urgency: 'warning', reason: 'Within 60 days' },
-    { university: 'Coventry University', courseType: 'Foundation', date: '15 Sep 2026', urgency: 'success', reason: 'Over 60 days' },
-    { university: 'University of Exeter', courseType: 'Undergraduate', date: '31 Oct 2026', urgency: 'success', reason: 'Over 60 days' }
-  ];
+  // Helper to parse deadline dates from intake or application data
+  const parseUpcomingDeadlines = (apps = []) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const activeApps = apps.filter(a => {
+      const st = (a.status || a.secondaryStatus || '').toLowerCase();
+      return !st.includes('closed') && !st.includes('rejected') && !st.includes('withdrawn') && !st.includes('enrolled');
+    });
+
+    const deadlineMap = new Map();
+
+    activeApps.forEach(app => {
+      const univ = app.universityName || (typeof app.university === 'object' ? app.university?.name : '') || '';
+      const courseType = app.level || 'Academic Program';
+      const intakeStr = app.intake || '';
+
+      if (!univ) return;
+
+      // Try to estimate deadline date from intake (e.g. "September 2026", "January 2027", "15 Jul 2026")
+      let targetDate = null;
+
+      // Check if app has explicit deadline property
+      if (app.deadline || app.appDeadline) {
+        const d = new Date(app.deadline || app.appDeadline);
+        if (!isNaN(d.getTime())) targetDate = d;
+      }
+
+      // Fallback: estimate from standard intake month/year
+      if (!targetDate && intakeStr) {
+        const monthMatch = intakeStr.match(/(january|february|march|april|may|june|july|august|september|october|november|december)/i);
+        const yearMatch = intakeStr.match(/20\d\d/);
+        if (monthMatch) {
+          const year = yearMatch ? parseInt(yearMatch[0], 10) : today.getFullYear();
+          const monthNames = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
+          const monthIndex = monthNames.indexOf(monthMatch[1].toLowerCase());
+          if (monthIndex !== -1) {
+            targetDate = new Date(year, monthIndex, 15); // Default to middle of intake month
+          }
+        }
+      }
+
+      // Only include upcoming dates (future or within the current year)
+      if (targetDate) {
+        const diffDays = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
+        if (diffDays >= 0) {
+          let urgency = 'success';
+          let reason = 'Over 60 days';
+          if (diffDays <= 30) {
+            urgency = 'danger';
+            reason = 'Within 30 days';
+          } else if (diffDays <= 60) {
+            urgency = 'warning';
+            reason = 'Within 60 days';
+          }
+
+          const dateStr = targetDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+          const uniqueKey = `${univ}-${courseType}-${dateStr}`;
+
+          if (!deadlineMap.has(uniqueKey)) {
+            deadlineMap.set(uniqueKey, {
+              university: univ,
+              courseType,
+              date: dateStr,
+              rawDate: targetDate,
+              urgency,
+              reason,
+              diffDays
+            });
+          }
+        }
+      }
+    });
+
+    // Sort by earliest deadline first and take top 4
+    return Array.from(deadlineMap.values())
+      .sort((a, b) => a.rawDate - b.rawDate)
+      .slice(0, 4);
+  };
+
+  const upcomingDeadlines = useMemo(() => {
+    return parseUpcomingDeadlines(applications);
+  }, [applications]);
 
   const getUrgencyClasses = (urgency) => {
     switch (urgency) {
@@ -329,28 +405,44 @@ export default function Dashboard({
         {/* Right Column (40%): Upcoming Deadlines */}
         <div className="lg:col-span-2 bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden flex flex-col">
           <div className="px-6 py-4 border-b border-[#E2E8F0] flex justify-between items-center">
-            <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">Upcoming Deadlines</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">Upcoming Deadlines</h2>
+              {upcomingDeadlines.length > 0 && (
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+              )}
+            </div>
             <button 
               onClick={() => onNavigateDeadlines && onNavigateDeadlines()}
-              className="text-xs text-[#D99A1C] font-semibold hover:underline"
+              className="text-xs text-[#D99A1C] font-semibold hover:underline cursor-pointer"
             >
               View All
             </button>
           </div>
+
           <div className="p-4 flex-1 space-y-3.5">
-            {upcomingDeadlines.map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between border-b border-slate-50 pb-3 last:border-0 last:pb-0">
-                <div className="space-y-0.5">
-                  <p className="text-xs font-bold text-[#0F172A]">{item.university}</p>
-                  <p className="text-[10px] text-[#64748B] font-semibold">{item.courseType}</p>
+            {upcomingDeadlines.length > 0 ? (
+              upcomingDeadlines.map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between border-b border-slate-50 pb-3 last:border-0 last:pb-0">
+                  <div className="space-y-0.5">
+                    <p className="text-xs font-bold text-[#0F172A] truncate max-w-[180px]">{item.university}</p>
+                    <p className="text-[10px] text-[#64748B] font-semibold">{item.courseType}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className={getUrgencyClasses(item.urgency)}>
+                      {item.date}
+                    </span>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <span className={getUrgencyClasses(item.urgency)}>
-                    {item.date}
-                  </span>
+              ))
+            ) : (
+              <div className="py-8 px-4 text-center space-y-2 my-auto">
+                <div className="w-9 h-9 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-sm">
+                  📅
                 </div>
+                <p className="text-xs font-bold text-slate-600">No Upcoming Intake Deadlines</p>
+                <p className="text-[10px] text-slate-400 font-medium">All deadlines for your submitted applications are currently up to date.</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
