@@ -46,7 +46,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
         i === idx ? { ...d, name: updatedName, url: updatedUrl, comment: editDocComment.trim() } : d
       );
 
-      await API.put('/applications/' + application.id, { documents: updatedDocs });
+      await API.put('/applications/' + (application?.id || application?._id), { documents: updatedDocs });
       setLocalDocuments(updatedDocs);
       setEditingDocIdx(null);
       setReplaceFile(null);
@@ -73,7 +73,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
     if (!newAppComment.trim()) return;
     setIsPostingAppComment(true);
     try {
-      const res = await API.post('/applications/' + application.id + '/comments', { text: newAppComment.trim() });
+      const res = await API.post('/applications/' + (application?.id || application?._id) + '/comments', { text: newAppComment.trim() });
       if (res.data?.success) {
         setAppComments(res.data.data || []);
         setNewAppComment('');
@@ -102,14 +102,16 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
 
   const loadChatMessages = async (silent = false) => {
     const token = localStorage.getItem('partner_token');
-    if (!token || !application?.id) return;
+    const targetAppId = application?.id || application?._id;
+    if (!token || !targetAppId) return;
 
     if (!silent) {
       setIsChatLoading(true);
     }
     
     try {
-      const res = await API.get(`/applications/${application.id}/chat`);
+      const targetAppId = application?.id || application?._id;
+      const res = await API.get(`/applications/${targetAppId}/chat`);
       const data = res.data;
       setChatMessages(data.data || []);
       setIsUnauthorized(false);
@@ -132,7 +134,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
   // Poll for messages every 8 seconds when active on Messages tab
   useEffect(() => {
     let intervalId;
-    if (isOpen && mainTab === 'activity' && application?.id) {
+    if (isOpen && mainTab === 'activity' && (application?.id || application?._id)) {
       loadChatMessages(false); // Initial load is non-silent
 
       intervalId = setInterval(() => {
@@ -190,7 +192,8 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
     });
 
     try {
-      const res = await API.post(`/applications/${application.id}/chat`, formData, {
+      const targetAppId = application?.id || application?._id;
+      const res = await API.post(`/applications/${targetAppId}/chat`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -725,7 +728,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                               comment: uploadComment.trim()
                             };
                             const updatedDocs = [...localDocuments, newDoc];
-                            await API.put(`/applications/${application.id}`, { documents: updatedDocs });
+                            await API.put(`/applications/${application?.id || application?._id}`, { documents: updatedDocs });
                             setLocalDocuments(updatedDocs);
 
                             setSelectedUploadFile(null);
@@ -883,7 +886,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                 </div>
 
                 <button
-                  onClick={() => fetchChatMessages(false)}
+                  onClick={() => loadChatMessages(false)}
                   disabled={isChatLoading || isUnauthorized}
                   className="p-1 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-800 transition-colors disabled:opacity-50 flex items-center gap-1.5 text-[9px] font-bold"
                   title="Manual refresh thread"
@@ -960,7 +963,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                       );
                     }
 
-                    const isPartner = msg.senderModel === 'Partner';
+                    const isPartner = msg.senderModel === 'Partner' || msg.senderModel === 'PartnerStaff';
                     const bubbleClass = isPartner
                       ? 'bg-gradient-to-r from-[#D99A1C] to-[#C28410] text-white rounded-l-xl rounded-tr-xl self-end ml-auto shadow-sm border border-amber-600/10'
                       : 'bg-slate-700 text-slate-100 rounded-r-xl rounded-tl-xl self-start mr-auto shadow-sm border border-slate-600';
