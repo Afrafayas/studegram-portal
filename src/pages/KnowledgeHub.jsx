@@ -1,3 +1,4 @@
+import { ActionButton } from '../components/ActionControls';
 import React, { useState, useEffect } from 'react';
 
 const REPRESENTED_UNIVERSITIES = {
@@ -493,7 +494,7 @@ export default function KnowledgeHub() {
         </div>
       ) : (
         <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-4">
-          <button
+          <ActionButton
             onClick={() => setSelectedCountry(null)}
             className="flex items-center gap-1.5 text-xs text-[#64748B] hover:text-[#0F172A] font-bold transition-colors"
           >
@@ -501,7 +502,7 @@ export default function KnowledgeHub() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             <span>Back to Countries</span>
-          </button>
+          </ActionButton>
           
           <div className="flex items-center gap-2">
             <span className="text-2xl">{selectedCountry.flag}</span>
@@ -564,12 +565,12 @@ export default function KnowledgeHub() {
                     </div>
 
                     {/* Explore Button */}
-                    <button
+                    <ActionButton
                       onClick={() => handleSelectCountry(c)}
                       className="w-full bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-xs font-bold text-slate-700 py-2.5 rounded-xl text-center transition-all duration-150"
                     >
                       Explore Guide
-                    </button>
+                    </ActionButton>
                   </div>
                 </div>
               );
@@ -587,12 +588,12 @@ export default function KnowledgeHub() {
             <p className="text-xs text-[#64748B] font-semibold leading-relaxed">
               We couldn't find any country guides matching "{searchQuery}". Try a different search term.
             </p>
-            <button
+            <ActionButton
               onClick={() => setSearchQuery('')}
               className="bg-[#D99A1C] hover:bg-[#C28410] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all duration-150 shadow-md inline-flex items-center gap-1.5"
             >
               Reset Search
-            </button>
+            </ActionButton>
           </div>
         )
       ) : (
@@ -656,7 +657,7 @@ export default function KnowledgeHub() {
               ].map((tab) => {
                 const isActive = activeTab === tab.id;
                 return (
-                  <button
+                  <ActionButton
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`min-w-[120px] md:min-w-0 flex-1 text-center py-3.5 text-xs font-bold transition-all border-b-2 select-none ${
@@ -666,7 +667,7 @@ export default function KnowledgeHub() {
                     }`}
                   >
                     {tab.label}
-                  </button>
+                  </ActionButton>
                 );
               })}
             </div>
@@ -954,7 +955,7 @@ export default function KnowledgeHub() {
                                 Visit Website
                               </a>
                               {uni.videoUrl && (
-                                <button
+                                <ActionButton
                                   onClick={() => setViewingVideo({
                                     title: `${uni.name} Campus Tour`,
                                     university: uni.name,
@@ -967,7 +968,7 @@ export default function KnowledgeHub() {
                                     <path d="M4 4l12 6-12 6V4z" />
                                   </svg>
                                   Watch Tour
-                                </button>
+                                </ActionButton>
                               )}
                             </div>
                           </div>
@@ -996,14 +997,14 @@ export default function KnowledgeHub() {
           <div className="relative max-w-4xl w-full bg-[#0F172A] border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[calc(100vh-100px)] text-left">
             
             {/* Close Button */}
-            <button
+            <ActionButton
               onClick={() => setViewingVideo(null)}
               className="absolute top-4 right-4 bg-black/60 hover:bg-black/80 text-white rounded-full p-2.5 transition-all shadow-md z-20"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
-            </button>
+            </ActionButton>
 
             {/* Scrollable Content Area */}
             <div className="overflow-y-auto flex-1 flex flex-col items-center">

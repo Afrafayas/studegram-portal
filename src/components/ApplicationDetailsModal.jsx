@@ -1,3 +1,4 @@
+import { ActionButton, ActionForm } from './ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState, useEffect, useRef } from 'react';
 import API from '../api/axios';
@@ -354,19 +355,19 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
               </p>
             </div>
           </div>
-          <button
+          <ActionButton
             onClick={onClose}
             className="p-1.5 hover:bg-slate-100 rounded-full text-[#64748B] hover:text-[#0F172A] transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
-          </button>
+          </ActionButton>
         </div>
 
         {/* Brand Main Toggle Tab Bar */}
         <div className="flex bg-slate-50 border-b border-slate-200/80 px-6 py-2 gap-4">
-          <button
+          <ActionButton
             onClick={() => setMainTab('details')}
             className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all ${
               mainTab === 'details'
@@ -375,8 +376,8 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
             }`}
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 002 2z" /></svg> App Details
-          </button>
-          <button
+          </ActionButton>
+          <ActionButton
             onClick={() => setMainTab('activity')}
             className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all relative ${
               mainTab === 'activity'
@@ -386,7 +387,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg> Messages & Activity
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-          </button>
+          </ActionButton>
         </div>
 
         {/* Modal Main Content Container */}
@@ -450,7 +451,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                   { id: 'profile', label: 'Student Profile' },
                   { id: 'documents', label: 'Uploaded Documents' }
                 ].map((tab) => (
-                  <button
+                  <ActionButton
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`py-3 px-4 font-bold text-xs border-b-2 transition-all ${
@@ -460,7 +461,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                     }`}
                   >
                     {tab.label}
-                  </button>
+                  </ActionButton>
                 ))}
               </div>
 
@@ -518,13 +519,13 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                             Commission Disbursed & Paid ✓
                           </span>
                         ) : (
-                          <button
+                          <ActionButton
                             type="button"
                             onClick={() => setShowClaimModal(true)}
                             className="bg-amber-600 hover:bg-amber-700 text-white font-black text-xs px-4 py-2 rounded-xl transition-all shadow cursor-pointer active:scale-95"
                           >
                             Claim Commission 💰
-                          </button>
+                          </ActionButton>
                         )}
                       </div>
                     )}
@@ -624,7 +625,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                       </div>
 
                       {/* Add Comment Input Form */}
-                      <form onSubmit={handleAddAppComment} className="flex gap-2 pt-1 border-t border-slate-200/60">
+                      <ActionForm onSubmit={handleAddAppComment} className="flex gap-2 pt-1 border-t border-slate-200/60">
                         <input
                           type="text"
                           value={newAppComment}
@@ -632,14 +633,14 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                           placeholder="Add a new comment for this application..."
                           className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#D99A1C]"
                         />
-                        <button
+                        <ActionButton
                           type="submit"
                           disabled={isPostingAppComment || !newAppComment.trim()}
                           className="bg-[#D99A1C] hover:bg-[#C28410] disabled:opacity-50 text-white text-xs font-extrabold px-4 py-2 rounded-xl transition-all shadow-xs cursor-pointer"
                         >
                           {isPostingAppComment ? 'Posting...' : 'Post Comment'}
-                        </button>
-                      </form>
+                        </ActionButton>
+                      </ActionForm>
                     </div>
 
 
@@ -668,7 +669,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                               {selectedUploadFile.name}
                             </span>
                           </div>
-                          <button
+                          <ActionButton
                             type="button"
                             onClick={() => {
                               setSelectedUploadFile(null);
@@ -677,7 +678,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                             className="text-xs text-rose-500 hover:text-rose-700 font-bold transition-colors cursor-pointer shrink-0"
                           >
                             ✕ Remove
-                          </button>
+                          </ActionButton>
                         </div>
                         <input
                           type="text"
@@ -710,7 +711,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
 
                     {/* Submit Button */}
                     <div className="flex justify-end pt-1">
-                      <button
+                      <ActionButton
                         type="button"
                         disabled={isUploadingDoc || !selectedUploadFile}
                         onClick={async () => {
@@ -749,7 +750,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                           </svg>
                         )}
                         {isUploadingDoc ? 'Uploading...' : 'Upload Document'}
-                      </button>
+                      </ActionButton>
                     </div>
 
                     {isUploadingDoc && !selectedUploadFile && (
@@ -800,14 +801,14 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                                         className="text-[10px] text-slate-500 font-semibold cursor-pointer"
                                       />
                                       <div className="flex gap-1.5 self-end">
-                                        <button
+                                        <ActionButton
                                           type="button"
                                           onClick={() => setEditingDocIdx(null)}
                                           className="border border-slate-200 bg-white hover:bg-slate-100 text-slate-600 text-[10px] font-bold px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
                                         >
                                           Cancel
-                                        </button>
-                                        <button
+                                        </ActionButton>
+                                        <ActionButton
                                           type="button"
                                           disabled={isReplacing}
                                           onClick={() => handleSaveEditedDoc(idx)}
@@ -820,7 +821,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                                             </svg>
                                           )}
                                           {isReplacing ? 'Saving...' : 'Save Changes'}
-                                        </button>
+                                        </ActionButton>
                                       </div>
                                     </div>
                                   </div>
@@ -828,7 +829,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                               </div>
                             </div>
                             <div className="flex items-center gap-1.5 shrink-0">
-                              <button
+                              <ActionButton
                                 type="button"
                                 onClick={() => {
                                   setEditingDocIdx(editingDocIdx === idx ? null : idx);
@@ -838,7 +839,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                                 className="border border-amber-200 bg-amber-50 hover:bg-amber-100 text-[#D99A1C] font-extrabold text-[10px] px-2.5 py-1.5 rounded-xl transition-all cursor-pointer flex items-center gap-1"
                               >
                                 <span>✏️ Edit</span>
-                              </button>
+                              </ActionButton>
                               <a
                                 href={doc.url}
                                 target="_blank"
@@ -885,7 +886,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                   </span>
                 </div>
 
-                <button
+                <ActionButton
                   onClick={() => loadChatMessages(false)}
                   disabled={isChatLoading || isUnauthorized}
                   className="p-1 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-800 transition-colors disabled:opacity-50 flex items-center gap-1.5 text-[9px] font-bold"
@@ -900,7 +901,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H17" />
                   </svg>
                   Sync Updates
-                </button>
+                </ActionButton>
               </div>
 
               {/* Chat Message Box / Area */}
@@ -1034,20 +1035,20 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                       className="bg-indigo-50 border border-indigo-100 text-indigo-700 font-bold text-[9px] px-2 py-1 rounded-lg flex items-center gap-1.5 shadow-sm"
                     >
                       <span className="truncate max-w-[120px]">{file.name}</span>
-                      <button
+                      <ActionButton
                         type="button"
                         onClick={() => setChatFiles(prev => prev.filter((_, i) => i !== idx))}
                         className="text-red-500 hover:text-red-700 font-extrabold focus:outline-none"
                       >
                         Ã—
-                      </button>
+                      </ActionButton>
                     </div>
                   ))}
                 </div>
               )}
 
               {/* Chat Input Form */}
-              <form 
+              <ActionForm 
                 onSubmit={handleSendChatMessage} 
                 className="bg-white p-3 border-t border-slate-100 flex items-center gap-2 shrink-0"
               >
@@ -1088,7 +1089,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                   disabled={isChatSending || isUnauthorized}
                 />
 
-                <button
+                <ActionButton
                   type="submit"
                   disabled={isChatSending || isUnauthorized || (!chatInput.trim() && chatFiles.length === 0)}
                   className="p-2.5 bg-gradient-to-r from-[#D99A1C] to-[#C28410] hover:scale-[1.02] active:scale-95 disabled:opacity-50 text-white rounded-xl transition-all duration-150 flex items-center justify-center shadow-md disabled:pointer-events-none"
@@ -1103,15 +1104,15 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                     </svg>
                   )}
-                </button>
-              </form>
+                </ActionButton>
+              </ActionForm>
             </div>
 
             {/* Right Column: Activity Logs & Notes */}
             <div className="md:w-5/12 p-6 flex flex-col min-h-0 bg-slate-50/30 overflow-y-auto">
               <div className="space-y-6">
                 {/* Note Input Box */}
-                <form onSubmit={handleAddNote} className="space-y-2">
+                <ActionForm onSubmit={handleAddNote} className="space-y-2">
                   <textarea
                     placeholder="Add a progress note or internal task description..."
                     rows="2.5"
@@ -1120,15 +1121,15 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                     onChange={(e) => setNewNote(e.target.value)}
                   ></textarea>
                   <div className="flex justify-end">
-                    <button
+                    <ActionButton
                       type="submit"
                       disabled={!newNote.trim()}
                       className="bg-[#D99A1C] hover:bg-[#C28410] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-xl text-[10px] uppercase tracking-wider transition-all duration-150 active:scale-95 shadow-md"
                     >
                       Post Note
-                    </button>
+                    </ActionButton>
                   </div>
-                </form>
+                </ActionForm>
 
                 {/* Notes Timeline Stream */}
                 <div className="space-y-4">

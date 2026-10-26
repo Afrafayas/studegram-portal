@@ -1,3 +1,4 @@
+import { ActionButton } from './ActionControls';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 
@@ -157,7 +158,7 @@ export default function Navbar({
     <nav className="h-[60px] min-h-[60px] bg-[#0A0A0F] border-b border-white/5 px-4 md:px-6 flex items-center justify-between sticky top-0 z-40 select-none text-white">
       {/* Left section: Logo & Hamburger toggle */}
       <div className="flex items-center gap-2 md:gap-3">
-        <button 
+        <ActionButton 
           onClick={onToggleSidebar}
           className="md:hidden p-1.5 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg focus:outline-none"
           title="Toggle Navigation"
@@ -165,10 +166,10 @@ export default function Navbar({
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
-        </button>
+        </ActionButton>
 
         {onBack && (
-          <button
+          <ActionButton
             onClick={onBack}
             className="p-1.5 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg focus:outline-none transition-all flex items-center justify-center active:scale-95 duration-100"
             title="Go Back"
@@ -176,7 +177,7 @@ export default function Navbar({
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-          </button>
+          </ActionButton>
         )}
  
         <div className="w-8 h-8 md:w-9 h-9 rounded-xl bg-gradient-to-tr from-[#D99A1C] to-[#F5B025] flex items-center justify-center font-extrabold text-black text-sm md:text-lg shadow-sm">
@@ -210,7 +211,7 @@ export default function Navbar({
 
         {/* Application Comments Icon & Drawer */}
         <div className="relative">
-          <button
+          <ActionButton
             onClick={() => {
               setShowComments(!showComments);
               if (showNotifications) setShowNotifications(false);
@@ -226,7 +227,7 @@ export default function Navbar({
                 {unreadCommentsCount}
               </span>
             )}
-          </button>
+          </ActionButton>
 
           {/* Application Comments Dropdown Drawer */}
           {showComments && (
@@ -294,7 +295,7 @@ export default function Navbar({
 
         {/* Bell Icon with Real-time Notification Dropdown */}
         <div className="relative">
-          <button 
+          <ActionButton 
             onClick={() => {
               setShowNotifications(!showNotifications);
               if (showComments) setShowComments(false);
@@ -310,7 +311,7 @@ export default function Navbar({
                 {unreadCount}
               </span>
             )}
-          </button>
+          </ActionButton>
 
           {/* Notifications Dropdown Drawer */}
           {showNotifications && (
@@ -326,12 +327,12 @@ export default function Navbar({
                     <p className="text-[10px] text-slate-400">Application updates & system alerts</p>
                   </div>
                   {unreadCount > 0 && (
-                    <button 
+                    <ActionButton 
                       onClick={handleMarkRead} 
                       className="text-[10px] text-[#D99A1C] font-extrabold hover:underline cursor-pointer"
                     >
                       Mark all read
-                    </button>
+                    </ActionButton>
                   )}
                 </div>
 
@@ -376,7 +377,7 @@ export default function Navbar({
 
         {/* User Avatar with Profile Dropdown Menu */}
         <div className="relative">
-          <button
+          <ActionButton
             onClick={() => {
               setShowUserMenu(!showUserMenu);
               if (showNotifications) setShowNotifications(false);
@@ -389,7 +390,7 @@ export default function Navbar({
               {displayInitials}
             </div>
             <span className="absolute bottom-1 left-7 w-2.5 h-2.5 bg-[#10B981] rounded-full ring-2 ring-[#0A0A0F]"></span>
-          </button>
+          </ActionButton>
 
           {showUserMenu && (
             <>
@@ -407,7 +408,7 @@ export default function Navbar({
                 </div>
 
                 <div className="p-1.5 space-y-1">
-                  <button
+                  <ActionButton
                     onClick={() => {
                       setShowUserMenu(false);
                       if (onOpenProfile) onOpenProfile();
@@ -418,9 +419,9 @@ export default function Navbar({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                     <span>My Profile & Password</span>
-                  </button>
+                  </ActionButton>
 
-                  <button
+                  <ActionButton
                     onClick={() => {
                       setShowUserMenu(false);
                       if (onLogout) onLogout();
@@ -431,7 +432,7 @@ export default function Navbar({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
                     <span>Sign Out</span>
-                  </button>
+                  </ActionButton>
                 </div>
               </div>
             </>

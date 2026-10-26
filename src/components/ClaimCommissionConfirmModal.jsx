@@ -1,3 +1,4 @@
+import { ActionButton } from './ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
@@ -59,7 +60,7 @@ export default function ClaimCommissionConfirmModal({ isOpen, onClose, applicati
         className="bg-white border border-slate-200 rounded-2xl p-6 max-w-md w-full shadow-2xl relative space-y-4 text-center animate-in zoom-in-95 duration-150"
       >
         {/* Close "X" Button */}
-        <button
+        <ActionButton
           onClick={onClose}
           disabled={isSubmitting}
           type="button"
@@ -69,7 +70,7 @@ export default function ClaimCommissionConfirmModal({ isOpen, onClose, applicati
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
           </svg>
-        </button>
+        </ActionButton>
 
         {/* Currency / Payout Icon */}
         <div className="w-14 h-14 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto ring-8 ring-amber-50/60 shadow-inner">
@@ -121,15 +122,15 @@ export default function ClaimCommissionConfirmModal({ isOpen, onClose, applicati
 
         {/* Actions */}
         <div className="grid grid-cols-2 gap-3 pt-2">
-          <button
+          <ActionButton
             type="button"
             disabled={isSubmitting}
             onClick={onClose}
             className="w-full py-2.5 px-4 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-bold transition-all focus:outline-none focus:ring-2 focus:ring-slate-300 disabled:opacity-50"
           >
             Cancel
-          </button>
-          <button
+          </ActionButton>
+          <ActionButton
             type="button"
             disabled={isSubmitting}
             onClick={handleConfirm}
@@ -149,7 +150,7 @@ export default function ClaimCommissionConfirmModal({ isOpen, onClose, applicati
                 <span className="text-sm leading-none">💰</span>
               </>
             )}
-          </button>
+          </ActionButton>
         </div>
       </div>
     </div>,

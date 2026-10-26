@@ -1,3 +1,4 @@
+import { ActionButton } from '../components/ActionControls';
 import React, { useMemo } from 'react';
 
 export default function Dashboard({ 
@@ -289,7 +290,7 @@ export default function Dashboard({
 
         {/* New Application CTA Button */}
         {onNewApplicationClick && (
-          <button
+          <ActionButton
             onClick={onNewApplicationClick}
             className="bg-[#D99A1C] hover:bg-[#C28410] text-black font-extrabold text-xs px-4 py-2.5 rounded-xl transition-all duration-150 hover:scale-[1.02] active:scale-95 shadow-md flex items-center gap-2 self-start sm:self-auto cursor-pointer"
           >
@@ -297,7 +298,7 @@ export default function Dashboard({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
             </svg>
             <span>+ New Application</span>
-          </button>
+          </ActionButton>
         )}
       </div>
 
@@ -332,19 +333,19 @@ export default function Dashboard({
               <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">Recent Applications</h2>
               <div className="flex items-center gap-3">
                 {onNewApplicationClick && (
-                  <button 
+                  <ActionButton 
                     onClick={onNewApplicationClick}
                     className="text-xs text-[#D99A1C] font-bold hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <span>+ New Application</span>
-                  </button>
+                  </ActionButton>
                 )}
-                <button 
+                <ActionButton 
                   onClick={() => onViewHistory && onViewHistory()}
                   className="text-xs text-[#64748B] hover:text-[#0F172A] font-semibold hover:underline"
                 >
                   View History
-                </button>
+                </ActionButton>
               </div>
             </div>
             <div className="overflow-x-auto">
@@ -377,7 +378,7 @@ export default function Dashboard({
                         </td>
                         <td className="px-6 py-3.5 text-xs text-[#64748B] font-semibold whitespace-nowrap">{student.date}</td>
                         <td className="px-6 py-3.5 text-right whitespace-nowrap pr-6">
-                          <button 
+                          <ActionButton 
                             onClick={() => onViewDetails && onViewDetails(student.rawApp)} 
                             className="p-1.5 hover:bg-slate-100 rounded-lg text-[#64748B] hover:text-[#0F172A] transition-all duration-150 inline-flex items-center justify-center"
                           >
@@ -385,7 +386,7 @@ export default function Dashboard({
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
-                          </button>
+                          </ActionButton>
                         </td>
                       </tr>
                     ))
@@ -411,12 +412,12 @@ export default function Dashboard({
                 <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
               )}
             </div>
-            <button 
+            <ActionButton 
               onClick={() => onNavigateDeadlines && onNavigateDeadlines()}
               className="text-xs text-[#D99A1C] font-semibold hover:underline cursor-pointer"
             >
               View All
-            </button>
+            </ActionButton>
           </div>
 
           <div className="p-4 flex-1 space-y-3.5">

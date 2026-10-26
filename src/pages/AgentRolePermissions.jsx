@@ -1,3 +1,4 @@
+import { ActionButton, ActionForm } from '../components/ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
@@ -211,7 +212,7 @@ export default function AgentRolePermissions({ partnerData }) {
             Manage your agency staff operational roles, sidebar item checklists, and feature access clearance.
           </p>
         </div>
-        <button
+        <ActionButton
           onClick={openCreateModal}
           className="bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.02] text-black font-extrabold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 active:scale-95"
         >
@@ -219,7 +220,7 @@ export default function AgentRolePermissions({ partnerData }) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
           </svg>
           Create Agency Role
-        </button>
+        </ActionButton>
       </div>
 
       {/* Roles Grid */}
@@ -257,7 +258,7 @@ export default function AgentRolePermissions({ partnerData }) {
               </div>
             </div>
 
-            <button
+            <ActionButton
               onClick={() => openEditModal(role)}
               className="w-full bg-[#0F172A] hover:bg-black text-white font-bold text-xs py-2.5 rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5"
             >
@@ -265,7 +266,7 @@ export default function AgentRolePermissions({ partnerData }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
               <span>Edit Permissions Checklist</span>
-            </button>
+            </ActionButton>
           </div>
         ))}
       </div>
@@ -281,12 +282,12 @@ export default function AgentRolePermissions({ partnerData }) {
                 </h3>
                 <p className="text-[10px] text-slate-400 font-semibold">Checklist sidebar navigation and operational rights</p>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-white font-bold text-sm">
+              <ActionButton onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-white font-bold text-sm">
                 ✕
-              </button>
+              </ActionButton>
             </div>
 
-            <form onSubmit={handleSaveRole} className="p-6 space-y-6 overflow-y-auto flex-1">
+            <ActionForm onSubmit={handleSaveRole} className="p-6 space-y-6 overflow-y-auto flex-1">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Role Title / Display Name *</label>
@@ -391,14 +392,14 @@ export default function AgentRolePermissions({ partnerData }) {
               </div>
 
               <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
-                <button
+                <ActionButton
                   type="button"
                   onClick={() => setIsModalOpen(false)}
                   className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all"
                 >
                   Cancel
-                </button>
-                <button
+                </ActionButton>
+                <ActionButton
                   type="submit"
                   disabled={isSaving}
                   className="bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-black font-bold text-xs px-6 py-2.5 rounded-xl transition-all shadow-md uppercase tracking-wider disabled:opacity-50 flex items-center gap-2"
@@ -410,9 +411,9 @@ export default function AgentRolePermissions({ partnerData }) {
                     </svg>
                   )}
                   {isSaving ? 'Saving to Database...' : 'Save Role & Permissions ✓'}
-                </button>
+                </ActionButton>
               </div>
-            </form>
+            </ActionForm>
           </div>
         </div>,
         document.body

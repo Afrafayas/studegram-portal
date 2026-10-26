@@ -1,3 +1,4 @@
+import { ActionButton } from '../components/ActionControls';
 import React, { useState } from 'react';
 import ScholarshipDetailsModal from '../components/ScholarshipDetailsModal';
 
@@ -430,18 +431,18 @@ export default function Scholarships({ setActivePage }) {
                     </div>
 
                     <div className="flex gap-2">
-                      <button
+                      <ActionButton
                         onClick={() => setSelectedScholarshipForDetails(s)}
                         className="flex-1 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-xs font-bold text-slate-700 py-2.5 rounded-xl text-center transition-all duration-150"
                       >
                         Check Criteria
-                      </button>
-                      <button
+                      </ActionButton>
+                      <ActionButton
                         onClick={() => setActivePage && setActivePage('UniversityDeadline')}
                         className="flex-1 bg-[#D99A1C] hover:bg-[#B87C0E] hover:scale-[1.01] active:scale-95 text-xs font-bold text-white py-2.5 rounded-xl text-center transition-all duration-150 shadow-xs"
                       >
                         Deadlines
-                      </button>
+                      </ActionButton>
                     </div>
                   </div>
                 </div>
@@ -463,7 +464,7 @@ export default function Scholarships({ setActivePage }) {
               We couldn't find any scholarships matching your search query or filters.
             </p>
           </div>
-          <button
+          <ActionButton
             onClick={() => {
               setSelectedCountry('All');
               setSelectedUniversity('All');
@@ -473,7 +474,7 @@ export default function Scholarships({ setActivePage }) {
             className="bg-[#D99A1C] hover:bg-[#C28410] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all duration-150 shadow-md inline-flex items-center gap-1.5"
           >
             Reset Filters
-          </button>
+          </ActionButton>
         </div>
       )}
 

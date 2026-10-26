@@ -1,3 +1,4 @@
+import { ActionButton, ActionForm } from '../components/ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState } from 'react';
 import API from '../api/axios';
@@ -57,7 +58,7 @@ export default function Login({ onNavigate, onLoginSuccess }) {
 
     setIsLoading(true);
 
-    API.post('/partners/login', { email, password })
+    return API.post('/partners/login', { email, password })
     .then((res) => {
       const data = res.data;
       if (!data?.success) {
@@ -294,7 +295,7 @@ export default function Login({ onNavigate, onLoginSuccess }) {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <ActionForm onSubmit={handleSubmit} className="space-y-5">
             {/* Email Input */}
             <div className="space-y-1.5">
               <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Email Address</label>
@@ -352,7 +353,7 @@ export default function Login({ onNavigate, onLoginSuccess }) {
                   disabled={isLoading}
                 />
                 {/* Eye toggle icon */}
-                <button
+                <ActionButton
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#64748B] hover:text-[#0F172A] focus:outline-none"
@@ -368,7 +369,7 @@ export default function Login({ onNavigate, onLoginSuccess }) {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
                   )}
-                </button>
+                </ActionButton>
               </div>
               {passwordError && (
                 <p className="text-[10px] text-[#EF4444] font-bold mt-0.5">{passwordError}</p>
@@ -387,17 +388,17 @@ export default function Login({ onNavigate, onLoginSuccess }) {
                 />
                 Remember me
               </label>
-              <button
+              <ActionButton
                 type="button"
                 onClick={handleOpenForgotModal}
                 className="text-[#D99A1C] font-bold hover:underline cursor-pointer focus:outline-none"
               >
                 Forgot password?
-              </button>
+              </ActionButton>
             </div>
 
             {/* Submit button with loading state */}
-            <button
+            <ActionButton
               type="submit"
               className="w-full bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.02] text-white font-bold py-3 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
               disabled={isLoading}
@@ -413,19 +414,19 @@ export default function Login({ onNavigate, onLoginSuccess }) {
               ) : (
                 'Sign In'
               )}
-            </button>
-          </form>
+            </ActionButton>
+          </ActionForm>
 
           {/* Bottom redirection */}
           <div className="text-center text-xs font-semibold text-[#64748B] pt-2">
             Don't have an account?{' '}
-            <button
+            <ActionButton
               onClick={() => onNavigate('register')}
               className="text-[#D99A1C] font-bold hover:underline"
               disabled={isLoading}
             >
               Register here
-            </button>
+            </ActionButton>
           </div>
 
         </div>
@@ -471,21 +472,21 @@ export default function Login({ onNavigate, onLoginSuccess }) {
               </div>
             )}
 
-            <button
+            <ActionButton
               onClick={() => setAccountStatusModal(null)}
               className="w-full bg-[#0F172A] hover:bg-black text-white font-bold py-2.5 rounded-xl text-xs transition-all uppercase tracking-wider cursor-pointer"
             >
               Close Window
-            </button>
+            </ActionButton>
 
             <div className="pt-1 text-center">
-              <button
+              <ActionButton
                 type="button"
                 onClick={() => setAccountStatusModal(null)}
                 className="text-xs text-slate-500 hover:text-[#D99A1C] font-bold underline transition-colors cursor-pointer"
               >
                 Back to Login Page
-              </button>
+              </ActionButton>
             </div>
           </div>
         </div>,
@@ -503,7 +504,7 @@ export default function Login({ onNavigate, onLoginSuccess }) {
                 <span className="text-[10px] font-black text-[#D99A1C] uppercase tracking-wider">Account Recovery</span>
                 <h3 className="text-lg font-bold text-[#0F172A]">Forgot Password</h3>
               </div>
-              <button
+              <ActionButton
                 type="button"
                 onClick={() => setShowForgotModal(false)}
                 className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-100 transition-colors focus:outline-none cursor-pointer"
@@ -511,7 +512,7 @@ export default function Login({ onNavigate, onLoginSuccess }) {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
-              </button>
+              </ActionButton>
             </div>
 
             <p className="text-xs text-slate-600 text-left leading-relaxed">
@@ -540,16 +541,16 @@ export default function Login({ onNavigate, onLoginSuccess }) {
                     Check your email inbox or spam folder for your 6-digit login password, then sign in below. You can change your password anytime in your Profile.
                   </p>
                 </div>
-                <button
+                <ActionButton
                   type="button"
                   onClick={() => setShowForgotModal(false)}
                   className="w-full bg-[#0F172A] hover:bg-black text-white font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md"
                 >
                   Return to Sign In
-                </button>
+                </ActionButton>
               </div>
             ) : (
-              <form onSubmit={handleForgotPasswordSubmit} className="space-y-4 text-left">
+              <ActionForm onSubmit={handleForgotPasswordSubmit} className="space-y-4 text-left">
                 <div className="space-y-1.5">
                   <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
                     Registered Email Address *
@@ -569,15 +570,15 @@ export default function Login({ onNavigate, onLoginSuccess }) {
                 </div>
 
                 <div className="flex items-center gap-3 pt-2">
-                  <button
+                  <ActionButton
                     type="button"
                     onClick={() => setShowForgotModal(false)}
                     className="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 rounded-xl text-xs transition-all cursor-pointer"
                     disabled={forgotLoading}
                   >
                     Cancel
-                  </button>
-                  <button
+                  </ActionButton>
+                  <ActionButton
                     type="submit"
                     disabled={forgotLoading}
                     className="w-2/3 bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
@@ -593,19 +594,19 @@ export default function Login({ onNavigate, onLoginSuccess }) {
                     ) : (
                       <span>Send 6-Digit Password →</span>
                     )}
-                  </button>
+                  </ActionButton>
                 </div>
 
                 <div className="pt-2 text-center">
-                  <button
+                  <ActionButton
                     type="button"
                     onClick={() => setShowForgotModal(false)}
                     className="text-xs text-slate-500 hover:text-[#D99A1C] font-bold underline transition-colors cursor-pointer"
                   >
                     ← Back to Login Page
-                  </button>
+                  </ActionButton>
                 </div>
-              </form>
+              </ActionForm>
             )}
           </div>
         </div>,

@@ -1,3 +1,4 @@
+import { ActionButton } from '../components/ActionControls';
 import React, { useState, useEffect, useMemo } from 'react';
 import ClaimCommissionConfirmModal from '../components/ClaimCommissionConfirmModal';
 
@@ -184,7 +185,7 @@ export default function Commissions({
         </div>
 
         {onRefresh && (
-          <button
+          <ActionButton
             onClick={onRefresh}
             className="self-start md:self-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-3.5 py-2 rounded-xl transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs"
           >
@@ -192,7 +193,7 @@ export default function Commissions({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
             <span>Refresh Status</span>
-          </button>
+          </ActionButton>
         )}
       </div>
 
@@ -306,7 +307,7 @@ export default function Commissions({
             {/* Filter Tabs */}
             <div className="bg-slate-100 p-1 rounded-xl flex gap-1 text-[10px] font-bold w-full sm:w-auto">
               {['All', 'Eligible to Claim', 'Claimed', 'Paid'].map((tab) => (
-                <button
+                <ActionButton
                   key={tab}
                   onClick={() => setFilterTab(tab)}
                   className={`px-3 py-1 rounded-lg transition-all flex-1 sm:flex-none text-center ${
@@ -316,7 +317,7 @@ export default function Commissions({
                   }`}
                 >
                   {tab}
-                </button>
+                </ActionButton>
               ))}
             </div>
           </div>
@@ -454,7 +455,7 @@ export default function Commissions({
                           {/* Claim Commission Button */}
                           {app.isVisaApprovedOrEnrolled && !app.isClaimed && !app.isPaid ? (
                             canClaim ? (
-                              <button
+                              <ActionButton
                                 type="button"
                                 onClick={() => setSelectedAppForClaim(app)}
                                 className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-[10px] uppercase px-3 py-1.5 rounded-xl transition-all shadow-sm active:scale-95 inline-flex items-center gap-1 cursor-pointer"
@@ -462,7 +463,7 @@ export default function Commissions({
                               >
                                 <span>💰</span>
                                 <span>Claim Commission</span>
-                              </button>
+                              </ActionButton>
                             ) : (
                               <span
                                 className="px-2.5 py-1 text-[9px] font-bold text-slate-400 bg-slate-100 rounded-lg border border-slate-200 select-none cursor-not-allowed"
@@ -475,7 +476,7 @@ export default function Commissions({
 
                           {/* View Application Details */}
                           {onViewDetails && (
-                            <button
+                            <ActionButton
                               type="button"
                               onClick={() => onViewDetails(app)}
                               className="p-1.5 hover:bg-slate-100 text-slate-400 hover:text-slate-700 rounded-lg transition-all"
@@ -485,7 +486,7 @@ export default function Commissions({
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                               </svg>
-                            </button>
+                            </ActionButton>
                           )}
                         </div>
                       </td>
@@ -526,16 +527,16 @@ export default function Commissions({
             </div>
 
             <div className="flex items-center gap-1.5">
-              <button
+              <ActionButton
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
               >
                 ◀ Prev
-              </button>
+              </ActionButton>
 
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <button
+                <ActionButton
                   key={page}
                   onClick={() => setCurrentPage(page)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
@@ -545,16 +546,16 @@ export default function Commissions({
                   }`}
                 >
                   {page}
-                </button>
+                </ActionButton>
               ))}
 
-              <button
+              <ActionButton
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
               >
                 Next ▶
-              </button>
+              </ActionButton>
             </div>
           </div>
         )}

@@ -1,3 +1,4 @@
+import { ActionButton, ActionForm } from '../components/ActionControls';
 import { createPortal } from 'react-dom';
 import { useState, useEffect } from 'react';
 import API from '../api/axios';
@@ -261,7 +262,7 @@ export default function StaffManagement({ partnerData }) {
             Manage your agency staff accounts, assign operational roles, and manage secure portal access.
           </p>
         </div>
-        <button
+        <ActionButton
           onClick={openAddModal}
           className="bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.02] text-black font-extrabold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 whitespace-nowrap active:scale-95"
         >
@@ -269,7 +270,7 @@ export default function StaffManagement({ partnerData }) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
           </svg>
           Add New Staff
-        </button>
+        </ActionButton>
       </div>
 
       {/* Metrics Row */}
@@ -351,7 +352,7 @@ export default function StaffManagement({ partnerData }) {
           <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200 text-xs">
             <span className="text-[10px] font-extrabold text-[#64748B] px-2 uppercase">Role:</span>
             {['ALL', 'AgencyAdmin', 'Manager', 'Counselor', 'Staff'].map((r) => (
-              <button
+              <ActionButton
                 key={r}
                 onClick={() => setRoleFilter(r)}
                 className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all ${
@@ -361,7 +362,7 @@ export default function StaffManagement({ partnerData }) {
                 }`}
               >
                 {r === 'ALL' ? 'All Roles' : r}
-              </button>
+              </ActionButton>
             ))}
           </div>
 
@@ -369,7 +370,7 @@ export default function StaffManagement({ partnerData }) {
           <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200 text-xs">
             <span className="text-[10px] font-extrabold text-[#64748B] px-2 uppercase">Status:</span>
             {['ALL', 'Active', 'Inactive'].map((st) => (
-              <button
+              <ActionButton
                 key={st}
                 onClick={() => setStatusFilter(st)}
                 className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all ${
@@ -379,7 +380,7 @@ export default function StaffManagement({ partnerData }) {
                 }`}
               >
                 {st}
-              </button>
+              </ActionButton>
             ))}
           </div>
         </div>
@@ -457,7 +458,7 @@ export default function StaffManagement({ partnerData }) {
 
                       {/* Status */}
                       <td className="py-4 px-4">
-                        <button
+                        <ActionButton
                           onClick={() => handleToggleStatus(staff)}
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold transition-all cursor-pointer border ${
                             staff.status === 'Active'
@@ -468,7 +469,7 @@ export default function StaffManagement({ partnerData }) {
                         >
                           <span className={`w-1.5 h-1.5 rounded-full ${staff.status === 'Active' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`}></span>
                           {staff.status}
-                        </button>
+                        </ActionButton>
                       </td>
 
                       {/* Created Date */}
@@ -483,7 +484,7 @@ export default function StaffManagement({ partnerData }) {
                       {/* Action Buttons */}
                       <td className="py-4 px-6 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button
+                          <ActionButton
                             onClick={() => openEditModal(staff)}
                             className="p-1.5 text-slate-500 hover:text-[#D99A1C] hover:bg-amber-50 rounded-lg transition-colors"
                             title="Edit Staff Member"
@@ -491,25 +492,25 @@ export default function StaffManagement({ partnerData }) {
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
-                          </button>
+                          </ActionButton>
 
                           {deleteConfirmId === staff._id ? (
                             <div className="flex items-center gap-1 bg-rose-50 border border-rose-200 rounded-lg p-1">
-                              <button
+                              <ActionButton
                                 onClick={() => handleDeleteStaff(staff._id)}
                                 className="px-2 py-0.5 bg-rose-600 text-white font-bold text-[10px] rounded hover:bg-rose-700"
                               >
                                 Delete
-                              </button>
-                              <button
+                              </ActionButton>
+                              <ActionButton
                                 onClick={() => setDeleteConfirmId(null)}
                                 className="px-1.5 py-0.5 text-slate-500 text-[10px] hover:text-slate-700"
                               >
                                 Cancel
-                              </button>
+                              </ActionButton>
                             </div>
                           ) : (
-                            <button
+                            <ActionButton
                               onClick={() => setDeleteConfirmId(staff._id)}
                               className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                               title="Delete Staff Account"
@@ -517,7 +518,7 @@ export default function StaffManagement({ partnerData }) {
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                               </svg>
-                            </button>
+                            </ActionButton>
                           )}
                         </div>
                       </td>
@@ -551,18 +552,18 @@ export default function StaffManagement({ partnerData }) {
                   </p>
                 </div>
               </div>
-              <button
+              <ActionButton
                 onClick={() => setIsModalOpen(false)}
                 className="text-slate-400 hover:text-white p-1 rounded-lg transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
-              </button>
+              </ActionButton>
             </div>
 
             {/* Form Body */}
-            <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
+            <ActionForm onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
               {/* Full Name */}
               <div className="space-y-1">
                 <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
@@ -646,7 +647,7 @@ export default function StaffManagement({ partnerData }) {
                   <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
                     Password {editingStaff ? '(Leave blank to keep unchanged)' : <span className="text-rose-500">*</span>}
                   </label>
-                  <button
+                  <ActionButton
                     type="button"
                     onClick={() => {
                       const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%';
@@ -660,7 +661,7 @@ export default function StaffManagement({ partnerData }) {
                     className="text-[10px] text-[#D99A1C] hover:underline font-extrabold cursor-pointer"
                   >
                     🎲 Auto Generate
-                  </button>
+                  </ActionButton>
                 </div>
                 <div className="relative">
                   <input
@@ -672,13 +673,13 @@ export default function StaffManagement({ partnerData }) {
                       formErrors.password ? 'border-rose-500 focus:ring-1 focus:ring-rose-500' : 'border-slate-200 focus:border-[#D99A1C] focus:bg-white'
                     }`}
                   />
-                  <button
+                  <ActionButton
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-2.5 text-[10px] text-slate-400 hover:text-slate-600 font-bold cursor-pointer"
                   >
                     {showPassword ? "Hide" : "Show"}
-                  </button>
+                  </ActionButton>
                 </div>
                 {formErrors.password && <p className="text-[10px] text-rose-500 font-bold">{formErrors.password}</p>}
                 <p className="text-[10px] text-slate-400 font-medium">
@@ -703,15 +704,15 @@ export default function StaffManagement({ partnerData }) {
 
               {/* Submit Buttons */}
               <div className="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
-                <button
+                <ActionButton
                   type="button"
                   onClick={() => setIsModalOpen(false)}
                   className="px-4 py-2.5 rounded-xl text-xs font-bold text-[#64748B] hover:bg-slate-100 transition-colors"
                   disabled={isSaving}
                 >
                   Cancel
-                </button>
-                <button
+                </ActionButton>
+                <ActionButton
                   type="submit"
                   disabled={isSaving}
                   className="bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.02] active:scale-95 text-black font-extrabold text-xs px-6 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-2 disabled:opacity-50"
@@ -729,9 +730,9 @@ export default function StaffManagement({ partnerData }) {
                   ) : (
                     'Create Staff Account'
                   )}
-                </button>
+                </ActionButton>
               </div>
-            </form>
+            </ActionForm>
           </div>
         </div>,
         document.body
@@ -759,12 +760,12 @@ export default function StaffManagement({ partnerData }) {
               Your agency registration is currently under review by the Unigather Admin team. Please wait for verification and approval before creating staff accounts.
             </p>
 
-            <button
+            <ActionButton
               onClick={() => setShowPendingModal(false)}
               className="w-full bg-[#0F172A] hover:bg-black text-white font-bold py-2.5 rounded-xl text-xs transition-all uppercase tracking-wider"
             >
               Close Window
-            </button>
+            </ActionButton>
           </div>
         </div>,
         document.body

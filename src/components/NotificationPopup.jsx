@@ -1,3 +1,4 @@
+import { ActionButton } from './ActionControls';
 import React, { useState, useEffect } from 'react';
 import { notices } from '../data/notices';
 
@@ -132,7 +133,7 @@ export default function NotificationPopup({ onViewNotice }) {
       />
 
       {/* Floating Highlighted Close Button */}
-      <button
+      <ActionButton
         onClick={handleClose}
         className="absolute top-5 right-5 z-50 w-8 h-8 rounded-full bg-white/90 hover:bg-rose-50 text-slate-700 hover:text-rose-600 shadow-sm border border-slate-200/60 flex items-center justify-center transition-all duration-150 hover:scale-105 active:scale-95 group"
         aria-label="Close notification"
@@ -140,7 +141,7 @@ export default function NotificationPopup({ onViewNotice }) {
         <svg className="w-3.5 h-3.5 transform group-hover:rotate-90 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
         </svg>
-      </button>
+      </ActionButton>
 
       {/* Top Banner Area (always rendered with same height for uniform sizing) */}
       <div className="mb-6 overflow-hidden rounded-2xl border border-slate-100 shadow-inner h-64 relative bg-slate-50">
@@ -208,20 +209,20 @@ export default function NotificationPopup({ onViewNotice }) {
       </div>
 
       <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-        <button
+        <ActionButton
           onClick={handleClose}
           className="px-4 py-2.5 rounded-xl text-slate-400 hover:text-slate-600 text-xs font-bold transition-all duration-150 hover:bg-slate-50"
         >
           Remind Me Later
-        </button>
+        </ActionButton>
         <div className="flex items-center gap-2.5">
-          <button
+          <ActionButton
             onClick={handleMarkAsRead}
             className="px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 text-xs font-bold transition-all duration-150 border border-slate-200/50"
           >
             Mark as Read
-          </button>
-          <button
+          </ActionButton>
+          <ActionButton
             onClick={handleView}
             className={`px-5 py-2.5 rounded-xl text-white text-xs font-bold transition-all duration-150 hover:scale-[1.02] active:scale-95 shadow-md flex items-center gap-1.5
               ${isImportant ? 'bg-gradient-to-r from-rose-500 to-amber-500 shadow-rose-200/50' : 'bg-gradient-to-r from-indigo-500 to-violet-500 shadow-indigo-200/50'}
@@ -231,7 +232,7 @@ export default function NotificationPopup({ onViewNotice }) {
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7-7" />
             </svg>
-          </button>
+          </ActionButton>
         </div>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { ActionButton, ActionForm } from './ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
@@ -176,7 +177,7 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
               </div>
             </div>
 
-            <button
+            <ActionButton
               onClick={onClose}
               className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-white/10 transition-colors focus:outline-none cursor-pointer"
               title="Close"
@@ -184,12 +185,12 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
-            </button>
+            </ActionButton>
           </div>
 
           {/* Navigation Tabs */}
           <div className="flex items-center gap-2 mt-6 pt-2 border-t border-white/10">
-            <button
+            <ActionButton
               onClick={() => {
                 setActiveTab('profile');
                 setProfileError('');
@@ -205,9 +206,9 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
               <span>Profile Details</span>
-            </button>
+            </ActionButton>
 
-            <button
+            <ActionButton
               onClick={() => {
                 setActiveTab('password');
                 setPasswordError('');
@@ -223,14 +224,14 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
               <span>Edit / Reset Password</span>
-            </button>
+            </ActionButton>
           </div>
         </div>
 
         {/* Content Body */}
         <div className="p-6 overflow-y-auto flex-1 bg-slate-50/50">
           {activeTab === 'profile' && (
-            <form onSubmit={handleUpdateProfile} className="space-y-4">
+            <ActionForm onSubmit={handleUpdateProfile} className="space-y-4">
               <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4">
                 <h4 className="text-xs font-black uppercase text-[#0F172A] tracking-wider flex items-center gap-2">
                   <span>General Information</span>
@@ -347,26 +348,26 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
               </div>
 
               <div className="flex justify-end gap-3 pt-2">
-                <button
+                <ActionButton
                   type="button"
                   onClick={onClose}
                   className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 transition-all cursor-pointer"
                 >
                   Cancel
-                </button>
-                <button
+                </ActionButton>
+                <ActionButton
                   type="submit"
                   disabled={isSavingProfile}
                   className="px-6 py-2.5 bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-white font-extrabold rounded-xl text-xs shadow-md transition-all uppercase tracking-wider disabled:opacity-50 cursor-pointer flex items-center gap-2"
                 >
                   {isSavingProfile ? 'Saving Changes...' : 'Save Profile Changes'}
-                </button>
+                </ActionButton>
               </div>
-            </form>
+            </ActionForm>
           )}
 
           {activeTab === 'password' && (
-            <form onSubmit={handleResetPassword} className="space-y-4">
+            <ActionForm onSubmit={handleResetPassword} className="space-y-4">
               <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-xs space-y-4">
                 <div>
                   <h4 className="text-xs font-black uppercase text-[#0F172A] tracking-wider">
@@ -404,7 +405,7 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                     />
-                    <button
+                    <ActionButton
                       type="button"
                       onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                       className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-700 focus:outline-none"
@@ -419,7 +420,7 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                         </svg>
                       )}
-                    </button>
+                    </ActionButton>
                   </div>
                 </div>
 
@@ -437,7 +438,7 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                       />
-                      <button
+                      <ActionButton
                         type="button"
                         onClick={() => setShowNewPassword(!showNewPassword)}
                         className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-700 focus:outline-none"
@@ -452,7 +453,7 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                           </svg>
                         )}
-                      </button>
+                      </ActionButton>
                     </div>
                   </div>
 
@@ -468,7 +469,7 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                       />
-                      <button
+                      <ActionButton
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-700 focus:outline-none"
@@ -483,7 +484,7 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                           </svg>
                         )}
-                      </button>
+                      </ActionButton>
                     </div>
                   </div>
                 </div>
@@ -494,22 +495,22 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
               </div>
 
               <div className="flex justify-end gap-3 pt-2">
-                <button
+                <ActionButton
                   type="button"
                   onClick={onClose}
                   className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 transition-all cursor-pointer"
                 >
                   Cancel
-                </button>
-                <button
+                </ActionButton>
+                <ActionButton
                   type="submit"
                   disabled={isSavingPassword}
                   className="px-6 py-2.5 bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-white font-extrabold rounded-xl text-xs shadow-md transition-all uppercase tracking-wider disabled:opacity-50 cursor-pointer flex items-center gap-2"
                 >
                   {isSavingPassword ? 'Updating Password...' : 'Save New Password'}
-                </button>
+                </ActionButton>
               </div>
-            </form>
+            </ActionForm>
           )}
         </div>
 

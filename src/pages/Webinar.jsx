@@ -1,3 +1,4 @@
+import { ActionButton, ActionForm } from '../components/ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
@@ -288,7 +289,7 @@ export default function Webinar() {
         </div>
 
         {/* Action Button */}
-        <button
+        <ActionButton
           onClick={() => setShowUploadModal(true)}
           className="self-start md:self-auto bg-[#D99A1C] hover:bg-[#C28410] text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all duration-150 hover:scale-[1.02] active:scale-95 shadow-md flex items-center gap-2"
         >
@@ -296,7 +297,7 @@ export default function Webinar() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           Host Webinar / Upload Poster
-        </button>
+        </ActionButton>
       </div>
 
       {/* Search/Filter Controls */}
@@ -454,18 +455,18 @@ export default function Webinar() {
                   <h2 className="text-sm font-extrabold uppercase tracking-wider">Host Webinar & Upload Poster</h2>
                   <p className="text-[10px] text-slate-300 font-semibold mt-0.5">Fill details and attach a seminar display graphic poster.</p>
                 </div>
-                <button
+                <ActionButton
                   onClick={() => setShowUploadModal(false)}
                   className="p-1 hover:bg-white/10 rounded-lg transition-colors text-slate-400 hover:text-white"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
-                </button>
+                </ActionButton>
               </div>
 
               {/* Modal Body / Scrollable Form */}
-              <form onSubmit={handleUploadSubmit} className="p-6 space-y-6 text-left overflow-y-auto flex-1">
+              <ActionForm onSubmit={handleUploadSubmit} className="p-6 space-y-6 text-left overflow-y-auto flex-1">
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Title */}
@@ -594,14 +595,14 @@ export default function Webinar() {
 
                 {/* Submit Buttons */}
                 <div className="flex gap-3 pt-3 border-t border-slate-100">
-                  <button
+                  <ActionButton
                     type="button"
                     onClick={() => setShowUploadModal(false)}
                     className="flex-1 border border-slate-200 hover:bg-slate-50 text-xs font-bold text-[#475569] py-2.5 rounded-xl transition-all"
                   >
                     Cancel
-                  </button>
-                  <button
+                  </ActionButton>
+                  <ActionButton
                     type="submit"
                     disabled={isSubmitting || isUploadingPoster}
                     className="flex-1 bg-[#D99A1C] hover:bg-[#C28410] disabled:opacity-50 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-md hover:scale-[1.01] flex items-center justify-center gap-2"
@@ -613,9 +614,9 @@ export default function Webinar() {
                       </svg>
                     )}
                     {isSubmitting ? 'Publishing Webinar...' : 'Publish Webinar Announcement'}
-                  </button>
+                  </ActionButton>
                 </div>
-              </form>
+              </ActionForm>
             </div>
           </div>
         </div>,
