@@ -1,3 +1,4 @@
+import { ActionButton, ActionForm } from '../components/ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState } from 'react';
 import API from '../api/axios';
@@ -303,7 +304,7 @@ export default function Register({ onNavigate }) {
           {/* WINDOW 1: PERSONAL DETAILS                 */}
           {/* ========================================== */}
           {step === 1 && (
-            <form onSubmit={handleNextToCompanyDetails} className="space-y-4">
+            <ActionForm onSubmit={handleNextToCompanyDetails} className="space-y-4">
               <div className="text-left space-y-1">
                 <span className="text-[10px] font-black text-[#D99A1C] uppercase tracking-wider">Step 1 of 3</span>
                 <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Personal Details</h1>
@@ -400,33 +401,33 @@ export default function Register({ onNavigate }) {
                 </div>
               </div>
 
-              <button
+              <ActionButton
                 type="submit"
                 className="w-full bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-white font-bold py-3 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider mt-4 cursor-pointer"
               >
                 Next: Company Details & Legal Upload →
-              </button>
+              </ActionButton>
 
               <div className="pt-3 text-center border-t border-slate-100 mt-4">
                 <p className="text-xs text-[#64748B] font-medium">
                   Already have an agency account?{' '}
-                  <button
+                  <ActionButton
                     type="button"
                     onClick={() => onNavigate('login')}
                     className="text-[#D99A1C] font-extrabold hover:underline cursor-pointer"
                   >
                     Go to Login Page →
-                  </button>
+                  </ActionButton>
                 </p>
               </div>
-            </form>
+            </ActionForm>
           )}
 
           {/* ========================================== */}
           {/* WINDOW 2: COMPANY DETAILS & LEGAL UPLOAD   */}
           {/* ========================================== */}
           {step === 2 && (
-            <form onSubmit={handleProceedToOtp} className="space-y-4">
+            <ActionForm onSubmit={handleProceedToOtp} className="space-y-4">
               <div className="text-left space-y-1">
                 <span className="text-[10px] font-black text-[#D99A1C] uppercase tracking-wider">Step 2 of 3</span>
                 <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Company Details & Document</h1>
@@ -531,13 +532,13 @@ export default function Register({ onNavigate }) {
                           <span className="text-emerald-600 font-bold">📄</span>
                           <span className="font-bold text-[#0F172A] truncate">{doc.name}</span>
                         </div>
-                        <button
+                        <ActionButton
                           type="button"
                           onClick={() => setDocuments(documents.filter((_, i) => i !== idx))}
                           className="text-rose-500 hover:text-rose-700 font-bold text-xs shrink-0 px-2"
                         >
                           Remove
-                        </button>
+                        </ActionButton>
                       </div>
                     ))}
                   </div>
@@ -590,14 +591,14 @@ export default function Register({ onNavigate }) {
               </div>
 
               <div className="flex items-center gap-3 mt-4">
-                <button
+                <ActionButton
                   type="button"
                   onClick={() => setStep(1)}
                   className="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl text-xs transition-all cursor-pointer"
                 >
                   ← Back
-                </button>
-                <button
+                </ActionButton>
+                <ActionButton
                   type="submit"
                   disabled={isLoading || uploadingDoc}
                   className="w-2/3 bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-white font-bold py-3 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
@@ -609,29 +610,29 @@ export default function Register({ onNavigate }) {
                     </svg>
                   )}
                   {isLoading ? 'Sending Email OTP...' : 'Next: Verify Email OTP →'}
-                </button>
+                </ActionButton>
               </div>
 
               <div className="pt-3 text-center border-t border-slate-100 mt-4">
                 <p className="text-xs text-[#64748B] font-medium">
                   Already have an agency account?{' '}
-                  <button
+                  <ActionButton
                     type="button"
                     onClick={() => onNavigate('login')}
                     className="text-[#D99A1C] font-extrabold hover:underline cursor-pointer"
                   >
                     Go to Login Page →
-                  </button>
+                  </ActionButton>
                 </p>
               </div>
-            </form>
+            </ActionForm>
           )}
 
           {/* ========================================== */}
           {/* WINDOW 3: EMAIL OTP VERIFICATION           */}
           {/* ========================================== */}
           {step === 3 && (
-            <form onSubmit={handleVerifyOtpAndRegister} className="space-y-4">
+            <ActionForm onSubmit={handleVerifyOtpAndRegister} className="space-y-4">
               <div className="text-left space-y-1">
                 <span className="text-[10px] font-black text-[#D99A1C] uppercase tracking-wider">Step 3 of 3</span>
                 <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Enter Email OTP</h1>
@@ -664,26 +665,26 @@ export default function Register({ onNavigate }) {
               </div>
 
               <div className="text-center pt-1">
-                <button
+                <ActionButton
                   type="button"
                   onClick={handleResendOtp}
                   disabled={isLoading}
                   className="text-xs text-[#D99A1C] font-extrabold hover:underline"
                 >
                   Didn't receive code? Resend OTP
-                </button>
+                </ActionButton>
               </div>
 
               <div className="flex items-center gap-3 mt-4">
-                <button
+                <ActionButton
                   type="button"
                   onClick={() => setStep(2)}
                   disabled={isLoading}
                   className="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl text-xs transition-all cursor-pointer"
                 >
                   ← Back
-                </button>
-                <button
+                </ActionButton>
+                <ActionButton
                   type="submit"
                   disabled={isLoading}
                   className="w-2/3 bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-white font-bold py-3 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
@@ -695,22 +696,22 @@ export default function Register({ onNavigate }) {
                     </svg>
                   )}
                   {isLoading ? 'Verifying OTP & Submitting...' : 'Verify & Submit Registration'}
-                </button>
+                </ActionButton>
               </div>
 
               <div className="pt-3 text-center border-t border-slate-100 mt-4">
                 <p className="text-xs text-[#64748B] font-medium">
                   Already have an agency account?{' '}
-                  <button
+                  <ActionButton
                     type="button"
                     onClick={() => onNavigate('login')}
                     className="text-[#D99A1C] font-extrabold hover:underline cursor-pointer"
                   >
                     Back to Login Page →
-                  </button>
+                  </ActionButton>
                 </p>
               </div>
-            </form>
+            </ActionForm>
           )}
 
           {/* ========================================== */}
@@ -746,22 +747,22 @@ export default function Register({ onNavigate }) {
                 </ul>
               </div>
 
-              <button
+              <ActionButton
                 type="button"
                 onClick={() => onNavigate('login')}
                 className="w-full bg-[#0F172A] hover:bg-black text-white font-bold py-3.5 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider cursor-pointer"
               >
                 Back to Sign In Page
-              </button>
+              </ActionButton>
 
               <div className="text-center pt-1">
-                <button
+                <ActionButton
                   type="button"
                   onClick={() => onNavigate('login')}
                   className="text-xs text-[#D99A1C] font-extrabold hover:underline cursor-pointer inline-flex items-center gap-1"
                 >
                   <span>← Go to Login Page</span>
-                </button>
+                </ActionButton>
               </div>
             </div>
           )}
@@ -808,7 +809,7 @@ export default function Register({ onNavigate }) {
               </div>
             </div>
 
-            <button
+            <ActionButton
               type="button"
               onClick={() => {
                 setShowApprovalModal(false);
@@ -817,10 +818,10 @@ export default function Register({ onNavigate }) {
               className="w-full bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-white font-extrabold py-3.5 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider cursor-pointer"
             >
               Understand & Go to Sign In →
-            </button>
+            </ActionButton>
 
             <div className="pt-2 text-center">
-              <button
+              <ActionButton
                 type="button"
                 onClick={() => {
                   setShowApprovalModal(false);
@@ -829,7 +830,7 @@ export default function Register({ onNavigate }) {
                 className="text-xs text-slate-500 hover:text-[#D99A1C] font-bold underline transition-colors cursor-pointer inline-flex items-center gap-1.5"
               >
                 <span>← Back to Login Page</span>
-              </button>
+              </ActionButton>
             </div>
           </div>
         </div>,

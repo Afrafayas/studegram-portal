@@ -1,3 +1,4 @@
+import { ActionButton, ActionForm } from '../components/ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState } from 'react';
 import { useToast } from '../context/ToastContext';
@@ -248,13 +249,13 @@ export default function SearchCourses({ onApplyCourse }) {
 
                   {/* Actions */}
                   <div className="flex gap-2 pt-1">
-                    <button
+                    <ActionButton
                       onClick={() => toast.success(`Details and admission requirements checklist for ${course.title} has been synchronized to your downloads.`)}
                       className="flex-1 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-xs font-bold text-slate-700 py-2.5 rounded-xl text-center transition-all duration-150"
                     >
                       Check Specs
-                    </button>
-                    <button
+                    </ActionButton>
+                    <ActionButton
                       onClick={() => {
                         if (onApplyCourse) {
                           onApplyCourse();
@@ -265,7 +266,7 @@ export default function SearchCourses({ onApplyCourse }) {
                       className="flex-1 bg-[#D99A1C] hover:bg-[#B87C0E] hover:scale-[1.01] active:scale-95 text-xs font-bold text-white py-2.5 rounded-xl text-center transition-all duration-150 shadow-xs"
                     >
                       Apply Now
-                    </button>
+                    </ActionButton>
                   </div>
                 </div>
               </div>
@@ -286,7 +287,7 @@ export default function SearchCourses({ onApplyCourse }) {
               We couldn't find any courses matching your criteria. Try adjusting the filters or search keywords.
             </p>
           </div>
-          <button
+          <ActionButton
             onClick={() => {
               setUniversity('All');
               setCourseType('All');
@@ -295,7 +296,7 @@ export default function SearchCourses({ onApplyCourse }) {
             className="bg-[#D99A1C] hover:bg-[#C28410] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all duration-150 shadow-md inline-flex items-center gap-1.5"
           >
             Reset Filters
-          </button>
+          </ActionButton>
         </div>
       )}
 
@@ -305,7 +306,7 @@ export default function SearchCourses({ onApplyCourse }) {
           <h3 className="text-sm font-bold text-[#0F172A]">Can't find the course you're looking for?</h3>
           <p className="text-xs text-[#64748B] font-semibold">Request a new university course to be added manually to our portal database.</p>
         </div>
-        <button
+        <ActionButton
           onClick={() => {
             setIsSubmitted(false);
             setShowManualModal(true);
@@ -313,7 +314,7 @@ export default function SearchCourses({ onApplyCourse }) {
           className="bg-[#D99A1C] hover:bg-[#C28410] text-white font-bold px-5 py-2.5 rounded-xl text-xs transition-all duration-150 hover:scale-[1.02] shadow-md shrink-0 uppercase tracking-wider"
         >
           Add Course Manually
-        </button>
+        </ActionButton>
       </div>
 
       {/* Manual Course Request Modal */}
@@ -328,7 +329,7 @@ export default function SearchCourses({ onApplyCourse }) {
               <h3 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
                 {isSubmitted ? "Request Submitted" : "Add Course Manually"}
               </h3>
-              <button
+              <ActionButton
                 onClick={() => {
                   setShowManualModal(false);
                   setIsSubmitted(false);
@@ -338,7 +339,7 @@ export default function SearchCourses({ onApplyCourse }) {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
-              </button>
+              </ActionButton>
             </div>
 
             {isSubmitted ? (
@@ -352,7 +353,7 @@ export default function SearchCourses({ onApplyCourse }) {
                 <p className="text-xs text-[#64748B] font-semibold leading-relaxed">
                   Course request submitted successfully!
                 </p>
-                <button
+                <ActionButton
                   onClick={() => {
                     setShowManualModal(false);
                     setIsSubmitted(false);
@@ -360,10 +361,10 @@ export default function SearchCourses({ onApplyCourse }) {
                   className="mt-4 bg-[#D99A1C] hover:bg-[#C28410] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all duration-150 shadow-md uppercase tracking-wider"
                 >
                   Done
-                </button>
+                </ActionButton>
               </div>
             ) : (
-              <form 
+              <ActionForm 
                 onSubmit={async (e) => {
                   e.preventDefault();
                   setIsSubmitting(true);
@@ -437,7 +438,7 @@ export default function SearchCourses({ onApplyCourse }) {
                   </div>
                 </div>
                 {/* Submit Button */}
-                <button
+                <ActionButton
                   type="submit"
                   disabled={isSubmitting}
                   className="w-full bg-[#D99A1C] hover:bg-[#C28410] disabled:opacity-50 text-white font-bold py-2 rounded-xl text-xs transition-all duration-150 hover:scale-[1.02] shadow-md uppercase tracking-wider mt-4 flex items-center justify-center gap-2"
@@ -449,8 +450,8 @@ export default function SearchCourses({ onApplyCourse }) {
                     </svg>
                   )}
                   {isSubmitting ? 'Submitting Request...' : 'Submit Request'}
-                </button>
-              </form>
+                </ActionButton>
+              </ActionForm>
             )}
           </div>
         </div>,

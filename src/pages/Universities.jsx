@@ -1,3 +1,4 @@
+import { ActionButton } from '../components/ActionControls';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 
@@ -88,7 +89,7 @@ export default function Universities({ setActivePage }) {
         {countries.map((c) => {
           const isActive = selectedCountry === c.name;
           return (
-            <button
+            <ActionButton
               key={c.name}
               onClick={() => setSelectedCountry(c.name)}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-150 border shadow-xs select-none ${
@@ -99,7 +100,7 @@ export default function Universities({ setActivePage }) {
             >
               <span>{c.icon}</span>
               <span>{c.name}</span>
-            </button>
+            </ActionButton>
           );
         })}
       </div>
@@ -188,18 +189,18 @@ export default function Universities({ setActivePage }) {
 
                   {/* Quick actions inside card */}
                   <div className="flex gap-2 pt-2">
-                    <button
+                    <ActionButton
                       onClick={() => setActivePage && setActivePage('SearchCourses')}
                       className="flex-1 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-xs font-bold text-slate-700 py-2.5 rounded-xl text-center transition-all duration-150"
                     >
                       View Courses
-                    </button>
-                    <button
+                    </ActionButton>
+                    <ActionButton
                       onClick={() => setActivePage && setActivePage('UniversityDeadline')}
                       className="flex-1 bg-[#D99A1C] hover:bg-[#B87C0E] hover:scale-[1.01] active:scale-95 text-xs font-bold text-white py-2.5 rounded-xl text-center transition-all duration-150 shadow-xs"
                     >
                       Deadlines
-                    </button>
+                    </ActionButton>
                   </div>
                 </div>
               </div>
@@ -220,7 +221,7 @@ export default function Universities({ setActivePage }) {
               We couldn't find any universities matching your search query or region filter. Please try a different query.
             </p>
           </div>
-          <button
+          <ActionButton
             onClick={() => {
               setSelectedCountry('All');
               setSearchQuery('');
@@ -228,7 +229,7 @@ export default function Universities({ setActivePage }) {
             className="bg-[#D99A1C] hover:bg-[#C28410] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all duration-150 shadow-md inline-flex items-center gap-1.5"
           >
             Reset Filters
-          </button>
+          </ActionButton>
         </div>
       )}
     </div>

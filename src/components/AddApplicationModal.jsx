@@ -1,3 +1,4 @@
+import { ActionButton, ActionForm } from './ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
@@ -290,14 +291,14 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
           <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
             Add New Application
           </h2>
-          <button
+          <ActionButton
             onClick={handleResetAndClose}
             className="p-1.5 hover:bg-slate-100 rounded-full text-[#64748B] hover:text-[#0F172A] transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
-          </button>
+          </ActionButton>
         </div>
 
         {/* Modal Scroll Content */}
@@ -323,7 +324,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
               <span className="text-xs text-[#64748B] font-semibold">Loading resources...</span>
             </div>
           ) : stepNumber === 1 ? (
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <ActionForm onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-1">
                 <h3 className="text-xs font-extrabold text-[#0F172A] uppercase tracking-wider">New Application Details</h3>
                 <p className="text-[11px] text-[#64748B] font-semibold">Select the student profile, target university, and program course.</p>
@@ -656,13 +657,13 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                           Document #{idx + 1}
                         </span>
                         {documentsList.length > 1 && (
-                          <button
+                          <ActionButton
                             type="button"
                             onClick={() => handleRemoveDocumentRow(doc.id)}
                             className="text-[11px] text-rose-500 hover:text-rose-700 font-bold flex items-center gap-1 cursor-pointer transition-colors"
                           >
                             ✕ Remove
-                          </button>
+                          </ActionButton>
                         )}
                       </div>
 
@@ -735,13 +736,13 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                                   onChange={(e) => handleFileUploadForDoc(doc.id, e.target.files?.[0])}
                                 />
                               </label>
-                              <button
+                              <ActionButton
                                 type="button"
                                 onClick={() => handleClearFileForDoc(doc.id)}
                                 className="text-xs text-rose-500 hover:text-rose-700 font-bold ml-1 cursor-pointer"
                               >
                                 Remove
-                              </button>
+                              </ActionButton>
                             </div>
                           </div>
                         )}
@@ -754,7 +755,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                 </div>
 
                 {/* Add Another Document Button */}
-                <button
+                <ActionButton
                   type="button"
                   onClick={handleAddDocumentRow}
                   className="w-full py-2.5 border-2 border-dashed border-[#D99A1C]/50 hover:border-[#D99A1C] hover:bg-amber-50/40 rounded-xl text-xs font-bold text-[#D99A1C] flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
@@ -763,7 +764,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
                   </svg>
                   <span>+ Add Another Document</span>
-                </button>
+                </ActionButton>
               </div>
 
               {/* Application-Level General Comment */}
@@ -781,7 +782,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
               </div>
 
               {/* Submit button */}
-              <button
+              <ActionButton
                 type="submit"
                 disabled={
                   isSubmitting ||
@@ -805,8 +806,8 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                 ) : (
                   'Submit Application'
                 )}
-              </button>
-            </form>
+              </ActionButton>
+            </ActionForm>
           ) : (
             /* STEP 4: Success Screen */
             <div className="flex flex-col items-center text-center py-8 space-y-4">
@@ -829,13 +830,13 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
               <p className="text-xs text-[#64748B] font-semibold max-w-xs leading-relaxed">
                 Your application has been logged in the Unigather system. Our handlers will verify the information.
               </p>
-              <button
+              <ActionButton
                 type="button"
                 onClick={handleResetAndClose}
                 className="bg-[#D99A1C] hover:bg-[#C28410] text-white font-bold py-2.5 px-6 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider mt-4"
               >
                 Close
-              </button>
+              </ActionButton>
             </div>
           )}
         </div>

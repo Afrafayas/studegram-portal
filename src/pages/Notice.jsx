@@ -1,3 +1,4 @@
+import { ActionButton, ActionForm } from '../components/ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import { notices } from '../data/notices';
@@ -149,7 +150,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
         <div className="flex-1 p-8 space-y-6 bg-[#F0F2F5] animate-fade-in-up">
           {/* Back Button and Header */}
           <div className="flex flex-col gap-2">
-            <button
+            <ActionButton
               onClick={() => setSelectedNoticeId(null)}
               className="inline-flex items-center gap-1.5 text-xs text-[#D99A1C] font-bold hover:underline mb-2 self-start transition-all"
             >
@@ -157,7 +158,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
               Back to Notices
-            </button>
+            </ActionButton>
             <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Notice Details</h1>
             <p className="text-xs text-[#64748B] font-semibold mt-1">Detailed view of critical notification updates.</p>
           </div>
@@ -234,7 +235,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
         </div>
 
         {/* Action Button */}
-        <button
+        <ActionButton
           onClick={() => setShowUploadModal(true)}
           className="self-start md:self-auto bg-[#D99A1C] hover:bg-[#C28410] text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all duration-150 hover:scale-[1.02] active:scale-95 shadow-md flex items-center gap-2"
         >
@@ -242,7 +243,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           Post Notice / Upload Poster
-        </button>
+        </ActionButton>
       </div>
 
       {/* Notices Cards List */}
@@ -289,7 +290,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
               <span className="bg-slate-100 text-[#0F172A] text-[9px] font-bold px-2.5 py-1 rounded-lg">
                 {notice.date}
               </span>
-              <button
+              <ActionButton
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedNoticeId(notice.id);
@@ -300,7 +301,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                 </svg>
-              </button>
+              </ActionButton>
             </div>
           </div>
         ))}
@@ -310,18 +311,18 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
       <div className="bg-white border border-[#E2E8F0] rounded-2xl px-6 py-4 shadow-sm flex items-center justify-between text-xs text-[#64748B] font-semibold">
         <span>Showing 1-{localNotices.length} of {localNotices.length} notices</span>
         <div className="flex gap-2">
-          <button className="px-4 py-2 border border-[#E2E8F0] bg-white rounded-xl hover:bg-slate-50 disabled:opacity-50 transition-all shadow-sm flex items-center gap-1.5 font-bold" disabled>
+          <ActionButton className="px-4 py-2 border border-[#E2E8F0] bg-white rounded-xl hover:bg-slate-50 disabled:opacity-50 transition-all shadow-sm flex items-center gap-1.5 font-bold" disabled>
             <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
             </svg>
             Prev
-          </button>
-          <button className="px-4 py-2 border border-[#E2E8F0] bg-white rounded-xl hover:bg-slate-50 disabled:opacity-50 transition-all shadow-sm flex items-center gap-1.5 font-bold" disabled>
+          </ActionButton>
+          <ActionButton className="px-4 py-2 border border-[#E2E8F0] bg-white rounded-xl hover:bg-slate-50 disabled:opacity-50 transition-all shadow-sm flex items-center gap-1.5 font-bold" disabled>
             Next
             <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
             </svg>
-          </button>
+          </ActionButton>
         </div>
       </div>
 
@@ -336,19 +337,19 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
                 <h3 className="text-sm font-extrabold tracking-tight">Post Announcement / Upload Poster</h3>
                 <p className="text-[10px] text-slate-400 font-semibold mt-1">Publish critical updates and media directly to the portal feed.</p>
               </div>
-              <button
+              <ActionButton
                 onClick={() => setShowUploadModal(false)}
                 className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all cursor-pointer"
               >
                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
-              </button>
+              </ActionButton>
             </div>
 
             {/* Modal Content */}
             <div className="p-6 max-h-[calc(100vh-160px)] overflow-y-auto">
-              <form onSubmit={handleUploadSubmit} className="space-y-4">
+              <ActionForm onSubmit={handleUploadSubmit} className="space-y-4">
                 
                 {/* Notice Title */}
                 <div className="space-y-1">
@@ -465,14 +466,14 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
 
                 {/* Submit Buttons */}
                 <div className="flex gap-3 pt-3 border-t border-slate-100">
-                  <button
+                  <ActionButton
                     type="button"
                     onClick={() => setShowUploadModal(false)}
                     className="flex-1 border border-slate-200 hover:bg-slate-50 text-xs font-bold text-[#475569] py-2.5 rounded-xl transition-all"
                   >
                     Cancel
-                  </button>
-                  <button
+                  </ActionButton>
+                  <ActionButton
                     type="submit"
                     disabled={isSubmitting || isUploadingPoster}
                     className="flex-1 bg-[#D99A1C] hover:bg-[#C28410] disabled:opacity-50 text-white text-xs font-bold py-2.5 rounded-xl transition-all shadow-md hover:scale-[1.01] flex items-center justify-center gap-2"
@@ -484,9 +485,9 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
                       </svg>
                     )}
                     {isSubmitting ? 'Publishing Notice...' : 'Publish Notice Announcement'}
-                  </button>
+                  </ActionButton>
                 </div>
-              </form>
+              </ActionForm>
             </div>
           </div>
         </div>,

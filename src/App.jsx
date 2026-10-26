@@ -1,3 +1,4 @@
+import { ActionButton } from './components/ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState, useEffect, useRef } from 'react';
 import Navbar from './components/Navbar';
@@ -303,12 +304,12 @@ export default function App() {
                 <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">{activePage.replace(/([A-Z])/g, ' $1').trim()}</h2>
                 <p className="text-[11px] text-[#64748B] font-semibold leading-relaxed">This section is being synchronized under the new Unigather data framework.</p>
               </div>
-              <button 
+              <ActionButton 
                 onClick={() => setActivePage('Dashboard')}
                 className="bg-[#D99A1C] hover:bg-[#C28410] text-white text-xs font-bold px-4 py-2 rounded-xl transition-all duration-150 hover:scale-[1.02] active:scale-95 shadow-md inline-flex items-center gap-1.5"
               >
                 Go back to Dashboard
-              </button>
+              </ActionButton>
             </div>
           </div>
         );
@@ -460,12 +461,12 @@ export default function App() {
               Your agency registration is currently under review by the Unigather Admin team. Please wait for verification and approval before submitting student applications or managing agency staff.
             </p>
 
-            <button
+            <ActionButton
               onClick={() => setPendingVerificationModalOpen(false)}
               className="w-full bg-[#0F172A] hover:bg-black text-white font-bold py-2.5 rounded-xl text-xs transition-all uppercase tracking-wider"
             >
               Close Window
-            </button>
+            </ActionButton>
           </div>
         </div>,
         document.body

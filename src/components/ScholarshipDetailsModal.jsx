@@ -1,3 +1,4 @@
+import { ActionButton } from './ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState } from 'react';
 
@@ -60,14 +61,14 @@ export default function ScholarshipDetailsModal({ isOpen, onClose, scholarship }
               </p>
             </div>
           </div>
-          <button
+          <ActionButton
             onClick={onClose}
             className="p-1.5 hover:bg-slate-100 rounded-full text-[#64748B] hover:text-[#0F172A] transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
-          </button>
+          </ActionButton>
         </div>
 
         {/* Modal Main Content */}
@@ -125,7 +126,7 @@ export default function ScholarshipDetailsModal({ isOpen, onClose, scholarship }
               ].map((tab) => {
                 const isActive = activeTab === tab.id;
                 return (
-                  <button
+                  <ActionButton
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     className={`flex-1 text-center py-3.5 text-xs font-bold border-b-2 select-none transition-all ${
@@ -135,7 +136,7 @@ export default function ScholarshipDetailsModal({ isOpen, onClose, scholarship }
                     }`}
                   >
                     {tab.label}
-                  </button>
+                  </ActionButton>
                 );
               })}
             </div>

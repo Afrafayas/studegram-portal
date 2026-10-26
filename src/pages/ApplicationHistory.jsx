@@ -1,3 +1,4 @@
+import { ActionButton } from '../components/ActionControls';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
@@ -185,12 +186,12 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
               Duplicate Alert: This passport number ({duplicateAlert}) has already been submitted by another agent. Please verify before proceeding.
             </p>
           </div>
-          <button 
+          <ActionButton 
             onClick={() => setDuplicateAlert(null)} 
             className="text-red-800 hover:text-red-950 font-bold px-2 py-1 rounded hover:bg-red-100 transition-colors"
           >
             Dismiss
-          </button>
+          </ActionButton>
         </div>
       )}
 
@@ -215,7 +216,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
         {/* Buttons */}
         <div className="flex items-center gap-2 flex-wrap">
           {/* Filter icon button */}
-          <button 
+          <ActionButton 
             type="button"
             onClick={() => setIsFilterOpen(!isFilterOpen)}
             className={`p-2.5 border rounded-xl transition-all duration-150 hover:scale-[1.02] shadow-sm cursor-pointer relative ${
@@ -231,10 +232,10 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
             {hasActiveFilters && (
               <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#D99A1C] rounded-full border-2 border-white"></span>
             )}
-          </button>
+          </ActionButton>
 
           {/* Export CSV button */}
-          <button 
+          <ActionButton 
             type="button"
             onClick={handleExportCSV}
             className="border border-[#D99A1C] text-[#D99A1C] hover:bg-amber-50 font-semibold px-4 py-2 rounded-xl text-xs transition-all duration-150 hover:scale-[1.02] shadow-sm flex items-center gap-1.5 cursor-pointer"
@@ -244,10 +245,10 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
             Export CSV
-          </button>
+          </ActionButton>
 
           {/* New Application Button */}
-          <button
+          <ActionButton
             onClick={onAddApplicationClick}
             className="bg-[#D99A1C] hover:bg-[#C28410] text-white font-semibold px-4 py-2 rounded-xl text-xs transition-all duration-150 hover:scale-[1.02] active:scale-95 shadow-md flex items-center gap-1.5"
           >
@@ -255,7 +256,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
             </svg>
             New Application
-          </button>
+          </ActionButton>
         </div>
       </div>
 
@@ -272,7 +273,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
               )}
             </div>
             {hasActiveFilters && (
-              <button
+              <ActionButton
                 type="button"
                 onClick={handleResetFilters}
                 className="text-xs text-[#D99A1C] hover:text-[#C28410] font-bold hover:underline cursor-pointer flex items-center gap-1"
@@ -281,7 +282,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
                 Reset Filters
-              </button>
+              </ActionButton>
             )}
           </div>
 
@@ -399,13 +400,13 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
                     <td className="px-6 py-4 whitespace-nowrap text-xs text-[#64748B] font-semibold">{app.dateAdded}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       <div className="flex items-center justify-center gap-1.5">
-                        <button onClick={() => onViewDetails && onViewDetails(app)} className="p-1.5 hover:bg-slate-100 rounded-lg text-[#64748B] hover:text-[#0F172A] transition-all duration-150 inline-flex items-center justify-center" title="View Details">
+                        <ActionButton onClick={() => onViewDetails && onViewDetails(app)} className="p-1.5 hover:bg-slate-100 rounded-lg text-[#64748B] hover:text-[#0F172A] transition-all duration-150 inline-flex items-center justify-center" title="View Details">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                           </svg>
-                        </button>
-                        <button 
+                        </ActionButton>
+                        <ActionButton 
                           onClick={() => onEditClick && onEditClick(app)} 
                           title="Edit Application"
                           className="p-1.5 hover:bg-slate-100 rounded-lg text-[#64748B] hover:text-[#D99A1C] transition-all duration-150 inline-flex items-center justify-center"
@@ -413,7 +414,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
-                        </button>
+                        </ActionButton>
 
                         {/* Claim Commission Action Button & Badges */}
                         {['Visa Approved', 'Enrolled / Closed'].includes(app.status || app.secondaryStatus) && (
@@ -426,7 +427,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
                               Commission Paid ✓
                             </span>
                           ) : (
-                            <button
+                            <ActionButton
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -436,7 +437,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
                               title="Claim Agency Commission Payout"
                             >
                               💸 Claim Commission
-                            </button>
+                            </ActionButton>
                           )
                         )}
                       </div>
@@ -448,13 +449,13 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
                   <td colSpan="6" className="px-6 py-12 text-center text-xs text-[#64748B] font-semibold space-y-2">
                     <div>No applications matched your search or filter parameters.</div>
                     {hasActiveFilters && (
-                      <button
+                      <ActionButton
                         type="button"
                         onClick={handleResetFilters}
                         className="text-xs text-[#D99A1C] hover:text-[#C28410] font-bold hover:underline cursor-pointer"
                       >
                         Reset All Filters
-                      </button>
+                      </ActionButton>
                     )}
                   </td>
                 </tr>
@@ -488,16 +489,16 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
             </div>
 
             <div className="flex items-center gap-1.5">
-              <button
+              <ActionButton
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
               >
                 ◀ Prev
-              </button>
+              </ActionButton>
 
               {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <button
+                <ActionButton
                   key={page}
                   onClick={() => setCurrentPage(page)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
@@ -507,16 +508,16 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
                   }`}
                 >
                   {page}
-                </button>
+                </ActionButton>
               ))}
 
-              <button
+              <ActionButton
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
               >
                 Next ▶
-              </button>
+              </ActionButton>
             </div>
           </div>
         )}

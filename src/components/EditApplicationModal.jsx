@@ -1,3 +1,4 @@
+import { ActionButton, ActionForm } from './ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
@@ -188,14 +189,14 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
               {application.studentName} &middot; {application.camsId}
             </p>
           </div>
-          <button
+          <ActionButton
             onClick={onClose}
             className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all cursor-pointer"
           >
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
-          </button>
+          </ActionButton>
         </div>
 
         {/* Tabs */}
@@ -204,7 +205,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
             { id: 'application', label: '📁 Application Details' },
             { id: 'student', label: '👤 Student Details' }
           ].map(tab => (
-            <button
+            <ActionButton
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
@@ -214,7 +215,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                 }`}
             >
               {tab.label}
-            </button>
+            </ActionButton>
           ))}
         </div>
 
@@ -229,7 +230,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
               <p className="text-xs font-bold text-slate-500">Loading data...</p>
             </div>
           ) : (
-            <form id="edit-app-form" onSubmit={handleSubmit}>
+            <ActionForm id="edit-app-form" onSubmit={handleSubmit}>
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 text-xs font-semibold px-4 py-3 rounded-xl mb-4">
                   ⚠️ {error}
@@ -479,23 +480,24 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                   </div>
                 </div>
               )}
-            </form>
+            </ActionForm>
           )}
         </div>
 
         {/* Footer Buttons */}
         {!isLoading && (
           <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex gap-3 justify-end">
-            <button
+            <ActionButton
               type="button"
               onClick={onClose}
               className="border border-slate-200 hover:bg-slate-100 text-xs font-bold text-slate-600 px-5 py-2.5 rounded-xl transition-all cursor-pointer"
             >
               Cancel
-            </button>
-            <button
+            </ActionButton>
+            <ActionButton
               type="submit"
               form="edit-app-form"
+              loading={isSubmitting}
               disabled={isSubmitting}
               className="bg-[#D99A1C] hover:bg-[#C28410] disabled:opacity-50 text-white text-xs font-bold px-6 py-2.5 rounded-xl transition-all shadow-md hover:scale-[1.01] flex items-center gap-2 cursor-pointer"
             >
@@ -510,7 +512,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
               ) : (
                 'Save All Changes'
               )}
-            </button>
+            </ActionButton>
           </div>
         )}
       </div>

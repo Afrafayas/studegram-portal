@@ -1,3 +1,4 @@
+import { ActionButton } from '../components/ActionControls';
 import React, { useState } from 'react';
 
 export default function UniversityDeadline() {
@@ -121,7 +122,7 @@ export default function UniversityDeadline() {
         {pills.map((pill) => {
           const isActive = activePill === pill.label;
           return (
-            <button
+            <ActionButton
               key={pill.label}
               onClick={() => setActivePill(pill.label)}
               className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-150 shadow-sm hover:scale-[1.02] ${
@@ -131,7 +132,7 @@ export default function UniversityDeadline() {
               }`}
             >
               {pill.label} <span className={`ml-1.5 ${isActive ? 'text-white/80' : 'text-[#64748B]'}`}>({pill.count})</span>
-            </button>
+            </ActionButton>
           );
         })}
       </div>
