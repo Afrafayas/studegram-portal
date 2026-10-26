@@ -123,28 +123,14 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
     ));
 
     try {
-      let fileUrl = '';
-      try {
-        const formData = new FormData();
-        formData.append('file', file);
-        const uploadRes = await API.post('/upload', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        if (uploadRes.data?.success && (uploadRes.data.url || uploadRes.data.fileUrl)) {
-          fileUrl = uploadRes.data.url || uploadRes.data.fileUrl;
-        } else if (uploadRes.data?.url) {
-          fileUrl = uploadRes.data.url;
-        }
-      } catch (uploadErr) {
-        console.warn('API /upload fallback to FileReader:', uploadErr.message);
-      }
-
-      if (!fileUrl) {
-        fileUrl = await new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result);
-          reader.readAsDataURL(file);
-        });
+      const formData = new FormData();
+      formData.append('file', file);
+      const uploadRes = await API.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      const fileUrl = uploadRes.data?.url || uploadRes.data?.fileUrl;
+      if (!uploadRes.data?.success || !fileUrl) {
+        throw new Error('File was not stored in S3. Please retry.');
       }
 
       setDocumentsList(prev => prev.map(doc => {

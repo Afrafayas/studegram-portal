@@ -163,21 +163,27 @@ export default function Webinar() {
     };
   }, [showUploadModal]);
 
-  // Handle Poster File Upload & Convert to Base64
-  const processFile = (file) => {
+  // Store poster in S3 before attaching it to the form.
+  const processFile = async (file) => {
     if (file && file.type.startsWith('image/')) {
       setIsUploadingPoster(true);
       setFileName(file.name);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setFormPosterUrl(e.target.result);
+      setFormPosterUrl('');
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await API.post('/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        const url = response.data?.url || response.data?.fileUrl;
+        if (!response.data?.success || !url) throw new Error('Poster was not stored in S3.');
+        setFormPosterUrl(url);
+      } catch (error) {
+        setFileName('');
+        toast.error(error.response?.data?.message || 'Poster upload failed. Please retry.');
+      } finally {
         setIsUploadingPoster(false);
-      };
-      reader.onerror = () => {
-        setIsUploadingPoster(false);
-        toast.error('Failed to read image file.');
-      };
-      reader.readAsDataURL(file);
+      }
     } else {
       toast.error('Please upload a valid image file (PNG/JPG).');
     }
