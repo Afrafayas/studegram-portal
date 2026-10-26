@@ -120,9 +120,10 @@ export default function App() {
     try {
       const res = await API.get('/applications');
       const data = res.data;
-      const mapped = (data.data || []).map((app, idx) => ({
+      const mapped = (data.data || []).map((app) => ({
+        ...app,
         id: app._id,
-        camsId: `CAMS-${10001 + idx}`,
+        camsId: app.camsId || app._id,
         studentName: app.student?.name || 'N/A',
         passportNo: app.student?.passportNo || 'N/A',
         universityName: app.university?.name || 'N/A',
@@ -144,15 +145,15 @@ export default function App() {
         student: app.student,
         course: app.course,
         university: app.university,
-        level: app.level || 'Undergraduate (UG)',
-        intake: app.intake || 'September 2026',
+        level: app.level || '',
+        intake: app.intake || '',
         documents: app.documents || [],
         notes: app.notes || '',
         applicationComments: app.applicationComments || [],
         commissionStatus: app.commissionStatus || 'Unclaimed',
-        paymentStatus: app.paymentStatus || 'Paid',
+        paymentStatus: app.paymentStatus || 'Pending',
         commissionAmount: app.commissionAmount || 0,
-        commissionRate: app.commissionRate || 10,
+        commissionRate: app.commissionRate ?? null,
         commissionType: app.commissionType || 'percentage',
         isCommissionSet: Boolean(app.isCommissionSet),
         universityPaid: Boolean(app.universityPaid),

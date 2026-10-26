@@ -1,5 +1,6 @@
 import { ActionButton } from '../components/ActionControls';
 import React, { useState } from 'react';
+import useApiCollection from '../hooks/useApiCollection';
 import ScholarshipDetailsModal from '../components/ScholarshipDetailsModal';
 
 export default function Scholarships({ setActivePage }) {
@@ -9,180 +10,15 @@ export default function Scholarships({ setActivePage }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedScholarshipForDetails, setSelectedScholarshipForDetails] = useState(null);
 
-  const scholarshipData = [
-    // UK
-    {
-      id: 1,
-      name: 'Great Scholarships',
-      university: 'Anglia Ruskin University',
-      country: 'United Kingdom',
-      type: 'Merit-based',
-      amount: '£10,000',
-      eligibility: 'Passport holder of India, Pakistan, or Nigeria; Minimum 65% in Bachelor\'s degree.',
-      deadline: '2027-05-31',
-      gradient: 'from-blue-600 to-indigo-800'
-    },
-    {
-      id: 2,
-      name: 'Vice-Chancellor\'s Excellence Scholarship',
-      university: 'University of Surrey',
-      country: 'United Kingdom',
-      type: 'Merit-based',
-      amount: '£5,000',
-      eligibility: 'First-class Honours equivalent in previous academic qualifications.',
-      deadline: '2027-06-30',
-      gradient: 'from-[#F5B025] to-[#0891B2]'
-    },
-    {
-      id: 3,
-      name: 'Coventry Academic Performance Scholarship',
-      university: 'Coventry University',
-      country: 'United Kingdom',
-      type: 'Merit-based',
-      amount: '£2,000',
-      eligibility: 'Minimum cumulative GPA of 3.0 or national equivalent.',
-      deadline: '2027-07-31',
-      gradient: 'from-pink-500 to-rose-600'
-    },
-    {
-      id: 4,
-      name: 'Hertfordshire International Scholarship',
-      university: 'University of Hertfordshire',
-      country: 'United Kingdom',
-      type: 'Merit-based',
-      amount: '£1,000 - £4,000',
-      eligibility: 'Outstanding academic record and a personal statement explaining career goals.',
-      deadline: '2027-08-15',
-      gradient: 'from-emerald-500 to-teal-700'
-    },
-    // Canada
-    {
-      id: 5,
-      name: 'Lester B. Pearson International Scholarship',
-      university: 'University of Toronto',
-      country: 'Canada',
-      type: 'Merit/Need-based',
-      amount: '100% Tuition + Living Cover',
-      eligibility: 'Nominated by high school counselor; demonstrated leadership and community service.',
-      deadline: '2027-01-15',
-      gradient: 'from-red-500 to-rose-700'
-    },
-    {
-      id: 6,
-      name: 'Entrance Scholarships for Graduates',
-      university: 'McGill University',
-      country: 'Canada',
-      type: 'Merit-based',
-      amount: '$3,000 - $12,000 CAD',
-      eligibility: 'Automatic consideration upon application; Top 5% of incoming student cohort.',
-      deadline: '2027-03-01',
-      gradient: 'from-purple-600 to-indigo-700'
-    },
-    {
-      id: 7,
-      name: 'UBC International Major Entrance Scholarship',
-      university: 'University of British Columbia',
-      country: 'Canada',
-      type: 'Merit-based',
-      amount: '$10,000 CAD/yr (Renewable)',
-      eligibility: 'High academic achievers with strong extracurricular profile.',
-      deadline: '2027-01-15',
-      gradient: 'from-[#D99A1C] to-[#0ea5e9]'
-    },
-    // USA
-    {
-      id: 8,
-      name: 'NYU Wagner Global Fellowships',
-      university: 'New York University',
-      country: 'United States',
-      type: 'Merit-based',
-      amount: '50% - 100% Tuition Cover',
-      eligibility: 'Enrolled in a master\'s program; Exceptional leadership potential and academics.',
-      deadline: '2026-12-15',
-      gradient: 'from-fuchsia-600 to-purple-800'
-    },
-    {
-      id: 9,
-      name: 'Dean\'s Scholarship Award',
-      university: 'Northeastern University',
-      country: 'United States',
-      type: 'Merit-based',
-      amount: '$10,000 - $28,000 USD/yr',
-      eligibility: 'Outstanding academic standing, top 10% in high school or university class.',
-      deadline: '2027-01-01',
-      gradient: 'from-blue-500 to-cyan-600'
-    },
-    {
-      id: 10,
-      name: 'Trustee Scholarship',
-      university: 'Boston University',
-      country: 'United States',
-      type: 'Merit-based',
-      amount: 'Full Tuition Fee Waiver',
-      eligibility: 'Perfect 4.0 GPA or equivalent; Submitted essay showing creative perspectives.',
-      deadline: '2026-12-01',
-      gradient: 'from-rose-500 to-red-700'
-    },
-    // Australia
-    {
-      id: 11,
-      name: 'Melbourne International Scholarship',
-      university: 'University of Melbourne',
-      country: 'Australia',
-      type: 'Merit-based',
-      amount: '$10,000 AUD or 100% Tuition',
-      eligibility: 'Top high school grads; GPA requirement varies by country of origin.',
-      deadline: '2026-12-31',
-      gradient: 'from-cyan-500 to-blue-600'
-    },
-    {
-      id: 12,
-      name: 'Vice-Chancellor\'s Scholarships',
-      university: 'University of Sydney',
-      country: 'Australia',
-      type: 'Merit-based',
-      amount: '$5,000 - $40,000 AUD',
-      eligibility: 'All international undergraduate and postgraduate applicants with top academic results.',
-      deadline: '2027-01-15',
-      gradient: 'from-amber-500 to-orange-600'
-    },
-    {
-      id: 13,
-      name: 'Monash International Leadership Scholarship',
-      university: 'Monash University',
-      country: 'Australia',
-      type: 'Merit-based',
-      amount: '100% Tuition Cover',
-      eligibility: 'Highest achieving international students; Assessed based on academic profile and SOP.',
-      deadline: '2026-10-15',
-      gradient: 'from-violet-600 to-indigo-800'
-    },
-    // Ireland
-    {
-      id: 14,
-      name: 'Government of Ireland Research Scholarship',
-      university: 'National Universities',
-      country: 'Ireland',
-      type: 'Research-based',
-      amount: '€19,000 Stipend + Fees Cover',
-      eligibility: 'Excellent research proposals for PhD or Master\'s by Research.',
-      deadline: '2026-10-20',
-      gradient: 'from-emerald-500 to-green-700'
-    },
-    {
-      id: 15,
-      name: 'UCD Global Excellence Scholarship',
-      university: 'University College Dublin',
-      country: 'Ireland',
-      type: 'Merit-based',
-      amount: '50% - 100% Tuition Cover',
-      eligibility: 'Outstanding academic transcript, active community service, and personal essay.',
-      deadline: '2027-02-28',
-      gradient: 'from-teal-500 to-cyan-600'
-    }
-  ];
+  const { records, loading, error } = useApiCollection('/scholarships');
+  const { records: universities } = useApiCollection('/universities');
+  const scholarshipData = records.map(item => ({
+    ...item, id: item._id, name: item.title, university: item.university || '',
+    country: item.country || universities.find(u => u.name === item.university)?.country || '',
+    type: item.category || 'Not specified', eligibility: item.eligibility || '',
+    gradient: 'from-blue-600 to-indigo-800'
+  }));
 
-  // Country Flags Mapping
   const countryFlags = {
     'United Kingdom': '🇬🇧',
     'Canada': '🇨🇦',
@@ -226,7 +62,8 @@ export default function Scholarships({ setActivePage }) {
 
   // Calculate Urgency level (Deadlines)
   const getDeadlineBadge = (deadlineStr) => {
-    const today = new Date('2026-07-11'); // Local project time: 2026-07-11
+    if (!deadlineStr || Number.isNaN(new Date(deadlineStr).getTime())) return <span>Not provided</span>;
+    const today = new Date();
     const deadlineDate = new Date(deadlineStr);
     const diffTime = deadlineDate - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -263,6 +100,8 @@ export default function Scholarships({ setActivePage }) {
 
   return (
     <div className="flex-1 p-8 space-y-8 bg-[#F0F2F5] animate-fade-in-up">
+      {loading && <p className="text-sm text-slate-500">Loading scholarships...</p>}
+      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>

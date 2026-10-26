@@ -2,7 +2,7 @@ import API from '../api/axios';
 import { ActionButton, ActionForm } from '../components/ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
-import { notices } from '../data/notices';
+import { mapNotice } from '../utils/resourceData';
 import { useToast } from '../context/ToastContext';
 
 const CATEGORIES_LIST = [
@@ -19,19 +19,18 @@ const CATEGORIES_LIST = [
 
 export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
   const toast = useToast();
-  // State for notices list
-  const [localNotices, setLocalNotices] = useState(() => {
-    const saved = localStorage.getItem('studegram_notices');
-    if (saved) {
-      return JSON.parse(saved);
-    }
-    return notices;
-  });
-
-  // Sync to localStorage
+  const [localNotices, setLocalNotices] = useState([]);
+  const [loadError, setLoadError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
-    localStorage.setItem('studegram_notices', JSON.stringify(localNotices));
-  }, [localNotices]);
+    let active = true;
+    API.get('/notices').then(response => {
+      if (!response.data?.success || !Array.isArray(response.data.data)) throw new Error('Unable to load notices.');
+      if (active) setLocalNotices(response.data.data.filter(n => n.status === 'Active' && ['All', 'Agents'].includes(n.targetAudience)).map(mapNotice));
+    }).catch(error => { if (active) setLoadError(error.response?.data?.message || error.message); })
+      .finally(() => { if (active) setIsLoading(false); });
+    return () => { active = false; };
+  }, []);
 
   // Form State
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -109,7 +108,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
   };
 
   // Submit Notice Form
-  const handleUploadSubmit = (e) => {
+  const handleUploadSubmit = async (e) => {
     e.preventDefault();
     if (!formTitle.trim() || !formMessage.trim()) {
       toast.error('Please fill out all required fields.');
@@ -118,25 +117,19 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
 
     setIsSubmitting(true);
 
-    const dateStr = new Date().toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
-
-    const newNotice = {
-      id: `notice-${Date.now()}`,
-      title: formTitle,
-      message: formMessage,
-      type: formType,
-      badge: formBadge.trim() || null,
-      date: dateStr,
-      isNew: true,
-      popup: false,
-      image: formPosterUrl || null
-    };
-
-    setLocalNotices([newNotice, ...localNotices]);
+    try {
+      const response = await API.post('/notices', {
+        title: formTitle.trim(), content: formMessage.trim(), category: formType,
+        priority: 'Medium', targetAudience: 'Agents', status: 'Active', image: formPosterUrl || '', badge: formBadge.trim()
+      });
+      if (!response.data?.success) throw new Error(response.data?.message || 'Unable to save notice.');
+      setLocalNotices(prev => [mapNotice(response.data.data), ...prev]);
+      window.dispatchEvent(new Event('notices-updated'));
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
+      setIsSubmitting(false);
+      return;
+    }
 
     // Reset Form & Close Modal
     setFormTitle('');
@@ -155,7 +148,9 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
     if (notice) {
       return (
         <div className="flex-1 p-8 space-y-6 bg-[#F0F2F5] animate-fade-in-up">
-          {/* Back Button and Header */}
+          {isLoading && <p className="text-sm text-slate-500">Loading notices...</p>}
+      {loadError && <p role="alert" className="text-sm text-red-600">{loadError}</p>}
+      {/* Back Button and Header */}
           <div className="flex flex-col gap-2">
             <ActionButton
               onClick={() => setSelectedNoticeId(null)}
@@ -222,7 +217,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
-                Verified Announcement
+                Published Announcement
               </span>
             </div>
           </div>

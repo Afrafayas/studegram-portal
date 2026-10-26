@@ -1,10 +1,24 @@
 import { ActionButton } from './ActionControls';
 import React, { useState, useEffect } from 'react';
-import { notices } from '../data/notices';
+import API from '../api/axios';
+import { mapNotice } from '../utils/resourceData';
 
-const initialNotifications = notices.filter(n => n.popup);
+
 
 export default function NotificationPopup({ onViewNotice }) {
+  const [initialNotifications, setInitialNotifications] = useState([]);
+  useEffect(() => {
+    let active = true;
+    const load = () => API.get('/notices').then(response => {
+      if (active && response.data?.success) {
+        setInitialNotifications(response.data.data.filter(n => n.status === 'Active' && ['All', 'Agents'].includes(n.targetAudience)).map(mapNotice).filter(n => n.popup));
+      }
+    }).catch(() => {});
+    load();
+    const timer = setInterval(load, 60000);
+    window.addEventListener('notices-updated', load);
+    return () => { active = false; clearInterval(timer); window.removeEventListener('notices-updated', load); };
+  }, []);
   const [readIds, setReadIds] = useState(() => {
     try {
       const stored = localStorage.getItem('studegram_read_notifications');

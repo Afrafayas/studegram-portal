@@ -1,59 +1,29 @@
-import { ActionButton, ActionForm } from '../components/ActionControls';
+import { ActionButton } from '../components/ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState } from 'react';
 import { useToast } from '../context/ToastContext';
+import useApiCollection from '../hooks/useApiCollection';
+import { mapCourse } from '../utils/resourceData';
 
 export default function SearchCourses({ onApplyCourse }) {
   const toast = useToast();
-  const [country, setCountry] = useState('United Kingdom');
+  const [country, setCountry] = useState('All');
   const [nationality, setNationality] = useState('India');
   const [university, setUniversity] = useState('All');
   const [courseType, setCourseType] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const [showManualModal, setShowManualModal] = useState(false);
-  const [manualCourse, setManualCourse] = useState({
-    courseUrl: '',
-    universityName: '',
-    courseName: '',
-    intake: 'September 2026'
-  });
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedCourseDetails, setSelectedCourseDetails] = useState(null);
 
-  const allCourses = [
-    // United Kingdom
-    { id: 1, title: 'MSc in Computer Science (Artificial Intelligence)', university: 'Anglia Ruskin University', country: 'United Kingdom', level: 'Postgraduate', duration: '12 - 15 Months', intake: 'September 2026', fee: '£16,700/yr', gradient: 'from-[#D99A1C] to-[#F5B025]' },
-    { id: 2, title: 'MBA with Professional Placement', university: 'Coventry University', country: 'United Kingdom', level: 'Postgraduate', duration: '24 Months', intake: 'September 2026', fee: '£19,850/yr', gradient: 'from-teal-500 to-emerald-500' },
-    { id: 3, title: 'BSc (Hons) Software Engineering', university: 'University of Surrey', country: 'United Kingdom', level: 'Undergraduate', duration: '3 Years', intake: 'September 2026', fee: '£22,400/yr', gradient: 'from-purple-500 to-pink-500' },
-    { id: 4, title: 'MSc Data Science and Analytics', university: 'University of Hertfordshire', country: 'United Kingdom', level: 'Postgraduate', duration: '1 Year', intake: 'September 2026', fee: '£15,450/yr', gradient: 'from-[#D99A1C] to-[#F5B025]' },
-    { id: 5, title: 'MA International Relations', university: 'Nottingham Trent University', country: 'United Kingdom', level: 'Postgraduate', duration: '12 Months', intake: 'January 2027', fee: '£16,000/yr', gradient: 'from-teal-500 to-emerald-500' },
-    { id: 6, title: 'BEng (Hons) Mechanical Engineering', university: 'Coventry University', country: 'United Kingdom', level: 'Undergraduate', duration: '3 Years', intake: 'September 2026', fee: '£18,250/yr', gradient: 'from-purple-500 to-pink-500' },
-    { id: 7, title: 'International Foundation in Science', university: 'Anglia Ruskin University', country: 'United Kingdom', level: 'Foundation', duration: '9 Months', intake: 'September 2026', fee: '£12,200/yr', gradient: 'from-blue-500 to-indigo-600' },
-
-    // Canada
-    { id: 8, title: 'Master of Applied Computing (MScAC)', university: 'University of Toronto', country: 'Canada', level: 'Postgraduate', duration: '16 Months', intake: 'September 2026', fee: '$45,000 CAD/yr', gradient: 'from-[#D99A1C] to-[#F5B025]' },
-    { id: 9, title: 'Master of Management in Finance', university: 'McGill University', country: 'Canada', level: 'Postgraduate', duration: '12 Months', intake: 'September 2026', fee: '$38,000 CAD/yr', gradient: 'from-teal-500 to-emerald-500' },
-    { id: 10, title: 'Bachelor of Computer Science (BCS)', university: 'University of British Columbia', country: 'Canada', level: 'Undergraduate', duration: '4 Years', intake: 'September 2026', fee: '$42,000 CAD/yr', gradient: 'from-purple-500 to-pink-500' },
-    { id: 11, title: 'Master of Data Science', university: 'University of British Columbia', country: 'Canada', level: 'Postgraduate', duration: '10 Months', intake: 'September 2026', fee: '$48,000 CAD/yr', gradient: 'from-[#D99A1C] to-[#F5B025]' },
-
-    // United States
-    { id: 12, title: 'MS in Computer Science', university: 'New York University', country: 'United States', level: 'Postgraduate', duration: '2 Years', intake: 'September 2026', fee: '$58,000/yr', gradient: 'from-[#D99A1C] to-[#F5B025]' },
-    { id: 13, title: 'MS in Information Systems', university: 'Northeastern University', country: 'United States', level: 'Postgraduate', duration: '18 - 24 Months', intake: 'September 2026', fee: '$52,000/yr', gradient: 'from-teal-500 to-emerald-500' },
-    { id: 14, title: 'BS in Economics', university: 'Boston University', country: 'United States', level: 'Undergraduate', duration: '4 Years', intake: 'September 2026', fee: '$55,000/yr', gradient: 'from-purple-500 to-pink-500' },
-
-    // Australia
-    { id: 15, title: 'Master of Information Technology', university: 'University of Melbourne', country: 'Australia', level: 'Postgraduate', duration: '2 Years', intake: 'February 2027', fee: '$44,000 AUD/yr', gradient: 'from-[#D99A1C] to-[#F5B025]' },
-    { id: 16, title: 'Master of Commerce', university: 'University of Sydney', country: 'Australia', level: 'Postgraduate', duration: '18 Months', intake: 'February 2027', fee: '$46,000 AUD/yr', gradient: 'from-teal-500 to-emerald-500' },
-    { id: 17, title: 'Bachelor of Engineering (Hons)', university: 'Monash University', country: 'Australia', level: 'Undergraduate', duration: '4 Years', intake: 'July 2026', fee: '$41,000 AUD/yr', gradient: 'from-purple-500 to-pink-500' }
-  ];
+  const { records: courseRecords, loading, error } = useApiCollection('/courses');
+  const allCourses = courseRecords.map(mapCourse);
 
   // Dynamically populate available universities for the selected country
   const availableUniversities = [
     'All',
     ...new Set(
       allCourses
-        .filter((c) => c.country === country)
+        .filter((c) => country === 'All' || c.country === country)
         .map((c) => c.university)
     )
   ];
@@ -61,7 +31,7 @@ export default function SearchCourses({ onApplyCourse }) {
   // Filtering logic
   const filteredCourses = allCourses.filter((c) => {
     // Country filter
-    if (c.country !== country) return false;
+    if (country !== 'All' && c.country !== country) return false;
 
     // University filter
     if (university !== 'All' && c.university !== university) return false;
@@ -82,6 +52,8 @@ export default function SearchCourses({ onApplyCourse }) {
 
   return (
     <div className="flex-1 p-8 space-y-6 bg-[#F0F2F5] animate-fade-in-up">
+      {loading && <p className="text-sm text-slate-500">Loading courses...</p>}
+      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
       {/* Title */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Search Courses</h1>
@@ -115,10 +87,8 @@ export default function SearchCourses({ onApplyCourse }) {
                   setUniversity('All');
                 }}
               >
-                <option value="United Kingdom">United Kingdom</option>
-                <option value="Canada">Canada</option>
-                <option value="United States">United States</option>
-                <option value="Australia">Australia</option>
+                <option value="All">All Countries</option>
+                {[...new Set(allCourses.map(c => c.country).filter(Boolean))].map(value => <option key={value} value={value}>{value}</option>)}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                 <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -183,9 +153,7 @@ export default function SearchCourses({ onApplyCourse }) {
                 onChange={(e) => setCourseType(e.target.value)}
               >
                 <option value="All">All Levels</option>
-                <option value="Postgraduate">Postgraduate</option>
-                <option value="Undergraduate">Undergraduate</option>
-                <option value="Foundation">Foundation</option>
+                {[...new Set(allCourses.map(c => c.level).filter(Boolean))].map(value => <option key={value} value={value}>{value}</option>)}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                 <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -250,7 +218,7 @@ export default function SearchCourses({ onApplyCourse }) {
                   {/* Actions */}
                   <div className="flex gap-2 pt-1">
                     <ActionButton
-                      onClick={() => toast.success(`Details and admission requirements checklist for ${course.title} has been synchronized to your downloads.`)}
+                      onClick={() => setSelectedCourseDetails(course)}
                       className="flex-1 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-xs font-bold text-slate-700 py-2.5 rounded-xl text-center transition-all duration-150"
                     >
                       Check Specs
@@ -300,162 +268,19 @@ export default function SearchCourses({ onApplyCourse }) {
         </div>
       )}
 
-      {/* Add Course Manually Card */}
-      <div className="bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
-        <div className="space-y-1 text-center sm:text-left">
-          <h3 className="text-sm font-bold text-[#0F172A]">Can't find the course you're looking for?</h3>
-          <p className="text-xs text-[#64748B] font-semibold">Request a new university course to be added manually to our portal database.</p>
-        </div>
-        <ActionButton
-          onClick={() => {
-            setIsSubmitted(false);
-            setShowManualModal(true);
-          }}
-          className="bg-[#D99A1C] hover:bg-[#C28410] text-white font-bold px-5 py-2.5 rounded-xl text-xs transition-all duration-150 hover:scale-[1.02] shadow-md shrink-0 uppercase tracking-wider"
-        >
-          Add Course Manually
-        </ActionButton>
-      </div>
-
-      {/* Manual Course Request Modal */}
-      {showManualModal && createPortal(
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 overflow-y-auto">
-          <div 
-            className="bg-white rounded-2xl w-full max-w-md shadow-2xl relative flex flex-col p-6 space-y-4 max-h-[90vh] overflow-y-auto my-auto" 
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
-                {isSubmitted ? "Request Submitted" : "Add Course Manually"}
-              </h3>
-              <ActionButton
-                onClick={() => {
-                  setShowManualModal(false);
-                  setIsSubmitted(false);
-                }}
-                className="p-1.5 hover:bg-slate-100 rounded-full text-[#64748B] hover:text-[#0F172A] transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </ActionButton>
-            </div>
-
-            {isSubmitted ? (
-              <div className="flex flex-col items-center text-center py-6 space-y-3">
-                <div className="w-12 h-12 bg-emerald-50 text-[#10B981] rounded-full flex items-center justify-center shadow-inner">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <p className="text-xs font-extrabold text-[#10B981] uppercase tracking-wider">Success!</p>
-                <p className="text-xs text-[#64748B] font-semibold leading-relaxed">
-                  Course request submitted successfully!
-                </p>
-                <ActionButton
-                  onClick={() => {
-                    setShowManualModal(false);
-                    setIsSubmitted(false);
-                  }}
-                  className="mt-4 bg-[#D99A1C] hover:bg-[#C28410] text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all duration-150 shadow-md uppercase tracking-wider"
-                >
-                  Done
-                </ActionButton>
-              </div>
-            ) : (
-              <ActionForm 
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  setIsSubmitting(true);
-                  await new Promise(r => setTimeout(r, 600));
-                  setIsSubmitted(true);
-                  setIsSubmitting(false);
-                  setManualCourse({
-                    courseUrl: '',
-                    universityName: '',
-                    courseName: '',
-                    intake: 'September 2026'
-                  });
-                }} 
-                className="space-y-4"
-              >
-                {/* Course URL */}
-                <div>
-                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Course URL</label>
-                  <input
-                    required
-                    type="url"
-                    placeholder="Paste university course link here"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white"
-                    value={manualCourse.courseUrl}
-                    onChange={(e) => setManualCourse({...manualCourse, courseUrl: e.target.value})}
-                  />
-                </div>
-                {/* University Name */}
-                <div>
-                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">University Name</label>
-                  <input
-                    required
-                    type="text"
-                    placeholder="Enter university name"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white"
-                    value={manualCourse.universityName}
-                    onChange={(e) => setManualCourse({...manualCourse, universityName: e.target.value})}
-                  />
-                </div>
-                {/* Course Name */}
-                <div>
-                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Course Name</label>
-                  <input
-                    required
-                    type="text"
-                    placeholder="Enter course name"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white"
-                    value={manualCourse.courseName}
-                    onChange={(e) => setManualCourse({...manualCourse, courseName: e.target.value})}
-                  />
-                </div>
-                {/* Intake Select */}
-                <div>
-                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">Intake</label>
-                  <div className="relative">
-                    <select
-                      required
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] cursor-pointer appearance-none pr-8 font-semibold"
-                      value={manualCourse.intake}
-                      onChange={(e) => setManualCourse({...manualCourse, intake: e.target.value})}
-                    >
-                      <option value="September 2026">September 2026</option>
-                      <option value="January 2027">January 2027</option>
-                      <option value="September 2027">September 2027</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
-                      <svg className="w-3.5 h-3.5 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                {/* Submit Button */}
-                <ActionButton
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-[#D99A1C] hover:bg-[#C28410] disabled:opacity-50 text-white font-bold py-2 rounded-xl text-xs transition-all duration-150 hover:scale-[1.02] shadow-md uppercase tracking-wider mt-4 flex items-center justify-center gap-2"
-                >
-                  {isSubmitting && (
-                    <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                  )}
-                  {isSubmitting ? 'Submitting Request...' : 'Submit Request'}
-                </ActionButton>
-              </ActionForm>
-            )}
+      <p className="text-xs text-slate-500">If a course is missing, please contact your administrator.</p>
+      {selectedCourseDetails && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center p-4">
+          <div role="dialog" aria-modal="true" aria-label="Course specifications" className="bg-white rounded-2xl p-6 w-full max-w-lg space-y-4">
+            <h2 className="font-bold text-slate-900">{selectedCourseDetails.title}</h2>
+            <p className="text-sm text-slate-600">{selectedCourseDetails.university}</p>
+            <p className="text-sm text-slate-600">{selectedCourseDetails.description || 'No course description provided.'}</p>
+            <p className="text-xs text-slate-500">Duration: {selectedCourseDetails.duration || 'Not provided'}</p>
+            <p className="text-xs text-slate-500">Fees: {selectedCourseDetails.fee}</p>
+            <p className="text-xs text-slate-500">Intakes: {selectedCourseDetails.intake || 'Not provided'}</p>
+            <ActionButton onClick={() => setSelectedCourseDetails(null)} className="bg-[#D99A1C] text-white rounded-xl px-5 py-2 text-xs font-bold">Close</ActionButton>
           </div>
-        </div>,
-        document.body
+        </div>, document.body
       )}
     </div>
   );

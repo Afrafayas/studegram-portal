@@ -4,12 +4,12 @@ import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 
 export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
-  if (!isOpen) return null;
 
   const [stepNumber, setStepNumber] = useState(1);
   const [students, setStudents] = useState([]);
   const [universities, setUniversities] = useState([]);
   const [courses, setCourses] = useState([]);
+  const [intakes, setIntakes] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -34,7 +34,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
   ]);
   const [notes, setNotes] = useState('');
   const [selectedLevel, setSelectedLevel] = useState('Undergraduate (UG)');
-  const [selectedIntake, setSelectedIntake] = useState('September 2026');
+  const [selectedIntake, setSelectedIntake] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -44,12 +44,14 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
       Promise.all([
         API.get('/students').then(res => res.data),
         API.get('/universities').then(res => res.data),
-        API.get('/courses').then(res => res.data)
+        API.get('/courses').then(res => res.data),
+        API.get('/intakes').then(res => res.data)
       ])
-      .then(([studentsRes, universitiesRes, coursesRes]) => {
+      .then(([studentsRes, universitiesRes, coursesRes, intakesRes]) => {
         setStudents(studentsRes.data || []);
         setUniversities(universitiesRes.data || []);
         setCourses(coursesRes.data || []);
+        setIntakes(intakesRes.data || []);
       })
       .catch(err => {
         console.error('Error loading application options:', err);
@@ -64,13 +66,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
   const availableCountries = Array.from(
     new Set([
       ...universities.map(u => (u.country || '').trim()).filter(Boolean),
-      'United Kingdom',
-      'Canada',
-      'United States',
-      'Australia',
-      'Ireland',
-      'Germany',
-      'New Zealand'
+
     ])
   ).sort();
 
@@ -173,7 +169,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
     ]);
     setNotes('');
     setSelectedLevel('Undergraduate (UG)');
-    setSelectedIntake('September 2026');
+    setSelectedIntake('');
     setStepNumber(1);
     onClose();
   };
@@ -263,6 +259,8 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
     const courseUnivId = course.university?._id || course.university;
     return courseUnivId === selectedUniversity;
   });
+
+  if (!isOpen) return null;
 
   return createPortal(
     <div
@@ -356,9 +354,9 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                           <option value="">
                             {students.length === 0 ? '-- No Registered Students Found --' : '-- Choose Student --'}
                           </option>
-                          {students.map((student, idx) => (
+                          {students.map((student) => (
                             <option key={student._id} value={student._id}>
-                              STD-{10001 + idx} - {student.name} ({student.passportNo || 'No Passport'})
+                              {student.name} ({student.passportNo || 'No Passport'})
                             </option>
                           ))}
                         </select>
@@ -521,9 +519,9 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                             ? `-- No Universities in ${selectedCountry} --` 
                             : '-- Choose University --'}
                       </option>
-                      {filteredUniversities.map((univ, idx) => (
+                      {filteredUniversities.map((univ) => (
                         <option key={univ._id} value={univ._id}>
-                          UNIV-{10001 + idx} - {univ.name} ({univ.city ? `${univ.city}, ` : ''}{univ.country})
+                          {univ.name} ({univ.city ? `${univ.city}, ` : ''}{univ.country})
                         </option>
                       ))}
                     </select>
@@ -554,9 +552,9 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                       <option value="">
                         {!selectedUniversity ? '-- Please Select a University First --' : '-- Choose Course --'}
                       </option>
-                      {filteredCourses.map((course, idx) => (
+                      {filteredCourses.map((course) => (
                         <option key={course._id} value={course._id}>
-                          CRS-{10001 + idx} - {course.title} ({course.degreeLevel || 'N/A'})
+                          {course.title} ({course.degreeLevel || 'N/A'})
                         </option>
                       ))}
                     </select>
@@ -607,10 +605,8 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                       required
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white font-semibold text-[#0F172A] appearance-none"
                     >
-                      <option value="September 2026">September 2026</option>
-                      <option value="January 2027">January 2027</option>
-                      <option value="May 2027">May 2027</option>
-                      <option value="September 2027">September 2027</option>
+                      <option value="">Select intake</option>
+                      {intakes.map(i => <option key={i._id} value={i.title}>{i.title}</option>)}
                     </select>
                     <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
                       <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">

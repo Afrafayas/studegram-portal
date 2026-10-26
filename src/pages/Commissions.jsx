@@ -38,7 +38,7 @@ export default function Commissions({
         return Boolean(cAppId && appId && cAppId === appId);
       });
 
-      const fee = Number(commRecord?.fee || commRecord?.tuitionFee || app.totalAmount || app.course?.tuitionFee || 15000);
+      const fee = Number(commRecord?.fee || commRecord?.tuitionFee || app.totalAmount || app.course?.tuitionFee || 0);
 
       const statusLower = (app.status || app.secondaryStatus || '').toLowerCase();
       const isVisaApprovedOrEnrolled = statusLower.includes('visa approved') || statusLower.includes('enrolled');
@@ -61,8 +61,8 @@ export default function Commissions({
       );
 
       const rate = isSet
-        ? (commRecord?.rate !== undefined ? Number(commRecord.rate) : (app.commissionRate || 10))
-        : 10;
+        ? (commRecord?.rate !== undefined ? Number(commRecord.rate) : (app.commissionRate ?? 0))
+        : 0;
 
       const commType = commRecord?.commissionType || app.commissionType || 'percentage';
 
@@ -72,7 +72,7 @@ export default function Commissions({
         if (!amount || amount <= 0) {
           amount = commType === 'fixed' && commRecord?.fixedAmount
             ? Number(commRecord.fixedAmount)
-            : Math.round((fee * (rate || 10)) / 100);
+            : Math.round((fee * (rate ?? 0)) / 100);
         }
       }
 
@@ -368,7 +368,7 @@ export default function Commissions({
                       <td className="px-5 py-3.5">
                         <div>
                           <p className="font-bold text-slate-800 truncate max-w-xs">{app.courseName}</p>
-                          <p className="text-[10px] text-slate-400 truncate max-w-xs">{app.universityName} ({app.intake || 'Sep 2026'})</p>
+                          <p className="text-[10px] text-slate-400 truncate max-w-xs">{app.universityName} ({app.intake || 'Not provided'})</p>
                         </div>
                       </td>
 

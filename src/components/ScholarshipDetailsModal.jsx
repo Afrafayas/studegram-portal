@@ -3,22 +3,15 @@ import { createPortal } from 'react-dom';
 import React, { useState } from 'react';
 
 export default function ScholarshipDetailsModal({ isOpen, onClose, scholarship }) {
-  if (!isOpen || !scholarship) return null;
 
   const [activeTab, setActiveTab] = useState('eligibility'); // eligibility, documents, steps
+  if (!isOpen || !scholarship) return null;
 
-  // Standard documents required for scholarship applications
-  const requiredDocs = [
-    { name: 'Scholarship Application Form', desc: 'Completed and signed form matching the target scholarship category.', type: 'PDF' },
-    { name: 'University Admission Offer Letter', desc: 'Copy of unconditional/conditional admission offer showing applicant details.', type: 'PDF' },
-    { name: 'Statement of Purpose (SOP)', desc: 'Dedicated 500-word essay explaining why you deserve the scholarship and your career path.', type: 'PDF/Word' },
-    { name: 'Academic References (2 LORs)', desc: 'Letters from high school counselors, principals, or university professors.', type: 'PDF' },
-    { name: 'Updated Curriculum Vitae (CV)', desc: 'Listing all academic accomplishments, leadership roles, and community projects.', type: 'PDF' }
-  ];
+  const requiredDocs = scholarship.requiredDocuments || [];
 
-  // Dynamic status based on deadline date (current date: 2026-07-11)
   const getDeadlineStatus = (deadlineStr) => {
-    const today = new Date('2026-07-11');
+    if (!deadlineStr || Number.isNaN(new Date(deadlineStr).getTime())) return { text: 'Deadline not provided', color: 'text-slate-500' };
+    const today = new Date();
     const deadlineDate = new Date(deadlineStr);
     const diffTime = deadlineDate - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -159,12 +152,7 @@ export default function ScholarshipDetailsModal({ isOpen, onClose, scholarship }
                   </div>
 
                   <div className="space-y-2 text-[#475569]">
-                    <h5 className="text-[9px] font-extrabold text-[#0F172A] uppercase tracking-wider">Default Requirements:</h5>
-                    <ul className="list-disc list-inside space-y-1">
-                      <li>Must hold an active application profile on the Unigather agent database.</li>
-                      <li>Must qualify as an international student paying overseas tuition fees.</li>
-                      <li>Excellent behavioral recommendations and zero visa refusal history.</li>
-                    </ul>
+                    <p>{scholarship.description || 'Additional requirements have not been provided.'}</p>
                   </div>
                 </div>
               )}
@@ -178,6 +166,7 @@ export default function ScholarshipDetailsModal({ isOpen, onClose, scholarship }
                   </div>
 
                   <div className="space-y-3">
+                    {!requiredDocs.length && <p className="text-xs text-slate-500">Document requirements have not been provided.</p>}
                     {requiredDocs.map((doc, idx) => (
                       <div key={idx} className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex gap-3 text-xs font-semibold">
                         <div className="w-8 h-8 rounded-lg bg-indigo-50 text-[#D99A1C] flex items-center justify-center font-bold text-[10px] shrink-0 uppercase">
@@ -202,12 +191,8 @@ export default function ScholarshipDetailsModal({ isOpen, onClose, scholarship }
                   </div>
 
                   <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-200">
-                    {[
-                      { step: 'Step 1', title: 'Secure Academic Admission Offer', desc: 'Apply and receive a valid conditional or unconditional offer letter from the university.' },
-                      { step: 'Step 2', title: 'Prepare Scholarship Document Suite', desc: 'Draft your Scholarship SOP, obtain LOR references, and organize your academic transcript files.' },
-                      { step: 'Step 3', title: 'Access Scholarship Application Portal', desc: 'Use the university applicant login or submit via the dedicated regional sponsor portal.' },
-                      { step: 'Step 4', title: 'File Application & Track Status', desc: 'Submit the application online and notify the Unigather processing desk to log reference numbers.' }
-                    ].map((s, idx) => (
+                    {!scholarship.applicationSteps?.length && <p className="text-xs text-slate-500">Application steps have not been provided.</p>}
+                    {(scholarship.applicationSteps || []).map((s, idx) => (
                       <div key={idx} className="relative flex gap-4 text-left text-xs font-semibold">
                         <span className="absolute -left-[20.5px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-indigo-600 bg-white z-10" />
                         <div className="space-y-0.5">
