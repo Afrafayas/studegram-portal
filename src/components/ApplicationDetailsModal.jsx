@@ -954,7 +954,10 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                       return (
                         <div key={msg._id || index} className="flex justify-center my-3.5 px-4">
                           <div className="text-[9px] text-slate-500 font-extrabold bg-slate-100 border border-slate-200/40 px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm max-w-full text-center uppercase tracking-wider select-none">
-                            <span>â„¹ï¸</span>
+                            <svg aria-hidden="true" className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                              <circle cx="12" cy="12" r="9" />
+                              <path strokeLinecap="round" d="M12 11v6m0-10v.01" />
+                            </svg>
                             <span>{msg.message}</span>
                             <span className="text-[8px] text-slate-400 font-bold select-none">
                               &middot; {new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
@@ -1017,7 +1020,11 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
 
                         {/* Timestamp */}
                         <span className="text-[8px] text-slate-400 font-bold mt-1 px-1 select-none">
-                          ðŸ•’ {new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                          <svg aria-hidden="true" className="inline-block w-2.5 h-2.5 mr-1 align-middle" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="9" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 2" />
+                          </svg>
+                          {new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
                     );
@@ -1154,7 +1161,11 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                             {note.text}
                           </p>
                           <span className="block text-[8px] text-slate-400 font-bold select-none mt-1">
-                            ðŸ•’ {note.date}
+                            <svg aria-hidden="true" className="inline-block w-2.5 h-2.5 mr-1 align-middle" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                              <circle cx="12" cy="12" r="9" />
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 2" />
+                            </svg>
+                            {note.date}
                           </span>
                         </div>
                       </div>

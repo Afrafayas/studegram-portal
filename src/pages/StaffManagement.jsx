@@ -1,3 +1,4 @@
+import StaffDetailPage from '../components/StaffDetailPage';
 import { ActionButton, ActionForm } from '../components/ActionControls';
 import { createPortal } from 'react-dom';
 import { useState, useEffect } from 'react';
@@ -8,6 +9,35 @@ export default function StaffManagement({ partnerData }) {
   const toast = useToast();
   const [staffList, setStaffList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [staffLoadError, setStaffLoadError] = useState('');
+  const [selectedStaffId, setSelectedStaffId] = useState(() => new URLSearchParams(window.location.search).get('portalStaffId'));
+  const selectedStaff = staffList.find(staff => String(staff._id || staff.id) === selectedStaffId);
+
+  useEffect(() => {
+    const syncSelection = () => setSelectedStaffId(new URLSearchParams(window.location.search).get('portalStaffId'));
+    window.addEventListener('popstate', syncSelection);
+    return () => window.removeEventListener('popstate', syncSelection);
+  }, []);
+
+  const openStaffDetails = (staff) => {
+    const id = String(staff._id || staff.id);
+    const url = new URL(window.location.href);
+    url.searchParams.set('portalStaffId', id);
+    window.history.pushState({ ...window.history.state, portalStaffDetail: true }, '', url);
+    setSelectedStaffId(id);
+    window.scrollTo({ top: 0 });
+  };
+
+  const closeStaffDetails = () => {
+    if (window.history.state?.portalStaffDetail) {
+      window.history.back();
+    } else {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('portalStaffId');
+      window.history.replaceState(window.history.state, '', url);
+      setSelectedStaffId(null);
+    }
+  };
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -32,12 +62,16 @@ export default function StaffManagement({ partnerData }) {
 
   const fetchStaffMembers = async () => {
     setIsLoading(true);
+    setStaffLoadError('');
     try {
       const res = await API.get('/partners/staff');
       if (res.data?.success) {
         setStaffList(res.data.data || []);
+      } else {
+        throw new Error(res.data?.message || 'Unable to load staff members.');
       }
     } catch (err) {
+      setStaffLoadError(err.response?.data?.message || err.message || 'Unable to load staff members.');
       console.error('Failed to load staff list:', err);
       toast.error(err.response?.data?.message || 'Error fetching staff members');
     } finally {
@@ -63,7 +97,8 @@ export default function StaffManagement({ partnerData }) {
           const mapped = agentRoles.map(r => ({
             id: r.name,
             title: r.displayName || r.name,
-            desc: r.description || 'Configured agency operational role'
+            desc: r.description || 'Configured agency operational role',
+            permissions: r.permissions || []
           }));
           setAvailableRoles(mapped);
         }
@@ -247,6 +282,10 @@ export default function StaffManagement({ partnerData }) {
 
   return (
     <div className="flex-1 p-4 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
+      {selectedStaffId ? (
+        <StaffDetailPage key={selectedStaffId} staff={selectedStaff} isLoading={isLoading} loadError={staffLoadError} onReload={fetchStaffMembers} onBack={closeStaffDetails} onEdit={openEditModal} onToggleStatus={handleToggleStatus} partnerData={partnerData} roles={availableRoles} />
+      ) : (
+      <>
       {/* Top Banner & Action */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-sm">
         <div className="space-y-1">
@@ -485,6 +524,15 @@ export default function StaffManagement({ partnerData }) {
                       <td className="py-4 px-6 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <ActionButton
+                            type="button"
+                            onClick={() => openStaffDetails(staff)}
+                            className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
+                            title="View Staff Details"
+                            aria-label={`View details for ${staff.name}`}
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" /><circle cx="12" cy="12" r="3" strokeWidth="2" /></svg>
+                          </ActionButton>
+                          <ActionButton
                             onClick={() => openEditModal(staff)}
                             className="p-1.5 text-slate-500 hover:text-[#D99A1C] hover:bg-amber-50 rounded-lg transition-colors"
                             title="Edit Staff Member"
@@ -530,6 +578,9 @@ export default function StaffManagement({ partnerData }) {
           </div>
         )}
       </div>
+
+      </>
+      )}
 
       {/* Add / Edit Staff Modal */}
       {isModalOpen && createPortal(
