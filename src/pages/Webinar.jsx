@@ -3,72 +3,20 @@ import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
-
-// Pre-populated Mock Data
-const INITIAL_WEBINARS = [
-  {
-    id: 'webinar-1',
-    title: 'Preparing for CAS Interviews & Visa Guidance',
-    university: 'Coventry University',
-    date: '2026-07-18T16:00',
-    description: 'Learn what to expect during Coventry University\'s CAS verification process and get answers live from admissions coordinators. Learn about documents required, financial verification, and interview questions.',
-    youtubeUrl: 'https://www.youtube.com/watch?v=71Y8QnykFi4',
-    status: 'Upcoming',
-    poster: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 'webinar-2',
-    title: 'STEM Careers & Post-Study Work Opportunities in the UK',
-    university: 'University of Surrey',
-    date: '2026-07-22T14:30',
-    description: 'Join Surrey representatives and industry professionals as they discuss UK student visa pathways, Graduate Route (PSW) rules, and high-demand careers in STEM fields.',
-    youtubeUrl: 'https://www.youtube.com/watch?v=SwCf8B07_s8',
-    status: 'Upcoming',
-    poster: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 'webinar-3',
-    title: 'Anglia Ruskin University: Scholarship & IELTS Waiver Guide',
-    university: 'Anglia Ruskin University',
-    date: '2026-07-10T11:00',
-    description: 'An in-depth look at ARU\'s scholarship options for global intakes, including application walkthroughs, entry requirements, and the new CBSE/ICSE English waiver policies.',
-    youtubeUrl: 'https://www.youtube.com/watch?v=HKwmD9yFBx8',
-    status: 'Recorded',
-    poster: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 'webinar-4',
-    title: 'University of Hertfordshire: Campus Life & Engineering Tour',
-    university: 'University of Hertfordshire',
-    date: '2026-07-28T10:00',
-    description: 'Discover campus life, housing options, and virtual tours of the advanced aerospace, robotics, and automotive labs at Hertfordshire.',
-    youtubeUrl: 'https://www.youtube.com/watch?v=PwBtjFEv8UU',
-    status: 'Upcoming',
-    poster: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=800&q=80'
-  }
-];
-
-
-const UNIVERSITIES_LIST = [
-  'Anglia Ruskin University',
-  'University of Surrey',
-  'Coventry University',
-  'University of Hertfordshire',
-  'University of Toronto',
-  'McGill University',
-  'University of British Columbia',
-  'New York University'
-];
+import useApiCollection from '../hooks/useApiCollection';
 
 export default function Webinar() {
   const toast = useToast();
+  const { records: universityRecords } = useApiCollection('/universities');
+  const UNIVERSITIES_LIST = universityRecords.map(u => u.name);
+  const [loadError, setLoadError] = useState('');
 
   const [webinars, setWebinars] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Helper to map backend object to frontend object
   const mapBackendToFrontend = (w) => {
-    let poster = 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80';
+    let poster = w.poster || '';
     let description = w.description || '';
     if (description.startsWith('POSTER_URL:')) {
       const parts = description.split('|||');
@@ -94,31 +42,10 @@ export default function Webinar() {
       try {
         const res = await API.get('/webinars');
         if (res.data && res.data.success && isMounted) {
-          if (res.data.data.length === 0) {
-            // Seed default webinars
-            const seedPromises = INITIAL_WEBINARS.map(w => {
-              const payload = {
-                title: w.title,
-                speaker: w.university,
-                date: w.date,
-                link: w.youtubeUrl,
-                status: w.status === 'Recorded' ? 'Completed' : w.status,
-                description: `POSTER_URL:${w.poster}|||${w.description}`
-              };
-              return API.post('/webinars', payload);
-            });
-            await Promise.all(seedPromises);
-            // Refetch
-            const refetchRes = await API.get('/webinars');
-            if (refetchRes.data && refetchRes.data.success && isMounted) {
-              setWebinars(refetchRes.data.data.map(mapBackendToFrontend));
-            }
-          } else {
-            setWebinars(res.data.data.map(mapBackendToFrontend));
-          }
+          setWebinars(res.data.data.map(mapBackendToFrontend));
         }
       } catch (err) {
-        console.error('Error fetching webinars:', err);
+        setLoadError(err.response?.data?.message || 'Unable to load webinars.');
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -137,7 +64,7 @@ export default function Webinar() {
   // Upload Form Modal
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [formTitle, setFormTitle] = useState('');
-  const [formUni, setFormUni] = useState(UNIVERSITIES_LIST[0]);
+  const [formUni, setFormUni] = useState('');
   const [formDate, setFormDate] = useState('');
   const [formDescription, setFormDescription] = useState('');
   const [formYoutube, setFormYoutube] = useState('');
@@ -163,21 +90,27 @@ export default function Webinar() {
     };
   }, [showUploadModal]);
 
-  // Handle Poster File Upload & Convert to Base64
-  const processFile = (file) => {
+  // Store poster in S3 before attaching it to the form.
+  const processFile = async (file) => {
     if (file && file.type.startsWith('image/')) {
       setIsUploadingPoster(true);
       setFileName(file.name);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setFormPosterUrl(e.target.result);
+      setFormPosterUrl('');
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await API.post('/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        const url = response.data?.url || response.data?.fileUrl;
+        if (!response.data?.success || !url) throw new Error('Poster was not stored in S3.');
+        setFormPosterUrl(url);
+      } catch (error) {
+        setFileName('');
+        toast.error(error.response?.data?.message || 'Poster upload failed. Please retry.');
+      } finally {
         setIsUploadingPoster(false);
-      };
-      reader.onerror = () => {
-        setIsUploadingPoster(false);
-        toast.error('Failed to read image file.');
-      };
-      reader.readAsDataURL(file);
+      }
     } else {
       toast.error('Please upload a valid image file (PNG/JPG).');
     }
@@ -212,8 +145,7 @@ export default function Webinar() {
       return;
     }
 
-    // Default placeholder poster if not uploaded
-    const posterSrc = formPosterUrl || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80';
+    const posterSrc = formPosterUrl || '';
     
     // Validate YouTube URL
     let videoUrl = formYoutube.trim();
@@ -225,7 +157,7 @@ export default function Webinar() {
       title: formTitle,
       speaker: formUni,
       date: formDate,
-      link: videoUrl || 'https://www.youtube.com',
+      link: videoUrl || '',
       status: new Date(formDate) > new Date() ? 'Upcoming' : 'Completed',
       description: `POSTER_URL:${posterSrc}|||${formDescription}`
     };
@@ -239,7 +171,7 @@ export default function Webinar() {
 
         // Reset Form & Close Modal
         setFormTitle('');
-        setFormUni(UNIVERSITIES_LIST[0]);
+        setFormUni('');
         setFormDate('');
         setFormDescription('');
         setFormYoutube('');
@@ -279,6 +211,7 @@ export default function Webinar() {
     <div className="flex-1 bg-[#F0F2F5]">
       <div className="p-8 space-y-8 animate-fade-in-up">
       
+      {loadError && <p role="alert" className="text-sm text-red-600">{loadError}</p>}
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -368,11 +301,11 @@ export default function Webinar() {
               >
                 {/* Poster Display */}
                 <div className="h-48 relative overflow-hidden bg-slate-100 group border-b border-slate-100">
-                  <img
+                  {webinar.poster && <img
                     src={webinar.poster}
                     alt={webinar.title}
                     className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-200"
-                  />
+                  />}
                   <div className="absolute top-3 left-3 flex gap-2">
                     <span className={`text-[9px] font-extrabold uppercase px-2.5 py-0.5 rounded-full shadow-xs border ${
                       webinar.status === 'Upcoming'
@@ -409,7 +342,7 @@ export default function Webinar() {
                       </div>
                     </div>
 
-                    <a
+                    {webinar.youtubeUrl ? <a
                       href={webinar.youtubeUrl}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -419,7 +352,7 @@ export default function Webinar() {
                         <path d="M23.498 6.163a3.003 3.003 0 0 0-2.11-2.11C19.517 3.545 12 3.545 12 3.545s-7.517 0-9.388.508a3.003 3.003 0 0 0-2.11 2.11C0 8.033 0 12 0 12s0 3.967.502 5.837a3.003 3.003 0 0 0 2.11 2.11c1.871.508 9.388.508 9.388.508s7.517 0 9.388-.508a3.003 3.003 0 0 0 2.11-2.11C24 15.967 24 12 24 12s0-3.967-.502-5.837zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                       </svg>
                       Watch on YouTube
-                    </a>
+                    </a> : <p className="text-xs text-slate-500">Video link has not been provided.</p>}
                   </div>
                 </div>
               </div>

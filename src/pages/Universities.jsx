@@ -1,3 +1,4 @@
+import { formatFee } from '../utils/courseFee';
 import { ActionButton } from '../components/ActionControls';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
@@ -8,14 +9,7 @@ export default function Universities({ setActivePage }) {
   const [universities, setUniversities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const countries = [
-    { name: 'All', icon: '🌍' },
-    { name: 'United Kingdom', icon: '🇬🇧' },
-    { name: 'Canada', icon: '🇨🇦' },
-    { name: 'United States', icon: '🇺🇸' },
-    { name: 'Australia', icon: '🇦🇺' },
-    { name: 'Germany', icon: '🇩🇪' }
-  ];
+  const countries = [{ name: 'All', icon: '' }, ...[...new Set(universities.map(u => u.country).filter(Boolean))].map(name => ({ name, icon: '' }))];
 
   useEffect(() => {
     const fetchUniversities = async () => {
@@ -26,11 +20,12 @@ export default function Universities({ setActivePage }) {
           // Pre-process some fields for the UI map (since DB might not have popularCourses array directly attached)
           const mappedUnis = data.data.map(u => ({
             ...u,
+            id: u._id,
             popularCourses: u.courses ? u.courses.map(c => typeof c === 'object' ? c.title : c) : [],
-            badge: u.ranking ? `Ranked ${u.ranking}` : 'Top Choice',
+            badge: u.ranking ? `Ranked ${u.ranking}` : '',
             badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-100',
-            rating: '4.8',
-            fee: u.courses && u.courses.length > 0 ? (typeof u.courses[0] === 'object' ? u.courses[0].tuitionFee : 'Varies') : 'Varies',
+            rating: u.rating || 'Not provided',
+            fee: u.courses && u.courses.length > 0 ? (typeof u.courses[0] === 'object' ? formatFee(u.courses[0].tuitionFee, u.courses[0].currency, u.courses[0].feePeriod) : 'Varies') : 'Varies',
             gradient: 'from-[#0ea5e9] to-[#0d9488]'
           }));
           setUniversities(mappedUnis);
@@ -51,7 +46,7 @@ export default function Universities({ setActivePage }) {
     const matchesCountry = selectedCountry === 'All' || uni.country === selectedCountry;
     const matchesSearch =
       uni.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      uni.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (uni.city || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       uni.popularCourses.some((course) => course.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesCountry && matchesSearch;
   });

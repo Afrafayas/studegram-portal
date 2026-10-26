@@ -79,21 +79,14 @@ export default function StaffManagement({ partnerData }) {
     }
   };
 
-  const DEFAULT_AGENT_ROLES = [
-    { id: 'AgencyAdmin', title: 'Agency Admin', desc: 'Full portal & staff access' },
-    { id: 'Manager', title: 'Manager', desc: 'All applications & search' },
-    { id: 'Counselor', title: 'Counselor', desc: 'Student application filing' },
-    { id: 'Staff', title: 'Staff Executive', desc: 'Standard processing staff' }
-  ];
-
-  const [availableRoles, setAvailableRoles] = useState(DEFAULT_AGENT_ROLES);
+  const [availableRoles, setAvailableRoles] = useState([]);
 
   const fetchAgentRoles = async () => {
     try {
       const res = await API.get('/roles');
       if (res.data?.success && Array.isArray(res.data.data)) {
         const agentRoles = res.data.data.filter(r => r.portalType === 'Agent');
-        if (agentRoles.length > 0) {
+        if (Array.isArray(agentRoles)) {
           const mapped = agentRoles.map(r => ({
             id: r.name,
             title: r.displayName || r.name,

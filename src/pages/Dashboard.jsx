@@ -174,7 +174,7 @@ export default function Dashboard({
     activeApps.forEach(app => {
       const univ = app.universityName || (typeof app.university === 'object' ? app.university?.name : '') || '';
       const courseType = app.level || 'Academic Program';
-      const intakeStr = app.intake || '';
+
 
       if (!univ) return;
 
@@ -185,20 +185,6 @@ export default function Dashboard({
       if (app.deadline || app.appDeadline) {
         const d = new Date(app.deadline || app.appDeadline);
         if (!isNaN(d.getTime())) targetDate = d;
-      }
-
-      // Fallback: estimate from standard intake month/year
-      if (!targetDate && intakeStr) {
-        const monthMatch = intakeStr.match(/(january|february|march|april|may|june|july|august|september|october|november|december)/i);
-        const yearMatch = intakeStr.match(/20\d\d/);
-        if (monthMatch) {
-          const year = yearMatch ? parseInt(yearMatch[0], 10) : today.getFullYear();
-          const monthNames = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
-          const monthIndex = monthNames.indexOf(monthMatch[1].toLowerCase());
-          if (monthIndex !== -1) {
-            targetDate = new Date(year, monthIndex, 15); // Default to middle of intake month
-          }
-        }
       }
 
       // Only include upcoming dates (future or within the current year)

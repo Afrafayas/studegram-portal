@@ -40,7 +40,7 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
       setPlace(partnerData.place || '');
       setAddress(partnerData.address || '');
       setCity(partnerData.city || '');
-      setCountry(partnerData.country || 'India');
+      setCountry(partnerData.country || '');
     }
     setProfileError('');
     setProfileSuccess('');
@@ -274,7 +274,7 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
                         value={partnerData?.email || ''}
                       />
                       <span className="absolute right-3 top-2.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                        Verified
+                        {partnerData?.isEmailVerified ? 'Verified' : 'Not verified'}
                       </span>
                     </div>
                   </div>

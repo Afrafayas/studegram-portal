@@ -1,3 +1,4 @@
+import { applicationFee } from '../utils/courseFee';
 import { ActionButton, ActionForm } from './ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState, useEffect, useRef } from 'react';
@@ -222,51 +223,22 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
     }
   };
 
-  const [notes, setNotes] = useState([
-    {
-      author: 'Unigather Verification Team',
-      role: 'Compliance',
-      text: 'Verified passport bio-page and academic transcripts. Eligibility confirmed for admission processing.',
-      date: '12 Jun 2026, 11:30 AM',
-      avatarColor: 'bg-emerald-500'
-    }
-  ]);
   const [newNote, setNewNote] = useState('');
-
-  const handleAddNote = (e) => {
-    e.preventDefault();
+  const notes = appComments.map(comment => ({
+    author: comment.author || comment.name || 'User', role: comment.role || '', text: comment.text || '',
+    date: comment.createdAt ? new Date(comment.createdAt).toLocaleString() : '', avatarColor: 'bg-blue-500'
+  }));
+  const handleAddNote = async event => {
+    event.preventDefault();
     if (!newNote.trim()) return;
-
-    const timeString = new Date().toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    }) + ', ' + new Date().toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    });
-
-    const addedNote = {
-      author: 'You (Agent)',
-      role: 'Sub-Agent / Manager',
-      text: newNote.trim(),
-      date: timeString,
-      avatarColor: 'bg-orange-500'
-    };
-
-    setNotes((prev) => [addedNote, ...prev]);
-    setNewNote('');
+    try {
+      const response = await API.post('/applications/' + (application.id || application._id) + '/comments', { text: newNote.trim() });
+      if (!response.data?.success) throw new Error('Unable to save note.');
+      setAppComments(response.data.data || []);
+      setNewNote('');
+      onUpdateSuccess?.();
+    } catch (error) { toast.error(error.response?.data?.message || error.message); }
   };
-
-  const documentChecklist = [
-    { name: 'Passport Bio-Page', status: 'Verified', date: '11 Jun 2026', type: 'PDF' },
-    { name: 'Higher Secondary School Certificate (12th)', status: 'Verified', date: '11 Jun 2026', type: 'PDF' },
-    { name: 'Bachelor Academic Transcript', status: 'Verified', date: '11 Jun 2026', type: 'PDF' },
-    { name: 'IELTS Academic Score Sheet', status: 'Verified', date: '12 Jun 2026', type: 'PDF' },
-    { name: 'Statement of Purpose (SOP)', status: 'Pending Review', date: '15 Jun 2026', type: 'DOCX' },
-    { name: 'Letter of Recommendation (LOR 1 & 2)', status: 'Pending Review', date: '15 Jun 2026', type: 'PDF' }
-  ];
 
   const currentAppStatus = application?.status || application?.secondaryStatus || 'Submitted';
 
@@ -351,7 +323,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                 Application details for {application.studentName}
               </h2>
               <p className="text-[10px] text-[#64748B] font-semibold mt-0.5">
-                CAMS ID: <span className="text-[#D99A1C] font-bold">{application.camsId}</span> &middot; Passport: <span className="font-bold text-[#0F172A]">{application.passportNo}</span> &middot; Level: <span className="font-bold text-indigo-600">{application.level || 'Undergraduate (UG)'}</span>
+                CAMS ID: <span className="text-[#D99A1C] font-bold">{application.camsId}</span> &middot; Passport: <span className="font-bold text-[#0F172A]">{application.passportNo}</span> &middot; Level: <span className="font-bold text-indigo-600">{application.level || 'Not provided'}</span>
               </p>
             </div>
           </div>
@@ -483,14 +455,16 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                         <div>
                           <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Course Program</span>
                           <span className="text-xs font-bold text-[#0F172A] leading-relaxed">{application.courseName}</span>
+                          <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mt-2">Course Tuition Fee</span>
+                          <span className="text-xs font-bold text-[#0F172A]">{applicationFee(application)}</span>
                         </div>
                         <div>
                           <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Level of Study</span>
-                          <span className="text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 inline-block">{application.level || 'Undergraduate (UG)'}</span>
+                          <span className="text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200 inline-block">{application.level || 'Not provided'}</span>
                         </div>
                         <div>
                           <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Requested Intake</span>
-                          <span className="text-xs font-bold text-[#0F172A]">{application.intake || 'September 2026'}</span>
+                          <span className="text-xs font-bold text-[#0F172A]">{application.intake || 'Not provided'}</span>
                         </div>
                         <div className="col-span-2">
                           <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Application Status</span>

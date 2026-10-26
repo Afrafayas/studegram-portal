@@ -1,3 +1,4 @@
+import { parseFee, formatFee, feeCurrency } from '../utils/courseFee';
 import { ActionButton } from '../components/ActionControls';
 import React, { useState, useEffect, useMemo } from 'react';
 import ClaimCommissionConfirmModal from '../components/ClaimCommissionConfirmModal';
@@ -38,7 +39,7 @@ export default function Commissions({
         return Boolean(cAppId && appId && cAppId === appId);
       });
 
-      const fee = Number(commRecord?.fee || commRecord?.tuitionFee || app.totalAmount || app.course?.tuitionFee || 15000);
+      const fee = (parseFee(app.tuitionFee ?? app.course?.tuitionFee ?? commRecord?.fee ?? commRecord?.tuitionFee) ?? 0);
 
       const statusLower = (app.status || app.secondaryStatus || '').toLowerCase();
       const isVisaApprovedOrEnrolled = statusLower.includes('visa approved') || statusLower.includes('enrolled');
@@ -61,8 +62,8 @@ export default function Commissions({
       );
 
       const rate = isSet
-        ? (commRecord?.rate !== undefined ? Number(commRecord.rate) : (app.commissionRate || 10))
-        : 10;
+        ? (commRecord?.rate !== undefined ? Number(commRecord.rate) : (app.commissionRate ?? 0))
+        : 0;
 
       const commType = commRecord?.commissionType || app.commissionType || 'percentage';
 
@@ -72,7 +73,7 @@ export default function Commissions({
         if (!amount || amount <= 0) {
           amount = commType === 'fixed' && commRecord?.fixedAmount
             ? Number(commRecord.fixedAmount)
-            : Math.round((fee * (rate || 10)) / 100);
+            : Math.round((fee * (rate ?? 0)) / 100);
         }
       }
 
@@ -87,6 +88,7 @@ export default function Commissions({
         ...app,
         commRecord,
         fee,
+        currency: feeCurrency(app.tuitionFee ?? app.course?.tuitionFee, app.currency || app.course?.currency || commRecord?.currency),
         rate,
         commType,
         payableAmount: amount,
@@ -368,13 +370,13 @@ export default function Commissions({
                       <td className="px-5 py-3.5">
                         <div>
                           <p className="font-bold text-slate-800 truncate max-w-xs">{app.courseName}</p>
-                          <p className="text-[10px] text-slate-400 truncate max-w-xs">{app.universityName} ({app.intake || 'Sep 2026'})</p>
+                          <p className="text-[10px] text-slate-400 truncate max-w-xs">{app.universityName} ({app.intake || 'Not provided'})</p>
                         </div>
                       </td>
 
                       {/* Course Tuition */}
                       <td className="px-5 py-3.5 text-slate-700 font-bold">
-                        ₹{app.fee.toLocaleString()}
+                        {formatFee(app.tuitionFee ?? app.course?.tuitionFee ?? app.fee, app.currency, app.feePeriod ?? app.course?.feePeriod ?? app.commRecord?.feePeriod)}
                       </td>
 
                       {/* Rate / Type (Strictly per-application) */}

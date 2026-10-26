@@ -26,62 +26,9 @@ const AGENT_FEATURE_ACTIONS = [
   { key: 'staff:manage', label: 'Add & Manage Agency Staff Credentials' }
 ];
 
-const DEFAULT_AGENT_ROLES = [
-  {
-    _id: 'ar1',
-    name: 'AgencyAdmin',
-    displayName: 'Agent SuperAdmin (Agency Owner)',
-    portalType: 'Agent',
-    description: 'Primary agency administrator with total control over staff accounts, applications, and payouts.',
-    permissions: [
-      'sidebar:dashboard', 'sidebar:applications', 'sidebar:universities', 'sidebar:courses',
-      'sidebar:staff', 'sidebar:notice', 'sidebar:webinar', 'sidebar:knowledge', 'sidebar:scholarships', 'sidebar:deadlines',
-      'applications:view', 'applications:create', 'applications:edit', 'applications:claim_commission', 'staff:view', 'staff:manage'
-    ],
-    isPreset: true
-  },
-  {
-    _id: 'ar2',
-    name: 'Manager',
-    displayName: 'Agency Branch Manager',
-    portalType: 'Agent',
-    description: 'Manages branch counselors, application filings, and student lead follow-ups.',
-    permissions: [
-      'sidebar:dashboard', 'sidebar:applications', 'sidebar:universities', 'sidebar:courses',
-      'sidebar:notice', 'sidebar:webinar', 'sidebar:knowledge', 'sidebar:scholarships', 'sidebar:deadlines',
-      'applications:view', 'applications:create', 'applications:edit', 'staff:view'
-    ],
-    isPreset: true
-  },
-  {
-    _id: 'ar3',
-    name: 'Counselor',
-    displayName: 'Student Counselor',
-    portalType: 'Agent',
-    description: 'Creates student profiles, searches courses, and files application submissions.',
-    permissions: [
-      'sidebar:dashboard', 'sidebar:applications', 'sidebar:universities', 'sidebar:courses', 'sidebar:notice',
-      'applications:view', 'applications:create'
-    ],
-    isPreset: true
-  },
-  {
-    _id: 'ar4',
-    name: 'Staff',
-    displayName: 'Agency Staff Executive',
-    portalType: 'Agent',
-    description: 'Standard processing staff member assisting with document uploads and application tracking.',
-    permissions: [
-      'sidebar:dashboard', 'sidebar:applications', 'sidebar:courses',
-      'applications:view', 'applications:create'
-    ],
-    isPreset: true
-  }
-];
-
 export default function AgentRolePermissions({ partnerData }) {
   const toast = useToast();
-  const [roles, setRoles] = useState(DEFAULT_AGENT_ROLES);
+  const [roles, setRoles] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   // Modal State
@@ -102,11 +49,7 @@ export default function AgentRolePermissions({ partnerData }) {
       const res = await API.get('/roles');
       if (res.data?.success && Array.isArray(res.data.data)) {
         const agentRoles = res.data.data.filter(r => r.portalType === 'Agent');
-        if (agentRoles.length > 0) {
-          const fetchedNames = new Set(agentRoles.map(r => r.name));
-          const missingPresets = DEFAULT_AGENT_ROLES.filter(pr => !fetchedNames.has(pr.name));
-          setRoles([...agentRoles, ...missingPresets]);
-        }
+        setRoles(agentRoles);
       }
     } catch (err) {
       console.warn('Failed to load agent roles from backend:', err.message);

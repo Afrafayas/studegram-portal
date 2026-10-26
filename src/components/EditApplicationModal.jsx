@@ -5,7 +5,6 @@ import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
 
 export default function EditApplicationModal({ isOpen, onClose, application, onUpdateSuccess }) {
-  if (!isOpen || !application) return null;
 
   const toast = useToast();
   const [activeTab, setActiveTab] = useState('application');
@@ -78,13 +77,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
   const availableCountries = Array.from(
     new Set([
       ...universities.map(u => (u.country || '').trim()).filter(Boolean),
-      'United Kingdom',
-      'Canada',
-      'United States',
-      'Australia',
-      'Ireland',
-      'Germany',
-      'New Zealand'
+
     ])
   ).sort();
 
@@ -172,6 +165,8 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
 
   const inputClass = "w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-[#0F172A] font-semibold focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white transition-all";
   const labelClass = "block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1";
+
+  if (!isOpen || !application) return null;
 
   return createPortal(
     <div
