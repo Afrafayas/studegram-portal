@@ -1,3 +1,4 @@
+import { getDisplayId } from '../utils/displayId';
 import StaffDetailPage from '../components/StaffDetailPage';
 import { ActionButton, ActionForm } from '../components/ActionControls';
 import { createPortal } from 'react-dom';
@@ -468,7 +469,7 @@ export default function StaffManagement({ partnerData }) {
                           </div>
                           <div>
                             <p className="font-bold text-xs text-[#0F172A]">{staff.name}</p>
-                            <p className="text-[10px] text-[#64748B]">ID: {staff._id.substring(18)}</p>
+                            <p className="text-[10px] text-[#64748B]">ID: {getDisplayId(staff)}</p>
                           </div>
                         </div>
                       </td>

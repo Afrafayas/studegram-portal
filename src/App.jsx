@@ -1,3 +1,4 @@
+import { getDisplayId } from './utils/displayId';
 import RegistrationStatus from './pages/RegistrationStatus';
 import { ActionButton } from './components/ActionControls';
 import { createPortal } from 'react-dom';
@@ -125,7 +126,7 @@ export default function App() {
       const mapped = (data.data || []).map((app) => ({
         ...app,
         id: app._id,
-        camsId: app.camsId || app._id,
+        camsId: getDisplayId(app),
         studentName: app.student?.name || 'N/A',
         passportNo: app.student?.passportNo || 'N/A',
         universityName: app.university?.name || 'N/A',

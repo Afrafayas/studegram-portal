@@ -67,7 +67,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
     }
 
     const headers = [
-      'CAMS ID',
+      'Application ID',
       'Student Name',
       'Passport Number',
       'Email',
@@ -207,7 +207,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
           <input
             type="text"
             className="w-full bg-white border border-[#E2E8F0] rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:border-[#D99A1C] transition-all"
-            placeholder="Search students, CAMS ID..."
+            placeholder="Search students, Application ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -347,7 +347,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-[#F8FAFC] border-b border-[#E2E8F0]">
-                <th className="px-6 py-4 text-[#64748B] text-[10px] font-extrabold uppercase tracking-wider">CAMS ID</th>
+                <th className="px-6 py-4 text-[#64748B] text-[10px] font-extrabold uppercase tracking-wider">Application ID</th>
                 <th className="px-6 py-4 text-[#64748B] text-[10px] font-extrabold uppercase tracking-wider">Student & Passport</th>
                 <th className="px-6 py-4 text-[#64748B] text-[10px] font-extrabold uppercase tracking-wider">University & Course</th>
                 <th className="px-6 py-4 text-[#64748B] text-[10px] font-extrabold uppercase tracking-wider">Status</th>

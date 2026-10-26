@@ -1,3 +1,4 @@
+import { getDisplayId } from '../utils/displayId';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../api/axios';
@@ -35,7 +36,7 @@ export default function RegistrationStatus({ onNavigate }) {
         <h2 className="font-bold">{request.documents.join(', ')}</h2>
         <p className="text-sm whitespace-pre-wrap">{request.message}</p>
         <p className="text-sm">{request.status === 'Received' ? 'Documents received for review' : 'Waiting for your email reply'}</p>
-        {request.replyTo?.length > 0 && <a className="text-blue-700 underline text-sm" href={`mailto:${request.replyTo.map(encodeURIComponent).join(',')}?subject=${encodeURIComponent(`Registration documents - ${data.companyName} (${data._id}/${request._id})`)}`}>Email handling staff and super admins</a>}
+        {request.replyTo?.length > 0 && <a className="text-blue-700 underline text-sm" href={`mailto:${request.replyTo.map(encodeURIComponent).join(',')}?subject=${encodeURIComponent(`Registration documents - ${data.companyName} (${getDisplayId(data)})`)}`}>Email handling staff and super admins</a>}
       </article>)}
       <h2 className="font-bold">Notifications</h2>
       {data.notifications.map(notification => <article key={notification._id} className="border-b py-3"><h3 className="font-semibold">{notification.title}</h3><p className="text-sm">{notification.message}</p><time className="text-xs text-slate-500">{new Date(notification.createdAt).toLocaleString()}</time></article>)}
