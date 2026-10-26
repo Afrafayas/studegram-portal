@@ -417,6 +417,7 @@ export default function Login({ onNavigate, onLoginSuccess }) {
             </ActionButton>
           </ActionForm>
 
+          {localStorage.getItem('registration_status_token') && <button type="button" onClick={() => onNavigate('registration-status')} className="text-sm text-amber-700 underline">View registration status and notifications</button>}
           {/* Bottom redirection */}
           <div className="text-center text-xs font-semibold text-[#64748B] pt-2">
             Don't have an account?{' '}
