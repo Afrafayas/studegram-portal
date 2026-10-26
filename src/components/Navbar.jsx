@@ -144,7 +144,7 @@ export default function Navbar({
     }
     setShowNotifications(false);
 
-    const extractedCams = (n.message || '').match(/CAMS-\d+/i)?.[0] || (n.title || '').match(/CAMS-\d+/i)?.[0];
+    const extractedCams = (n.message || '').match(/(?:APP|CAMS)-\d+/i)?.[0] || (n.title || '').match(/(?:APP|CAMS)-\d+/i)?.[0];
     const targetAppId = n.relatedId || n.applicationId || n.targetAppId || n.appId || extractedCams;
 
     if (targetAppId && onSelectApplication) {

@@ -63,10 +63,7 @@ export default function Register({ onNavigate }) {
     if (!taxId.trim()) newErrors.taxId = 'Business Registration / Tax ID is required';
     if (!city.trim()) newErrors.city = 'City is required';
 
-    // MANDATORY DOCUMENT CHECK
-    if (documents.length === 0) {
-      newErrors.documents = 'At least 1 legal company document upload is MANDATORY for agency registration.';
-    }
+    // Staff can request missing documents after registration.
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -74,7 +71,7 @@ export default function Register({ onNavigate }) {
 
   const [uploadingDoc, setUploadingDoc] = useState(false);
 
-  // File Upload Handler for Mandatory Legal Documents
+  // File Upload Handler for Registration Documents
   const handleLegalDocFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -201,6 +198,9 @@ export default function Register({ onNavigate }) {
       });
 
       if (regRes.data.success) {
+        if (regRes.data.registrationToken) localStorage.setItem('registration_status_token', regRes.data.registrationToken);
+        onNavigate('registration-status');
+        return;
         setShowApprovalModal(true);
         setStep(4); // Under Review Window
       } else {
@@ -249,7 +249,7 @@ export default function Register({ onNavigate }) {
             </div>
             <div className="flex items-center gap-3 text-xs font-bold">
               <span className={`w-7 h-7 rounded-full flex items-center justify-center shadow-sm ${step >= 2 ? 'bg-white text-[#D99A1C]' : 'bg-white/20 text-white'}`}>2</span>
-              <span className={step === 2 ? 'text-white font-extrabold underline' : 'text-white/80'}>Company Info & Mandatory Legal Document</span>
+              <span className={step === 2 ? 'text-white font-extrabold underline' : 'text-white/80'}>Company Info & Registration Documents</span>
             </div>
             <div className="flex items-center gap-3 text-xs font-bold">
               <span className={`w-7 h-7 rounded-full flex items-center justify-center shadow-sm ${step >= 3 ? 'bg-white text-[#D99A1C]' : 'bg-white/20 text-white'}`}>3</span>
@@ -419,7 +419,7 @@ export default function Register({ onNavigate }) {
               <div className="text-left space-y-1">
                 <span className="text-[10px] font-black text-[#D99A1C] uppercase tracking-wider">Step 2 of 3</span>
                 <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Company Details & Document</h1>
-                <p className="text-xs text-[#64748B] font-semibold">Provide your registered company information and mandatory legal proof</p>
+                <p className="text-xs text-[#64748B] font-semibold">Provide your registered company information and legal proof (you can submit missing documents later)</p>
               </div>
 
               {/* Agency Name */}
@@ -493,16 +493,16 @@ export default function Register({ onNavigate }) {
                 </div>
               </div>
 
-              {/* MANDATORY LEGAL DOCUMENT UPLOAD BOX */}
+              {/* REQUESTED BEFORE APPROVAL LEGAL DOCUMENT UPLOAD BOX */}
               <div className="space-y-2 pt-2 border-t border-slate-100">
                 <div className="flex items-center justify-between">
                   <label className="block text-[10px] font-black text-[#0F172A] uppercase tracking-wider">
-                    📜 Mandatory Company Legal Document Upload *
+                    📜 Company Legal Documents
                   </label>
-                  <span className="text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">Mandatory</span>
+                  <span className="text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">Required before approval</span>
                 </div>
                 <p className="text-[11px] text-[#64748B] leading-tight">
-                  Upload at least 1 official legal document (e.g., Certificate of Incorporation, GST Certificate, Business License or Trade Card).
+                  You may register now and provide missing documents when requested. Before approval, provide at least 1 official legal document (e.g., Certificate of Incorporation, GST Certificate, Business License or Trade Card).
                 </p>
 
                 {errors.documents && (

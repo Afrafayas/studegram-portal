@@ -323,7 +323,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                 Application details for {application.studentName}
               </h2>
               <p className="text-[10px] text-[#64748B] font-semibold mt-0.5">
-                CAMS ID: <span className="text-[#D99A1C] font-bold">{application.camsId}</span> &middot; Passport: <span className="font-bold text-[#0F172A]">{application.passportNo}</span> &middot; Level: <span className="font-bold text-indigo-600">{application.level || 'Not provided'}</span>
+                Application ID: <span className="text-[#D99A1C] font-bold">{application.camsId}</span> &middot; Passport: <span className="font-bold text-[#0F172A]">{application.passportNo}</span> &middot; Level: <span className="font-bold text-indigo-600">{application.level || 'Not provided'}</span>
               </p>
             </div>
           </div>

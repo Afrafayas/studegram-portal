@@ -1,3 +1,5 @@
+import { getDisplayId } from './utils/displayId';
+import RegistrationStatus from './pages/RegistrationStatus';
 import { ActionButton } from './components/ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState, useEffect, useRef } from 'react';
@@ -33,6 +35,7 @@ import { useToast } from './context/ToastContext';
 export default function App() {
   const toast = useToast();
   const [currentPage, setCurrentPage] = useState(() => {
+    if (new URLSearchParams(window.location.search).has('registrationToken')) return 'registration-status';
     return localStorage.getItem('partner_token') ? 'dashboard' : 'login';
   }); // Starts as 'login' or 'dashboard' if already logged in
   const [partnerData, setPartnerData] = useState(() => {
@@ -123,7 +126,7 @@ export default function App() {
       const mapped = (data.data || []).map((app) => ({
         ...app,
         id: app._id,
-        camsId: app.camsId || app._id,
+        camsId: getDisplayId(app),
         studentName: app.student?.name || 'N/A',
         passportNo: app.student?.passportNo || 'N/A',
         universityName: app.university?.name || 'N/A',
@@ -318,6 +321,8 @@ export default function App() {
   };
 
   // Auth Routing
+  if (currentPage === 'registration-status') return <RegistrationStatus onNavigate={setCurrentPage} />;
+
   if (currentPage === 'login') {
     return (
       <Login 

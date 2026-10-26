@@ -1,3 +1,4 @@
+import { normalizeDisplayIds } from '../utils/displayId';
 import axios from 'axios';
 
 // Reads backend API URL strictly from .env (VITE_API_BASE_URL)
@@ -23,7 +24,7 @@ API.interceptors.request.use(
 );
 
 API.interceptors.response.use(
-  (response) => response,
+  (response) => { response.data = normalizeDisplayIds(response.data); return response; },
   (error) => {
     if (error.response && error.response.status === 401) {
       console.warn('Unauthorized partner request - Token may be expired.');

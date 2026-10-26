@@ -1,3 +1,4 @@
+import { getDisplayId } from '../utils/displayId';
 import API from '../api/axios';
 import { ActionButton, ActionForm } from '../components/ActionControls';
 import { createPortal } from 'react-dom';
@@ -212,7 +213,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
 
             {/* Metadata Footer */}
             <div className="pt-6 border-t border-slate-100 text-[10px] text-[#64748B] font-semibold flex items-center justify-between">
-              <span>Ref: N-{notice.id}092 • Posted by Admin</span>
+              <span>Ref: {getDisplayId(notice)} • Posted by Admin</span>
               <span className="flex items-center gap-1.5 text-indigo-600">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -284,7 +285,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
                 {notice.title}
               </h3>
 
-              <p className="text-[10px] text-[#64748B] font-semibold">Ref: N-{notice.id}092 • Posted by Admin</p>
+              <p className="text-[10px] text-[#64748B] font-semibold">Ref: {getDisplayId(notice)} • Posted by Admin</p>
             </div>
 
             {/* Right Date Chip */}

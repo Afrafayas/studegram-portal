@@ -1,3 +1,4 @@
+import { getDisplayId } from '../utils/displayId';
 import { ActionButton } from '../components/ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState } from 'react';
@@ -194,7 +195,7 @@ export default function SearchCourses({ onApplyCourse }) {
                     </span>
                   </div>
                   <div className="text-white">
-                    <h3 className="font-extrabold text-sm truncate leading-tight pr-6">{course.title}</h3>
+                    <h3 className="font-extrabold text-sm truncate leading-tight pr-6">{course.title}</h3><p className="text-[10px] font-mono text-slate-500">{getDisplayId(course)}</p>
                     <p className="text-[10px] text-slate-400 font-semibold flex items-center gap-1 mt-0.5">
                       <span className="truncate">{course.university}</span>
                     </p>
@@ -272,7 +273,7 @@ export default function SearchCourses({ onApplyCourse }) {
       {selectedCourseDetails && createPortal(
         <div className="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center p-4">
           <div role="dialog" aria-modal="true" aria-label="Course specifications" className="bg-white rounded-2xl p-6 w-full max-w-lg space-y-4">
-            <h2 className="font-bold text-slate-900">{selectedCourseDetails.title}</h2>
+            <h2 className="font-bold text-slate-900">{selectedCourseDetails.title}</h2><p className="text-xs font-mono text-slate-500">{getDisplayId(selectedCourseDetails)}</p>
             <p className="text-sm text-slate-600">{selectedCourseDetails.university}</p>
             <p className="text-sm text-slate-600">{selectedCourseDetails.description || 'No course description provided.'}</p>
             <p className="text-xs text-slate-500">Duration: {selectedCourseDetails.duration || 'Not provided'}</p>
