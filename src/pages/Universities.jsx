@@ -1,3 +1,4 @@
+import { formatFee } from '../utils/courseFee';
 import { ActionButton } from '../components/ActionControls';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
@@ -24,7 +25,7 @@ export default function Universities({ setActivePage }) {
             badge: u.ranking ? `Ranked ${u.ranking}` : '',
             badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-100',
             rating: u.rating || 'Not provided',
-            fee: u.courses && u.courses.length > 0 ? (typeof u.courses[0] === 'object' ? u.courses[0].tuitionFee : 'Varies') : 'Varies',
+            fee: u.courses && u.courses.length > 0 ? (typeof u.courses[0] === 'object' ? formatFee(u.courses[0].tuitionFee, u.courses[0].currency, u.courses[0].feePeriod) : 'Varies') : 'Varies',
             gradient: 'from-[#0ea5e9] to-[#0d9488]'
           }));
           setUniversities(mappedUnis);

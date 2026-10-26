@@ -1,3 +1,4 @@
+import { parseFee, formatFee, feeCurrency } from '../utils/courseFee';
 import { ActionButton } from '../components/ActionControls';
 import React, { useState, useEffect, useMemo } from 'react';
 import ClaimCommissionConfirmModal from '../components/ClaimCommissionConfirmModal';
@@ -38,7 +39,7 @@ export default function Commissions({
         return Boolean(cAppId && appId && cAppId === appId);
       });
 
-      const fee = Number(commRecord?.fee || commRecord?.tuitionFee || app.totalAmount || app.course?.tuitionFee || 0);
+      const fee = (parseFee(app.tuitionFee ?? app.course?.tuitionFee ?? commRecord?.fee ?? commRecord?.tuitionFee) ?? 0);
 
       const statusLower = (app.status || app.secondaryStatus || '').toLowerCase();
       const isVisaApprovedOrEnrolled = statusLower.includes('visa approved') || statusLower.includes('enrolled');
@@ -87,6 +88,7 @@ export default function Commissions({
         ...app,
         commRecord,
         fee,
+        currency: feeCurrency(app.tuitionFee ?? app.course?.tuitionFee, app.currency || app.course?.currency || commRecord?.currency),
         rate,
         commType,
         payableAmount: amount,
@@ -374,7 +376,7 @@ export default function Commissions({
 
                       {/* Course Tuition */}
                       <td className="px-5 py-3.5 text-slate-700 font-bold">
-                        ₹{app.fee.toLocaleString()}
+                        {formatFee(app.tuitionFee ?? app.course?.tuitionFee ?? app.fee, app.currency, app.feePeriod ?? app.course?.feePeriod ?? app.commRecord?.feePeriod)}
                       </td>
 
                       {/* Rate / Type (Strictly per-application) */}

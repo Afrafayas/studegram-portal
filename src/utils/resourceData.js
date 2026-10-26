@@ -1,3 +1,4 @@
+import { formatFee } from './courseFee';
 export function mapNotice(notice) {
   return {
     ...notice, id: notice._id, message: notice.content || '', type: notice.category || 'General',
@@ -10,7 +11,7 @@ export function mapCourse(course) {
   return {
     ...course, id: course._id, universityId: course.university?._id,
     university: course.university?.name || '', country: course.university?.country || '',
-    level: course.degreeLevel || '', fee: course.tuitionFee || 'Not provided',
+    level: course.degreeLevel || '', fee: formatFee(course.tuitionFee, course.currency, course.feePeriod),
     intake: (course.intakes || []).map(i => typeof i === 'object' ? i.title : i).filter(Boolean).join(', '),
     gradient: 'from-[#D99A1C] to-[#F5B025]'
   };

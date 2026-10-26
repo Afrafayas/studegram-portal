@@ -1,3 +1,4 @@
+import { applicationFee } from '../utils/courseFee';
 import { ActionButton, ActionForm } from './ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState, useEffect, useRef } from 'react';
@@ -454,6 +455,8 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                         <div>
                           <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Course Program</span>
                           <span className="text-xs font-bold text-[#0F172A] leading-relaxed">{application.courseName}</span>
+                          <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mt-2">Course Tuition Fee</span>
+                          <span className="text-xs font-bold text-[#0F172A]">{applicationFee(application)}</span>
                         </div>
                         <div>
                           <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Level of Study</span>
