@@ -312,8 +312,8 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
 
       {/* Pagination with prev/next buttons */}
       <div className="bg-white border border-[#E2E8F0] rounded-2xl px-6 py-4 shadow-sm flex items-center justify-between text-xs text-[#64748B] font-semibold">
-        <span>Showing 1-{localNotices.length} of {localNotices.length} notices</span>
-        <div className="flex gap-2">
+        {/* <span>Showing 1-{localNotices.length} of {localNotices.length} notices</span> */}
+        <div className="flex gap-2 ml-auto">
           <ActionButton className="px-4 py-2 border border-[#E2E8F0] bg-white rounded-xl hover:bg-slate-50 disabled:opacity-50 transition-all shadow-sm flex items-center gap-1.5 font-bold" disabled>
             <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />

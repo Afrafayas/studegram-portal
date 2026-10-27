@@ -166,7 +166,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
   const totalItems = filteredApps.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+  // const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const paginatedApps = filteredApps.slice(startIndex, startIndex + itemsPerPage);
 
   return (
@@ -483,9 +483,9 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
                 <option value={50}>50</option>
                 <option value={100}>100</option>
               </select>
-              <span className="text-xs font-semibold text-slate-400">
+              {/* <span className="text-xs font-semibold text-slate-400">
                 Showing {totalItems > 0 ? startIndex + 1 : 0} to {endIndex} of {totalItems} entries
-              </span>
+              </span> */}
             </div>
 
             <div className="flex items-center gap-1.5">
