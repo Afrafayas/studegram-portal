@@ -63,7 +63,9 @@ export default function Register({ onNavigate }) {
     if (!taxId.trim()) newErrors.taxId = 'Business Registration / Tax ID is required';
     if (!city.trim()) newErrors.city = 'City is required';
 
-    // Staff can request missing documents after registration.
+    if (!documents.some(doc => doc.url)) {
+      newErrors.documents = 'Please upload at least one legal document before continuing.';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -129,6 +131,7 @@ export default function Register({ onNavigate }) {
   // Move Step 2 -> Step 3 (Send OTP)
   const handleProceedToOtp = async (e) => {
     e.preventDefault();
+    if (uploadingDoc || isLoading) return;
     if (!validateStep2()) return;
 
     setIsLoading(true);
@@ -167,6 +170,11 @@ export default function Register({ onNavigate }) {
   // Submit Final Registration (Step 3 -> Step 4)
   const handleVerifyOtpAndRegister = async (e) => {
     e.preventDefault();
+    if (!validateStep2()) {
+      setStep(2);
+      window.scrollTo(0, 0);
+      return;
+    }
     if (!otpCode || otpCode.trim().length !== 6) {
       setErrors({ otp: 'Please enter the 6-digit OTP code sent to your email.' });
       return;
@@ -419,7 +427,7 @@ export default function Register({ onNavigate }) {
               <div className="text-left space-y-1">
                 <span className="text-[10px] font-black text-[#D99A1C] uppercase tracking-wider">Step 2 of 3</span>
                 <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Company Details & Document</h1>
-                <p className="text-xs text-[#64748B] font-semibold">Provide your registered company information and legal proof (you can submit missing documents later)</p>
+                <p className="text-xs text-[#64748B] font-semibold">Provide your registered company information and upload at least one legal document to continue.</p>
               </div>
 
               {/* Agency Name */}
@@ -493,16 +501,16 @@ export default function Register({ onNavigate }) {
                 </div>
               </div>
 
-              {/* REQUESTED BEFORE APPROVAL LEGAL DOCUMENT UPLOAD BOX */}
+              {/* REQUIRED LEGAL DOCUMENT UPLOAD BOX */}
               <div className="space-y-2 pt-2 border-t border-slate-100">
                 <div className="flex items-center justify-between">
                   <label className="block text-[10px] font-black text-[#0F172A] uppercase tracking-wider">
                     📜 Company Legal Documents
                   </label>
-                  <span className="text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">Required before approval</span>
+                  <span className="text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">Required *</span>
                 </div>
                 <p className="text-[11px] text-[#64748B] leading-tight">
-                  You may register now and provide missing documents when requested. Before approval, provide at least 1 official legal document (e.g., Certificate of Incorporation, GST Certificate, Business License or Trade Card).
+                  Upload at least 1 official legal document to continue (e.g., Certificate of Incorporation, GST Certificate, Business License or Trade Card).
                 </p>
 
                 {errors.documents && (
