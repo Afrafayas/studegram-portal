@@ -68,6 +68,7 @@ export default function Navbar({
         });
 
         setCommentsList(updatedList);
+        window.dispatchEvent(new CustomEvent('application_comments_updated'));
         const actualUnreplied = updatedList.filter(c => c.isUnreplied).length;
         setUnreadCommentsCount(actualUnreplied);
       }

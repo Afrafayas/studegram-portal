@@ -374,7 +374,7 @@ export default function App() {
           } else if (appId) {
             const found = applications.find(a => a._id === appId || a.id === appId);
             setSelectedAppForDetails(null);
-            if (found) setSelectedAppForDetails(found);
+            if (found) setSelectedAppForDetails({ ...found });
             else if (/^[0-9a-fA-F]{24}$/.test(String(appId))) {
               try {
                 const res = await API.get('/applications/' + appId);
