@@ -367,13 +367,20 @@ export default function App() {
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
         onNavigatePage={(page) => setActivePage(page)}
         onOpenProfile={() => setShowProfileModal(true)}
-        onSelectApplication={(appId) => {
+        onSelectApplication={async (appId) => {
           setActivePage('ApplicationHistory');
           if (typeof appId === 'object' && appId !== null) {
             setSelectedAppForDetails(appId);
           } else if (appId) {
             const found = applications.find(a => a._id === appId || a.id === appId);
+            setSelectedAppForDetails(null);
             if (found) setSelectedAppForDetails(found);
+            else if (/^[0-9a-fA-F]{24}$/.test(String(appId))) {
+              try {
+                const res = await API.get('/applications/' + appId);
+                if (res.data?.success) setSelectedAppForDetails(res.data.data);
+              } catch (err) { console.error('Could not open application:', err); }
+            }
           }
         }}
       />
