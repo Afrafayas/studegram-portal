@@ -70,6 +70,31 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
     }
   }, [application]);
 
+  // Refresh on opening, selecting the same application, and header comment polling.
+  useEffect(() => {
+    const appId = application?.id || application?._id;
+    if (!isOpen || !appId) return;
+    let cancelled = false;
+    let requestVersion = 0;
+    const refreshComments = async () => {
+      const version = ++requestVersion;
+      try {
+        const res = await API.get('/applications/' + appId);
+        if (!cancelled && version === requestVersion && res.data?.success) {
+          setAppComments(res.data.data?.applicationComments || []);
+        }
+      } catch (err) {
+        console.warn('Could not refresh application comments:', err.message);
+      }
+    };
+    refreshComments();
+    window.addEventListener('application_comments_updated', refreshComments);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('application_comments_updated', refreshComments);
+    };
+  }, [isOpen, application]);
+
   const handleAddAppComment = async (e) => {
     e.preventDefault();
     if (!newAppComment.trim()) return;
@@ -305,6 +330,12 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
   ];
 
   if (!isOpen || !application) return null;
+
+  // Comments are displayed in conversation order; an agent reply clears the highlight.
+  const latestComment = appComments.at(-1);
+  const latestCommentIsUnreplied = latestComment && (
+    /\badmin\b/i.test(latestComment.authorRole || latestComment.role || latestComment.author || '')
+  );
 
   return createPortal(
     <div
@@ -548,7 +579,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
 
                     {/* Application General COMMENTS Section (Student Profile Tab) */}
                     <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4.5 space-y-3 mt-6 text-left shadow-xs">
-                      {/* Dark Blue Unreplied Highlight */}
+                      {/* Standalone unreplied banner disabled; highlight the comment itself instead.
                       {application.hasUnrepliedMessage && application.lastRepliedBy === 'Admin' && (
                         <div className="bg-[#1e3a8a] text-white border border-[#1d4ed8] rounded-xl p-3 shadow-md flex items-center justify-between mb-2 animate-pulse">
                           <div className="flex items-center gap-2">
@@ -557,7 +588,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                           </div>
                           <span className="text-[9px] bg-[#1d4ed8] text-white font-black uppercase px-2 py-0.5 rounded border border-blue-400">Dark Blue Highlight</span>
                         </div>
-                      )}
+                      )} */}
 
                       <div className="flex items-center justify-between">
                         <h4 className="text-[10px] font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
@@ -581,8 +612,16 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                           </div>
                         )}
 
-                        {appComments.map((comment, cIdx) => (
-                          <div key={cIdx} className="bg-white border border-slate-200/80 rounded-xl p-3 space-y-1 shadow-3xs">
+                        {appComments.map((comment, cIdx) => {
+                          const isUnreplied = latestCommentIsUnreplied && cIdx === appComments.length - 1;
+                          return (
+                          <div key={comment._id || cIdx} className={`border rounded-xl p-3 space-y-1 shadow-3xs ${isUnreplied ? 'bg-blue-50 border-blue-400 ring-1 ring-blue-200' : 'bg-white border-slate-200/80'}`}>
+                            {isUnreplied && (
+                              <span className="inline-flex items-center gap-1.5 text-[9px] font-extrabold text-blue-800">
+                                <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
+                                New · Awaiting your reply
+                              </span>
+                            )}
                             <div className="flex items-center justify-between text-[9px] font-extrabold">
                               <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md border border-slate-200">{comment.author || 'Agent'}</span>
                               <span className="text-slate-400">{comment.createdAt ? new Date(comment.createdAt).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Just now'}</span>
@@ -591,7 +630,8 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                               {comment.text}
                             </p>
                           </div>
-                        ))}
+                          );
+                        })}
 
                         {!application.notes && appComments.length === 0 && (
                           <p className="text-[11px] font-semibold text-slate-400 text-center py-2">No comments added yet for this application.</p>
