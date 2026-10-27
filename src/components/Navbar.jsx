@@ -62,7 +62,7 @@ export default function Navbar({
           const isMarkedRead = Boolean(c.isRead || readIds.has(idKey));
           return {
             ...c,
-            isUnreplied: isMarkedRead ? false : c.isUnreplied,
+            isUnreplied: c.isUnreplied,
             isRead: isMarkedRead
           };
         });
@@ -91,10 +91,10 @@ export default function Navbar({
       // Only decrement count for the specific read comment
       setCommentsList(prev => prev.map(c => 
         (c.applicationId === comm.applicationId || (comm.commentId && c.commentId === comm.commentId))
-          ? { ...c, isUnreplied: false, isRead: true } 
+          ? { ...c, isRead: true } 
           : c
       ));
-      setUnreadCommentsCount(prev => Math.max(0, prev - 1));
+
 
       if (comm.applicationId) {
         const commentIdParam = comm.commentId || 'latest';
