@@ -1,3 +1,4 @@
+import SearchableSelect from '../components/SearchableSelect';
 import { useState } from 'react';
 import useApiCollection from '../hooks/useApiCollection';
 import { publishedDeadlines } from '../utils/resourceData';
@@ -24,14 +25,14 @@ export default function UniversityDeadline() {
       </div>
       {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
       <div className="bg-white border border-slate-200 rounded-2xl p-5 flex flex-wrap gap-4">
-        <select aria-label="University" value={university} onChange={e => setUniversity(e.target.value)} className="border border-slate-200 rounded-xl px-4 py-2 text-sm">
+        <SearchableSelect searchLabel="Search universities..." aria-label="University" value={university} onChange={e => setUniversity(e.target.value)} className="border border-slate-200 rounded-xl px-4 py-2 text-sm">
           <option value="All">All Universities</option>
           {universities.map(value => <option key={value} value={value}>{value}</option>)}
-        </select>
-        <select aria-label="Deadline type" value={type} onChange={e => setType(e.target.value)} className="border border-slate-200 rounded-xl px-4 py-2 text-sm">
+        </SearchableSelect>
+        <SearchableSelect aria-label="Deadline type" value={type} onChange={e => setType(e.target.value)} className="border border-slate-200 rounded-xl px-4 py-2 text-sm">
           <option value="All">All Types ({rows.length})</option>
           {types.map(value => <option key={value} value={value}>{value} ({rows.filter(row => row.courseType === value).length})</option>)}
-        </select>
+        </SearchableSelect>
       </div>
       <div className="bg-white border border-slate-200 rounded-2xl overflow-x-auto">
         <table className="w-full text-left text-xs">

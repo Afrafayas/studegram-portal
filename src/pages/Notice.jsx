@@ -1,3 +1,4 @@
+import SearchableSelect from '../components/SearchableSelect';
 import { getDisplayId } from '../utils/displayId';
 import API from '../api/axios';
 import { ActionButton, ActionForm } from '../components/ActionControls';
@@ -372,7 +373,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
                   <div className="space-y-1">
                     <label className="text-[10px] font-extrabold text-[#475569] uppercase tracking-wider">Category / Type *</label>
                     <div className="relative">
-                      <select
+                      <SearchableSelect
                         value={formType}
                         onChange={(e) => setFormType(e.target.value)}
                         className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-3 py-2.5 text-xs text-[#0F172A] font-bold focus:outline-none focus:ring-1 focus:ring-[#D99A1C] appearance-none"
@@ -380,7 +381,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
                         {CATEGORIES_LIST.map((cat) => (
                           <option key={cat} value={cat}>{cat}</option>
                         ))}
-                      </select>
+                      </SearchableSelect>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#475569]">
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />

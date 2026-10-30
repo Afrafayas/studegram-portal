@@ -283,7 +283,7 @@ export default function Dashboard({
             <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
             </svg>
-            <span>+ New Application</span>
+            <span>New Application</span>
           </ActionButton>
         )}
       </div>
@@ -323,7 +323,7 @@ export default function Dashboard({
                     onClick={onNewApplicationClick}
                     className="text-xs text-[#D99A1C] font-bold hover:underline flex items-center gap-1 cursor-pointer"
                   >
-                    <span>+ New Application</span>
+                    <span> New Application</span>
                   </ActionButton>
                 )}
                 <ActionButton 

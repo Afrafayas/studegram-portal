@@ -1,3 +1,4 @@
+import SearchableSelect from '../components/SearchableSelect';
 import { getDisplayId } from '../utils/displayId';
 import { ActionButton } from '../components/ActionControls';
 import { createPortal } from 'react-dom';
@@ -80,7 +81,7 @@ export default function SearchCourses({ onApplyCourse }) {
           <div>
             <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">University Country</label>
             <div className="relative">
-              <select
+              <SearchableSelect
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
                 value={country}
                 onChange={(e) => {
@@ -90,7 +91,7 @@ export default function SearchCourses({ onApplyCourse }) {
               >
                 <option value="All">All Countries</option>
                 {[...new Set(allCourses.map(c => c.country).filter(Boolean))].map(value => <option key={value} value={value}>{value}</option>)}
-              </select>
+              </SearchableSelect>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                 <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -103,7 +104,7 @@ export default function SearchCourses({ onApplyCourse }) {
           <div>
             <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Student Nationality</label>
             <div className="relative">
-              <select
+              <SearchableSelect
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
                 value={nationality}
                 onChange={(e) => setNationality(e.target.value)}
@@ -112,7 +113,7 @@ export default function SearchCourses({ onApplyCourse }) {
                 <option value="Nepal">Nepal</option>
                 <option value="Nigeria">Nigeria</option>
                 <option value="Pakistan">Pakistan</option>
-              </select>
+              </SearchableSelect>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                 <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -125,7 +126,7 @@ export default function SearchCourses({ onApplyCourse }) {
           <div>
             <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">University</label>
             <div className="relative">
-              <select
+              <SearchableSelect searchLabel="Search universities..."
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
                 value={university}
                 onChange={(e) => setUniversity(e.target.value)}
@@ -135,7 +136,7 @@ export default function SearchCourses({ onApplyCourse }) {
                     {uniName === 'All' ? 'All Universities' : uniName}
                   </option>
                 ))}
-              </select>
+              </SearchableSelect>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                 <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -148,14 +149,14 @@ export default function SearchCourses({ onApplyCourse }) {
           <div>
             <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Course Level</label>
             <div className="relative">
-              <select
+              <SearchableSelect
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
                 value={courseType}
                 onChange={(e) => setCourseType(e.target.value)}
               >
                 <option value="All">All Levels</option>
                 {[...new Set(allCourses.map(c => c.level).filter(Boolean))].map(value => <option key={value} value={value}>{value}</option>)}
-              </select>
+              </SearchableSelect>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                 <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
