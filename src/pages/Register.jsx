@@ -1,3 +1,5 @@
+import SearchableSelect from '../components/SearchableSelect';
+import ValidatedInput from '../components/ValidatedInput';
 import { ActionButton, ActionForm } from '../components/ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState } from 'react';
@@ -343,7 +345,7 @@ export default function Register({ onNavigate }) {
                   <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Phone Number *</label>
                   <div className="flex gap-2">
                     <span className="bg-slate-100 border border-slate-200 rounded-xl px-2.5 py-2.5 text-xs font-bold text-[#0F172A] flex items-center shrink-0">+91</span>
-                    <input
+                    <ValidatedInput validationKind="phone"
                       type="tel"
                       className={`w-full bg-slate-50 border rounded-xl px-3 py-2.5 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
                         errors.phoneNumber ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'
@@ -449,19 +451,19 @@ export default function Register({ onNavigate }) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Entity Type *</label>
-                  <select
+                  <SearchableSelect
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C]"
                     value={partnerType}
                     onChange={(e) => setPartnerType(e.target.value)}
                   >
                     <option value="Company">Private Limited / LLP Company</option>
                     <option value="Individual">Individual Counselor / Sole Proprietorship</option>
-                  </select>
+                  </SearchableSelect>
                 </div>
 
                 <div className="space-y-1">
                   <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Business Reg / Tax ID *</label>
-                  <input
+                  <ValidatedInput validationKind="tax"
                     type="text"
                     className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
                       errors.taxId ? 'border-[#EF4444] focus:ring-[#EF4444]' : 'border-slate-200 focus:ring-[#D99A1C]'

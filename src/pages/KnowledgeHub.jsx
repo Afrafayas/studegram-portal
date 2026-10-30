@@ -1,3 +1,4 @@
+import SearchableSelect from '../components/SearchableSelect';
 import { useState } from 'react';
 import useApiCollection from '../hooks/useApiCollection';
 
@@ -23,10 +24,10 @@ export default function KnowledgeHub() {
       <div className="flex flex-wrap gap-4 p-5 bg-white border border-slate-200 rounded-2xl">
         <input aria-label="Search university information" placeholder="Search universities..." value={search}
           onChange={e => setSearch(e.target.value)} className="border border-slate-200 rounded-xl px-4 py-2 text-sm flex-1" />
-        <select aria-label="Country" value={country} onChange={e => setCountry(e.target.value)} className="border border-slate-200 rounded-xl px-4 py-2 text-sm">
+        <SearchableSelect aria-label="Country" value={country} onChange={e => setCountry(e.target.value)} className="border border-slate-200 rounded-xl px-4 py-2 text-sm">
           <option value="All">All Countries</option>
           {countries.map(value => <option key={value} value={value}>{value}</option>)}
-        </select>
+        </SearchableSelect>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {visible.map(university => (

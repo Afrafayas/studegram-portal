@@ -1,3 +1,4 @@
+import ValidatedInput from './ValidatedInput';
 import { ActionButton, ActionForm } from './ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
@@ -282,7 +283,7 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
                   {/* Phone */}
                   <div className="space-y-1">
                     <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Contact Phone</label>
-                    <input
+                    <ValidatedInput validationKind="phone"
                       type="text"
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-[#0F172A] focus:outline-none focus:bg-white focus:ring-1 focus:ring-[#D99A1C]"
                       value={phone}

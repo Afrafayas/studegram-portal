@@ -1,3 +1,5 @@
+import SearchableSelect from '../components/SearchableSelect';
+import ValidatedInput from '../components/ValidatedInput';
 import { getDisplayId } from '../utils/displayId';
 import StaffDetailPage from '../components/StaffDetailPage';
 import { ActionButton, ActionForm } from '../components/ActionControls';
@@ -648,7 +650,7 @@ export default function StaffManagement({ partnerData }) {
                   <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
                     Phone Number
                   </label>
-                  <input
+                  <ValidatedInput validationKind="phone"
                     type="text"
                     placeholder="+91 98765 43210"
                     value={formData.phone}
@@ -737,14 +739,14 @@ export default function StaffManagement({ partnerData }) {
                 <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
                   Account Access Status
                 </label>
-                <select
+                <SearchableSelect
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-[#0F172A] focus:outline-none focus:border-[#D99A1C] focus:bg-white transition-all font-semibold"
                 >
                   <option value="Active">Active (Allowed to sign in)</option>
                   <option value="Inactive">Inactive (Sign in disabled)</option>
-                </select>
+                </SearchableSelect>
               </div>
 
               {/* Submit Buttons */}

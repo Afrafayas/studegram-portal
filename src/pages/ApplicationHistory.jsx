@@ -1,3 +1,4 @@
+import SearchableSelect from '../components/SearchableSelect';
 import { ActionButton } from '../components/ActionControls';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
@@ -292,7 +293,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
               <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">
                 Status
               </label>
-              <select
+              <SearchableSelect
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="w-full bg-slate-50 border border-[#E2E8F0] rounded-xl px-3 py-2 text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:border-[#D99A1C] cursor-pointer"
@@ -301,7 +302,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
                 {availableStatuses.map(st => (
                   <option key={st} value={st}>{st}</option>
                 ))}
-              </select>
+              </SearchableSelect>
             </div>
 
             {/* University Filter */}
@@ -309,7 +310,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
               <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">
                 University
               </label>
-              <select
+              <SearchableSelect searchLabel="Search universities..."
                 value={universityFilter}
                 onChange={(e) => setUniversityFilter(e.target.value)}
                 className="w-full bg-slate-50 border border-[#E2E8F0] rounded-xl px-3 py-2 text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:border-[#D99A1C] cursor-pointer"
@@ -318,7 +319,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
                 {availableUniversities.map(univ => (
                   <option key={univ} value={univ}>{univ}</option>
                 ))}
-              </select>
+              </SearchableSelect>
             </div>
 
             {/* Intake Filter */}
@@ -326,7 +327,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
               <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">
                 Intake
               </label>
-              <select
+              <SearchableSelect
                 value={intakeFilter}
                 onChange={(e) => setIntakeFilter(e.target.value)}
                 className="w-full bg-slate-50 border border-[#E2E8F0] rounded-xl px-3 py-2 text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:border-[#D99A1C] cursor-pointer"
@@ -335,7 +336,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
                 {availableIntakes.map(intake => (
                   <option key={intake} value={intake}>{intake}</option>
                 ))}
-              </select>
+              </SearchableSelect>
             </div>
           </div>
         </div>
@@ -469,7 +470,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
           <div className="px-6 py-4 bg-slate-50 border-t border-[#E2E8F0] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#64748B] font-semibold select-none">
             <div className="flex items-center gap-3">
               <span className="text-xs font-semibold text-slate-500">Rows per page:</span>
-              <select
+              <SearchableSelect
                 value={itemsPerPage}
                 onChange={(e) => {
                   setItemsPerPage(Number(e.target.value));
@@ -482,7 +483,7 @@ export default function ApplicationHistory({ onAddApplicationClick, applications
                 <option value={20}>20</option>
                 <option value={50}>50</option>
                 <option value={100}>100</option>
-              </select>
+              </SearchableSelect>
               {/* <span className="text-xs font-semibold text-slate-400">
                 Showing {totalItems > 0 ? startIndex + 1 : 0} to {endIndex} of {totalItems} entries
               </span> */}

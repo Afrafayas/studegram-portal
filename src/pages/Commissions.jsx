@@ -1,3 +1,4 @@
+import SearchableSelect from '../components/SearchableSelect';
 import { parseFee, formatFee, feeCurrency } from '../utils/courseFee';
 import { ActionButton } from '../components/ActionControls';
 import React, { useState, useEffect, useMemo } from 'react';
@@ -509,7 +510,7 @@ export default function Commissions({
           <div className="px-6 py-4 bg-slate-50 border-t border-[#E2E8F0] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#64748B] font-semibold select-none">
             <div className="flex items-center gap-3">
               <span className="text-xs font-semibold text-slate-500">Rows per page:</span>
-              <select
+              <SearchableSelect
                 value={itemsPerPage}
                 onChange={(e) => {
                   setItemsPerPage(Number(e.target.value));
@@ -522,7 +523,7 @@ export default function Commissions({
                 <option value={20}>20</option>
                 <option value={50}>50</option>
                 <option value={100}>100</option>
-              </select>
+              </SearchableSelect>
               {/* <span className="text-xs font-semibold text-slate-400">
                 Showing {totalItems > 0 ? startIndex + 1 : 0} to {endIndex} of {totalItems} entries
               </span> */}

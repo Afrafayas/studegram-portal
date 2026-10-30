@@ -1,3 +1,4 @@
+import SearchableSelect from '../components/SearchableSelect';
 import { ActionButton } from '../components/ActionControls';
 import React, { useState } from 'react';
 import useApiCollection from '../hooks/useApiCollection';
@@ -135,7 +136,7 @@ export default function Scholarships({ setActivePage }) {
           <div>
             <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Destination Country</label>
             <div className="relative">
-              <select
+              <SearchableSelect
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
                 value={selectedCountry}
                 onChange={(e) => {
@@ -149,7 +150,7 @@ export default function Scholarships({ setActivePage }) {
                 <option value="United States">United States</option>
                 <option value="Australia">Australia</option>
                 <option value="Ireland">Ireland</option>
-              </select>
+              </SearchableSelect>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                 <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -162,7 +163,7 @@ export default function Scholarships({ setActivePage }) {
           <div>
             <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Partner University</label>
             <div className="relative">
-              <select
+              <SearchableSelect searchLabel="Search universities..."
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
                 value={selectedUniversity}
                 onChange={(e) => setSelectedUniversity(e.target.value)}
@@ -172,7 +173,7 @@ export default function Scholarships({ setActivePage }) {
                     {uni === 'All' ? 'All Universities' : uni}
                   </option>
                 ))}
-              </select>
+              </SearchableSelect>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                 <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -185,7 +186,7 @@ export default function Scholarships({ setActivePage }) {
           <div>
             <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Scholarship Category</label>
             <div className="relative">
-              <select
+              <SearchableSelect
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white cursor-pointer appearance-none pr-8 font-semibold"
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
@@ -194,7 +195,7 @@ export default function Scholarships({ setActivePage }) {
                 <option value="Merit-based">Merit-based</option>
                 <option value="Merit/Need-based">Merit/Need-based</option>
                 <option value="Research-based">Research-based</option>
-              </select>
+              </SearchableSelect>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                 <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />

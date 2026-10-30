@@ -1,3 +1,5 @@
+import SearchableSelect from './SearchableSelect';
+import ValidatedInput from './ValidatedInput';
 import { ActionButton, ActionForm } from './ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
@@ -345,7 +347,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                   {studentSelectionMode === 'existing' ? (
                     <div>
                       <div className="relative">
-                        <select
+                        <SearchableSelect
                           required={studentSelectionMode === 'existing'}
                           value={selectedStudent}
                           onChange={(e) => setSelectedStudent(e.target.value)}
@@ -359,7 +361,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                               {student.name} ({student.passportNo || 'No Passport'})
                             </option>
                           ))}
-                        </select>
+                        </SearchableSelect>
                         <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
                           <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -399,7 +401,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                         </div>
                         <div>
                           <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Passport Number *</label>
-                          <input
+                          <ValidatedInput validationKind="passport"
                             type="text"
                             required={studentSelectionMode === 'new'}
                             value={newStudentPassport}
@@ -412,7 +414,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Phone Number</label>
-                          <input
+                          <ValidatedInput validationKind="phone"
                             type="text"
                             value={newStudentPhone}
                             onChange={(e) => setNewStudentPhone(e.target.value)}
@@ -434,7 +436,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Gender</label>
-                          <select
+                          <SearchableSelect
                             value={newStudentGender}
                             onChange={(e) => setNewStudentGender(e.target.value)}
                             className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] font-semibold text-[#0F172A] cursor-pointer"
@@ -443,7 +445,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
                             <option value="Other">Other</option>
-                          </select>
+                          </SearchableSelect>
                         </div>
                         <div>
                           <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Resident Address</label>
@@ -466,7 +468,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                     Destination Country *
                   </label>
                   <div className="relative">
-                    <select
+                    <SearchableSelect
                       required
                       value={selectedCountry}
                       onChange={(e) => {
@@ -480,7 +482,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                       {availableCountries.map((c) => (
                         <option key={c} value={c}>{c}</option>
                       ))}
-                    </select>
+                    </SearchableSelect>
                     <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
                       <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -502,7 +504,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                     )}
                   </div>
                   <div className="relative">
-                    <select
+                    <SearchableSelect searchLabel="Search universities..."
                       required
                       disabled={!selectedCountry}
                       value={selectedUniversity}
@@ -524,7 +526,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                           {univ.name} ({univ.city ? `${univ.city}, ` : ''}{univ.country})
                         </option>
                       ))}
-                    </select>
+                    </SearchableSelect>
                     <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
                       <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -542,7 +544,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                 <div>
                   <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Select Course</label>
                   <div className="relative">
-                    <select
+                    <SearchableSelect searchLabel="Search courses..."
                       required
                       disabled={!selectedUniversity}
                       value={selectedCourse}
@@ -557,7 +559,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                           {course.title} ({course.degreeLevel || 'N/A'})
                         </option>
                       ))}
-                    </select>
+                    </SearchableSelect>
                     <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
                       <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -575,7 +577,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                     Level of Study *
                   </label>
                   <div className="relative">
-                    <select
+                    <SearchableSelect
                       value={selectedLevel}
                       onChange={(e) => setSelectedLevel(e.target.value)}
                       required
@@ -584,7 +586,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                       <option value="Undergraduate (UG)">Undergraduate (UG)</option>
                       <option value="Postgraduate (PG)">Postgraduate (PG)</option>
                       <option value="PhD">PhD</option>
-                    </select>
+                    </SearchableSelect>
                     <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
                       <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -599,7 +601,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                     Requested Intake Season *
                   </label>
                   <div className="relative">
-                    <select
+                    <SearchableSelect
                       value={selectedIntake}
                       onChange={(e) => setSelectedIntake(e.target.value)}
                       required
@@ -607,7 +609,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                     >
                       <option value="">Select intake</option>
                       {intakes.map(i => <option key={i._id} value={i.title}>{i.title}</option>)}
-                    </select>
+                    </SearchableSelect>
                     <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
                       <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />

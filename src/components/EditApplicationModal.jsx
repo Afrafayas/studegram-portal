@@ -1,3 +1,5 @@
+import SearchableSelect from './SearchableSelect';
+import ValidatedInput from './ValidatedInput';
 import { ActionButton, ActionForm } from './ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
@@ -240,7 +242,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                   <div>
                     <label className={labelClass}>Destination Country *</label>
                     <div className="relative">
-                      <select
+                      <SearchableSelect
                         value={selectedCountry}
                         onChange={handleCountryChange}
                         required
@@ -250,7 +252,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                         {availableCountries.map(c => (
                           <option key={c} value={c}>{c}</option>
                         ))}
-                      </select>
+                      </SearchableSelect>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -270,7 +272,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                       )}
                     </div>
                     <div className="relative">
-                      <select
+                      <SearchableSelect searchLabel="Search universities..."
                         value={selectedUniversity}
                         onChange={handleUniversityChange}
                         required
@@ -287,7 +289,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                         {filteredUniversities.map(uni => (
                           <option key={uni._id} value={uni._id}>{uni.name} ({uni.city ? `${uni.city}, ` : ''}{uni.country})</option>
                         ))}
-                      </select>
+                      </SearchableSelect>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -305,7 +307,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                   <div>
                     <label className={labelClass}>Course Program *</label>
                     <div className="relative">
-                      <select
+                      <SearchableSelect searchLabel="Search courses..."
                         value={selectedCourse}
                         onChange={e => setSelectedCourse(e.target.value)}
                         required
@@ -320,7 +322,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                             {course.title} ({course.degreeLevel || 'UG'})
                           </option>
                         ))}
-                      </select>
+                      </SearchableSelect>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -338,7 +340,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                   <div>
                     <label className={labelClass}>Level of Study *</label>
                     <div className="relative">
-                      <select
+                      <SearchableSelect
                         value={selectedLevel}
                         onChange={e => setSelectedLevel(e.target.value)}
                         required
@@ -347,7 +349,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                         <option value="Undergraduate (UG)">Undergraduate (UG)</option>
                         <option value="Postgraduate (PG)">Postgraduate (PG)</option>
                         <option value="PhD">PhD</option>
-                      </select>
+                      </SearchableSelect>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -407,7 +409,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className={labelClass}>Phone / WhatsApp *</label>
-                      <input
+                      <ValidatedInput validationKind="phone"
                         type="text"
                         required
                         value={studentPhone}
@@ -418,7 +420,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                     </div>
                     <div>
                       <label className={labelClass}>Passport Number</label>
-                      <input
+                      <ValidatedInput validationKind="passport"
                         type="text"
                         value={studentPassport}
                         onChange={e => setStudentPassport(e.target.value)}
@@ -442,7 +444,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                     <div>
                       <label className={labelClass}>Gender</label>
                       <div className="relative">
-                        <select
+                        <SearchableSelect
                           value={studentGender}
                           onChange={e => setStudentGender(e.target.value)}
                           className={inputClass + ' appearance-none'}
@@ -452,7 +454,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                           <option value="Female">Female</option>
                           <option value="Other">Other</option>
                           <option value="Prefer not to say">Prefer not to say</option>
-                        </select>
+                        </SearchableSelect>
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />

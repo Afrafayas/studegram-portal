@@ -1,3 +1,4 @@
+import SearchableSelect from '../components/SearchableSelect';
 import { ActionButton, ActionForm } from '../components/ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
@@ -257,7 +258,7 @@ export default function Webinar() {
 
             {/* University Selector Dropdown */}
             <div className="relative w-full sm:w-48">
-              <select
+              <SearchableSelect
                 value={uniFilter}
                 onChange={(e) => setUniFilter(e.target.value)}
                 className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-3 py-2 text-xs text-[#0F172A] font-bold focus:outline-none focus:ring-1 focus:ring-[#D99A1C] appearance-none"
@@ -266,7 +267,7 @@ export default function Webinar() {
                 {UNIVERSITIES_LIST.map((uni) => (
                   <option key={uni} value={uni}>{uni}</option>
                 ))}
-              </select>
+              </SearchableSelect>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#475569]">
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -419,7 +420,7 @@ export default function Webinar() {
                   <div className="space-y-1">
                     <label className="text-[10px] font-extrabold text-[#475569] uppercase tracking-wider">University Partner</label>
                     <div className="relative">
-                      <select
+                      <SearchableSelect
                         value={formUni}
                         onChange={(e) => setFormUni(e.target.value)}
                         className="w-full bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl px-3.5 py-2.5 text-xs text-[#0F172A] font-bold focus:outline-none focus:ring-1 focus:ring-[#D99A1C] appearance-none"
@@ -427,7 +428,7 @@ export default function Webinar() {
                         {UNIVERSITIES_LIST.map((uni) => (
                           <option key={uni} value={uni}>{uni}</option>
                         ))}
-                      </select>
+                      </SearchableSelect>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#475569]">
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
