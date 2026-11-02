@@ -1,3 +1,8 @@
+import { listSourceVersion } from '../utils/serverList.mjs';
+import useServerList from '../hooks/useServerList';
+import ListToolbar, { ListPagination } from '../components/ListToolbar';
+import ActionMenu from '../components/ActionMenu';
+import { mapListApplication } from '../utils/listApplication';
 import { ActionButton } from '../components/ActionControls';
 import React, { useMemo } from 'react';
 
@@ -10,6 +15,7 @@ export default function Dashboard({
   onNavigateDeadlines,
   onNewApplicationClick
 }) {
+  const list = useServerList('/applications', { initialLimit: 5, reloadKey: listSourceVersion(applications) });
     // Calculate Commission statistics
   const claimedCommissions = commissions.length > 0 
     ? commissions.filter(c => c.status === 'Claimed' || c.status === 'Pending Approval' || c.status === 'Paid')
@@ -136,7 +142,7 @@ export default function Dashboard({
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   };
 
-  const recentApps = applications.slice(0, 5).map(app => {
+  const recentApps = list.records.map(mapListApplication).map(app => {
     const currentStatus = app.status || app.secondaryStatus || 'Submitted';
     return {
       name: app.studentName || 'N/A',
@@ -242,7 +248,7 @@ export default function Dashboard({
   };
 
   return (
-    <div className="flex-1 p-8 space-y-8 bg-[#F0F2F5] animate-fade-in-up">
+    <div className="workspace-page flex-1 p-8 space-y-8 bg-[#F0F2F5] animate-fade-in-up">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -313,7 +319,7 @@ export default function Dashboard({
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Left Column (60%): Recent Applications */}
-        <div className="lg:col-span-3 bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden flex flex-col justify-between">
+        <div className="workspace-list-frame lg:col-span-5 bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden flex flex-col justify-between">
           <div>
             <div className="px-6 py-4 border-b border-[#E2E8F0] flex justify-between items-center">
               <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">Recent Applications</h2>
@@ -334,8 +340,9 @@ export default function Dashboard({
                 </ActionButton>
               </div>
             </div>
+            <ListToolbar list={list} label="applications" fields={[{"key":"status","label":"Statuses"},{"key":"university","label":"Universities"}]} />
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+              <table className="workspace-table w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50 border-b border-[#E2E8F0]">
                     <th className="px-6 py-3 text-[#64748B] text-[10px] font-extrabold uppercase tracking-wider">Student</th>
@@ -347,7 +354,7 @@ export default function Dashboard({
                 <tbody className="divide-y divide-slate-100">
                   {recentApps.length > 0 ? (
                     recentApps.map((student, index) => (
-                      <tr key={index} className="hover:bg-slate-50 transition-colors duration-150">
+                      <tr tabIndex={0} onKeyDown={event => { if (event.target === event.currentTarget && event.key === "Enter") { event.preventDefault(); event.currentTarget.click(); } }} key={index} onClick={() => onViewDetails && onViewDetails(student.rawApp)} className="hover:bg-amber-50/40 transition-colors duration-150 cursor-pointer group">
                         <td className="px-6 py-3.5 flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#D99A1C] to-[#F5B025] text-white flex items-center justify-center font-bold text-xs shrink-0">
                             {student.initials}
@@ -363,16 +370,15 @@ export default function Dashboard({
                           </span>
                         </td>
                         <td className="px-6 py-3.5 text-xs text-[#64748B] font-semibold whitespace-nowrap">{student.date}</td>
-                        <td className="px-6 py-3.5 text-right whitespace-nowrap pr-6">
-                          <ActionButton 
-                            onClick={() => onViewDetails && onViewDetails(student.rawApp)} 
-                            className="p-1.5 hover:bg-slate-100 rounded-lg text-[#64748B] hover:text-[#0F172A] transition-all duration-150 inline-flex items-center justify-center"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                            </svg>
-                          </ActionButton>
+                        <td className="px-6 py-3.5 text-right whitespace-nowrap pr-6" onClick={(e) => e.stopPropagation()}>
+                          <ActionMenu
+                            items={[
+                              {
+                                label: 'View Application Details',
+                                onClick: () => onViewDetails && onViewDetails(student.rawApp)
+                              }
+                            ]}
+                          />
                         </td>
                       </tr>
                     ))
@@ -386,11 +392,13 @@ export default function Dashboard({
                 </tbody>
               </table>
             </div>
+            <ListPagination list={list} />
           </div>
         </div>
 
-        {/* Right Column (40%): Upcoming Deadlines */}
-        <div className="lg:col-span-2 bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden flex flex-col">
+        {/* Upcoming Deadlines temporarily hidden from the agent dashboard.
+
+        <div className="workspace-list-frame lg:col-span-2 bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden flex flex-col">
           <div className="px-6 py-4 border-b border-[#E2E8F0] flex justify-between items-center">
             <div className="flex items-center gap-2">
               <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">Upcoming Deadlines</h2>
@@ -432,6 +440,7 @@ export default function Dashboard({
             )}
           </div>
         </div>
+        */}
       </div>
     </div>
   );

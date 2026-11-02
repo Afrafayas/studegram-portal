@@ -1,3 +1,4 @@
+import BatchDocumentUpload from '../components/BatchDocumentUpload';
 import SearchableSelect from '../components/SearchableSelect';
 import ValidatedInput from '../components/ValidatedInput';
 import { ActionButton, ActionForm } from '../components/ActionControls';
@@ -23,8 +24,7 @@ export default function Register({ onNavigate }) {
   const [country, setCountry] = useState('India');
   const [city, setCity] = useState('');
   const [documents, setDocuments] = useState([]);
-  const [docName, setDocName] = useState('');
-  const [docUrl, setDocUrl] = useState('');
+  const [hasQueuedDocuments, setHasQueuedDocuments] = useState(false);
 
   // Step 3: OTP Verification
   const [otpCode, setOtpCode] = useState('');
@@ -61,6 +61,7 @@ export default function Register({ onNavigate }) {
 
   const validateStep2 = () => {
     const newErrors = {};
+    if (hasQueuedDocuments || uploadingDoc) newErrors.documents = 'Upload or remove queued documents before continuing.';
     if (!agencyName.trim()) newErrors.agencyName = 'Company / Agency name is required';
     if (!taxId.trim()) newErrors.taxId = 'Business Registration / Tax ID is required';
     if (!city.trim()) newErrors.city = 'City is required';
@@ -74,52 +75,6 @@ export default function Register({ onNavigate }) {
   };
 
   const [uploadingDoc, setUploadingDoc] = useState(false);
-
-  // File Upload Handler for Registration Documents
-  const handleLegalDocFileUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 15 * 1024 * 1024) {
-      setErrors({ ...errors, docAdd: 'File size exceeds 15MB limit.' });
-      return;
-    }
-
-    setUploadingDoc(true);
-    setErrors({ ...errors, docAdd: '' });
-
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const uploadRes = await API.post('/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      const fileUrl = uploadRes.data?.url || uploadRes.data?.fileUrl;
-      if (!uploadRes.data?.success || !fileUrl) {
-        throw new Error('File was not stored in S3. Please retry.');
-      }
-
-      const title = docName.trim() || file.name;
-      const newDoc = {
-        name: title,
-        title: title,
-        fileName: file.name,
-        url: fileUrl,
-        previewUrl: fileUrl,
-        size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
-        uploadedAt: new Date().toISOString()
-      };
-
-      setDocuments(prev => [...prev, newDoc]);
-      setDocName('');
-      setErrors(prev => ({ ...prev, documents: '', docAdd: '' }));
-    } catch (err) {
-      console.error('File upload error:', err);
-      setErrors(prev => ({ ...prev, docAdd: 'Failed to upload document file.' }));
-    } finally {
-      setUploadingDoc(false);
-    }
-  };
 
   // Move Step 1 -> Step 2
   const handleNextToCompanyDetails = (e) => {
@@ -542,50 +497,7 @@ export default function Register({ onNavigate }) {
                   </div>
                 )}
 
-                {/* Document input inline file picker */}
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-3">
-                  <div>
-                    <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1">
-                      Document Title (Optional Name)
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs text-[#0F172A] placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#D99A1C]"
-                      placeholder="e.g. GST Registration Certificate / Incorporation Proof"
-                      value={docName}
-                      onChange={(e) => setDocName(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="border-2 border-dashed border-slate-200 hover:border-[#D99A1C] transition-colors rounded-xl p-4 text-center relative bg-white cursor-pointer">
-                    <input
-                      type="file"
-                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                      onChange={handleLegalDocFileUpload}
-                      disabled={uploadingDoc}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    />
-                    <div className="space-y-1">
-                      {uploadingDoc ? (
-                        <div className="flex flex-col items-center justify-center py-2 space-y-1.5">
-                          <svg className="animate-spin h-6 w-6 text-[#D99A1C]" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                          </svg>
-                          <p className="text-xs font-bold text-[#D99A1C] animate-pulse">Uploading legal document...</p>
-                        </div>
-                      ) : (
-                        <>
-                          <span className="text-2xl block">📤</span>
-                          <p className="text-xs font-bold text-[#0F172A]">Click to select legal document file</p>
-                          <p className="text-[10px] text-slate-400 font-semibold">PDF, DOCX, PNG, JPG up to 15MB</p>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  {errors.docAdd && <p className="text-[10px] text-rose-500 font-bold">{errors.docAdd}</p>}
-                </div>
+                <BatchDocumentUpload role="Agent" disabled={isLoading} onBusyChange={setUploadingDoc} onPendingChange={setHasQueuedDocuments} onComplete={async uploaded => { setDocuments(prev => [...prev, ...uploaded]); setErrors(prev => ({ ...prev, documents: '', docAdd: '' })); }} />
               </div>
 
               <div className="flex items-center gap-3 mt-4">
@@ -598,7 +510,7 @@ export default function Register({ onNavigate }) {
                 </ActionButton>
                 <ActionButton
                   type="submit"
-                  disabled={isLoading || uploadingDoc}
+                  disabled={isLoading || uploadingDoc || hasQueuedDocuments}
                   className="w-2/3 bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-white font-bold py-3 rounded-xl text-xs transition-all shadow-md uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {isLoading && (

@@ -1,7 +1,8 @@
+import StudentDobInput from './StudentDobInput';
+import { getStudentDobError } from '../utils/studentAge.mjs';
 import SearchableSelect from './SearchableSelect';
 import ValidatedInput from './ValidatedInput';
 import { ActionButton, ActionForm } from './ActionControls';
-import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
@@ -64,7 +65,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
           setStudentEmail(s.email || '');
           setStudentPhone(s.phone || '');
           setStudentPassport(s.passportNo || '');
-          setStudentDob(s.dob || '');
+          setStudentDob(s.dob ? s.dob.slice(0, 10) : '');
           setStudentGender(s.gender || '');
           setStudentAddress(s.address || '');
         })
@@ -111,6 +112,12 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const dobError = getStudentDobError(studentDob);
+    if (dobError) {
+      setError(dobError);
+      setActiveTab('student');
+      return;
+    }
     if (!selectedCountry) {
       setError('Please select a destination country.');
       setActiveTab('application');
@@ -166,38 +173,39 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
   };
 
   const inputClass = "w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-[#0F172A] font-semibold focus:outline-none focus:ring-1 focus:ring-[#D99A1C] focus:bg-white transition-all";
-  const labelClass = "block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1";
+  const labelClass = "block text-[11px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1";
 
   if (!isOpen || !application) return null;
 
-  return createPortal(
+  return (
     <div
-      className="fixed inset-0 z-[9999] overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+      className="w-full min-w-0 p-4 sm:p-6 lg:p-8 [overflow-wrap:anywhere]"
     >
       <div
         onClick={e => e.stopPropagation()}
-        className="bg-white border border-slate-100 rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden transform transition-all duration-300 max-h-[90vh] flex flex-col my-auto"
+        className="bg-white border border-slate-200 border-t-4 border-t-[#D99A1C] rounded-2xl w-full shadow-sm flex flex-col"
       >
         {/* Header */}
-        <div className="bg-slate-950 px-6 py-5 text-white flex justify-between items-center">
+        <div className="px-4 sm:px-6 py-5 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200">
           <div>
-            <h3 className="text-sm font-extrabold tracking-tight">Edit Application</h3>
-            <p className="text-[10px] text-slate-400 font-semibold mt-0.5">
+            <h3 className="text-lg sm:text-xl font-bold text-slate-900">Edit Application</h3>
+            <p className="text-xs text-slate-500 font-semibold mt-1">
               {application.studentName} &middot; {application.camsId}
             </p>
           </div>
           <ActionButton
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all cursor-pointer"
+            className="shrink-0 self-start inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
           >
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
             </svg>
+            Back
           </ActionButton>
         </div>
 
         {/* Tabs */}
-        <div className="flex bg-slate-50 border-b border-slate-200 px-6 gap-2 pt-2">
+        <div className="flex flex-wrap bg-slate-50 border-b border-slate-200 px-4 sm:px-6 gap-2 pt-2">
           {[
             { id: 'application', label: '📁 Application Details' },
             { id: 'student', label: '👤 Student Details' }
@@ -217,7 +225,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
         </div>
 
         {/* Content */}
-        <div className="p-6 max-h-[60vh] overflow-y-auto">
+        <div className="p-4 sm:p-6">
           {isLoading ? (
             <div className="py-12 flex flex-col items-center justify-center gap-3">
               <svg className="animate-spin h-6 w-6 text-[#D99A1C]" fill="none" viewBox="0 0 24 24">
@@ -236,7 +244,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
 
               {/* ─── Tab 1: Application Details ─── */}
               {activeTab === 'application' && (
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
 
                   {/* Destination Country */}
                   <div>
@@ -359,7 +367,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                   </div>
 
                   {/* Notes */}
-                  <div>
+                  <div className="lg:col-span-2">
                     <label className={labelClass}>Comments / Notes</label>
                     <textarea
                       rows="3"
@@ -380,7 +388,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                   </div>
 
                   {/* Name & Email */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className={labelClass}>Full Name *</label>
                       <input
@@ -406,7 +414,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                   </div>
 
                   {/* Phone & Passport */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className={labelClass}>Phone / WhatsApp *</label>
                       <ValidatedInput validationKind="phone"
@@ -431,11 +439,10 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                   </div>
 
                   {/* DOB & Gender */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className={labelClass}>Date of Birth</label>
-                      <input
-                        type="date"
+                      <StudentDobInput
                         value={studentDob}
                         onChange={e => setStudentDob(e.target.value)}
                         className={inputClass}
@@ -483,7 +490,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
 
         {/* Footer Buttons */}
         {!isLoading && (
-          <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex gap-3 justify-end">
+          <div className="px-4 sm:px-6 py-4 bg-slate-50 border-t border-slate-200 rounded-b-2xl flex flex-wrap gap-3 justify-end">
             <ActionButton
               type="button"
               onClick={onClose}
@@ -513,7 +520,6 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
           </div>
         )}
       </div>
-    </div>,
-    document.body
+    </div>
   );
 }

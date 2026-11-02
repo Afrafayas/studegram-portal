@@ -1,3 +1,7 @@
+import ListFilterTabs from '../components/ListFilterTabs';
+import useServerList from '../hooks/useServerList';
+import ListToolbar, { ListPagination } from '../components/ListToolbar';
+import ActionMenu from '../components/ActionMenu';
 import SearchableSelect from '../components/SearchableSelect';
 import ValidatedInput from '../components/ValidatedInput';
 import { getDisplayId } from '../utils/displayId';
@@ -10,6 +14,7 @@ import { useToast } from '../context/ToastContext';
 
 export default function StaffManagement({ partnerData }) {
   const toast = useToast();
+  const list = useServerList('/partners/staff');
   const [staffList, setStaffList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [staffLoadError, setStaffLoadError] = useState('');
@@ -64,6 +69,7 @@ export default function StaffManagement({ partnerData }) {
   const [showPassword, setShowPassword] = useState(false);
 
   const fetchStaffMembers = async () => {
+    list.refresh();
     setIsLoading(true);
     setStaffLoadError('');
     try {
@@ -237,18 +243,7 @@ export default function StaffManagement({ partnerData }) {
     }
   };
 
-  // Filtering
-  const filteredStaff = staffList.filter((s) => {
-    const matchesSearch =
-      s.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.phone?.includes(searchQuery);
-
-    const matchesRole = roleFilter === 'ALL' || s.role === roleFilter;
-    const matchesStatus = statusFilter === 'ALL' || s.status === statusFilter;
-
-    return matchesSearch && matchesRole && matchesStatus;
-  });
+  const filteredStaff = list.records;
 
   // Role Badge Styling Helper
   const getRoleBadge = (role) => {
@@ -277,13 +272,13 @@ export default function StaffManagement({ partnerData }) {
   };
 
   return (
-    <div className="flex-1 p-4 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
+    <div className="workspace-page flex-1 p-4 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
       {selectedStaffId ? (
         <StaffDetailPage key={selectedStaffId} staff={selectedStaff} isLoading={isLoading} loadError={staffLoadError} onReload={fetchStaffMembers} onBack={closeStaffDetails} onEdit={openEditModal} onToggleStatus={handleToggleStatus} partnerData={partnerData} roles={availableRoles} />
       ) : (
       <>
       {/* Top Banner & Action */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-sm">
+      <div className="workspace-panel flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-sm">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold text-[#0F172A] tracking-tight">
@@ -308,122 +303,13 @@ export default function StaffManagement({ partnerData }) {
         </ActionButton>
       </div>
 
-      {/* Metrics Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-[#E2E8F0] rounded-2xl p-4 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-amber-50 text-[#D99A1C] flex items-center justify-center shrink-0">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-          </div>
-          <div>
-            <p className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Total Staff</p>
-            <p className="text-xl font-black text-[#0F172A]">{staffList.length}</p>
-          </div>
-        </div>
-
-        <div className="bg-white border border-[#E2E8F0] rounded-2xl p-4 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <div>
-            <p className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Active Staff</p>
-            <p className="text-xl font-black text-emerald-600">
-              {staffList.filter(s => s.status === 'Active').length}
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-white border border-[#E2E8F0] rounded-2xl p-4 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <div>
-            <p className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Managers & Counselors</p>
-            <p className="text-xl font-black text-purple-600">
-              {staffList.filter(s => ['Manager', 'Counselor', 'AgencyAdmin'].includes(s.role)).length}
-            </p>
-          </div>
-        </div>
-
-        <div className="bg-white border border-[#E2E8F0] rounded-2xl p-4 shadow-sm flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-            </svg>
-          </div>
-          <div>
-            <p className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Deactivated</p>
-            <p className="text-xl font-black text-rose-600">
-              {staffList.filter(s => s.status === 'Inactive').length}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Filter and Search Bar */}
-      <div className="bg-white border border-[#E2E8F0] rounded-2xl p-4 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="relative w-full md:w-80">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </span>
-          <input
-            type="text"
-            placeholder="Search staff by name, email, phone..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-xs text-[#0F172A] placeholder-slate-400 focus:outline-none focus:border-[#D99A1C] focus:bg-white transition-all"
-          />
-        </div>
-
-        <div className="flex items-center gap-3 w-full md:w-auto overflow-x-auto">
-          {/* Filter by Role */}
-          <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200 text-xs">
-            <span className="text-[10px] font-extrabold text-[#64748B] px-2 uppercase">Role:</span>
-            {['ALL', 'AgencyAdmin', 'Manager', 'Counselor', 'Staff'].map((r) => (
-              <ActionButton
-                key={r}
-                onClick={() => setRoleFilter(r)}
-                className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all ${
-                  roleFilter === r
-                    ? 'bg-[#0A0A0F] text-white shadow-xs'
-                    : 'text-[#64748B] hover:text-[#0F172A]'
-                }`}
-              >
-                {r === 'ALL' ? 'All Roles' : r}
-              </ActionButton>
-            ))}
-          </div>
-
-          {/* Filter by Status */}
-          <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200 text-xs">
-            <span className="text-[10px] font-extrabold text-[#64748B] px-2 uppercase">Status:</span>
-            {['ALL', 'Active', 'Inactive'].map((st) => (
-              <ActionButton
-                key={st}
-                onClick={() => setStatusFilter(st)}
-                className={`px-2.5 py-1 rounded-lg font-bold text-[11px] transition-all ${
-                  statusFilter === st
-                    ? 'bg-[#0A0A0F] text-white shadow-xs'
-                    : 'text-[#64748B] hover:text-[#0F172A]'
-                }`}
-              >
-                {st}
-              </ActionButton>
-            ))}
-          </div>
-        </div>
-      </div>
+      <ListToolbar list={list} label="staff" fields={[{"key":"role","label":"Roles"},{"key":"status","label":"Statuses"}]} />
 
       {/* Staff Table */}
-      <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden">
-        {isLoading ? (
+      <div className="workspace-panel workspace-list-frame bg-white border border-[#E2E8F0] border-t-4 border-t-[#D99A1C] rounded-2xl shadow-sm overflow-hidden">
+        {/* Scoping Tabs */}
+        <ListFilterTabs list={list} endpoint="/partners/staff" field="status" options={[{value:'All',label:'All staff'},{value:'Active',label:'Active'},{value:'Inactive',label:'Inactive'}]} />
+        {list.loading ? (
           <div className="p-12 text-center text-[#64748B] space-y-3">
             <svg className="animate-spin h-8 w-8 text-[#D99A1C] mx-auto" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -443,7 +329,7 @@ export default function StaffManagement({ partnerData }) {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse">
+            <table className="workspace-table w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-[#E2E8F0] text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
                   <th className="py-3.5 px-6">Staff Member</th>
@@ -462,7 +348,7 @@ export default function StaffManagement({ partnerData }) {
                     : 'ST';
 
                   return (
-                    <tr key={staff._id} className="hover:bg-slate-50/80 transition-colors">
+                    <tr tabIndex={0} onKeyDown={event => { if (event.target === event.currentTarget && event.key === "Enter") { event.preventDefault(); event.currentTarget.click(); } }} key={staff._id} onClick={() => openStaffDetails(staff)} className="hover:bg-amber-50/40 transition-colors cursor-pointer group">
                       {/* Name & Avatar */}
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-3">
@@ -516,55 +402,29 @@ export default function StaffManagement({ partnerData }) {
                         })}
                       </td>
 
-                      {/* Action Buttons */}
-                      <td className="py-4 px-6 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <ActionButton
-                            type="button"
-                            onClick={() => openStaffDetails(staff)}
-                            className="p-1.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"
-                            title="View Staff Details"
-                            aria-label={`View details for ${staff.name}`}
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" /><circle cx="12" cy="12" r="3" strokeWidth="2" /></svg>
-                          </ActionButton>
-                          <ActionButton
-                            onClick={() => openEditModal(staff)}
-                            className="p-1.5 text-slate-500 hover:text-[#D99A1C] hover:bg-amber-50 rounded-lg transition-colors"
-                            title="Edit Staff Member"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                          </ActionButton>
-
-                          {deleteConfirmId === staff._id ? (
-                            <div className="flex items-center gap-1 bg-rose-50 border border-rose-200 rounded-lg p-1">
-                              <ActionButton
-                                onClick={() => handleDeleteStaff(staff._id)}
-                                className="px-2 py-0.5 bg-rose-600 text-white font-bold text-[10px] rounded hover:bg-rose-700"
-                              >
-                                Delete
-                              </ActionButton>
-                              <ActionButton
-                                onClick={() => setDeleteConfirmId(null)}
-                                className="px-1.5 py-0.5 text-slate-500 text-[10px] hover:text-slate-700"
-                              >
-                                Cancel
-                              </ActionButton>
-                            </div>
-                          ) : (
-                            <ActionButton
-                              onClick={() => setDeleteConfirmId(staff._id)}
-                              className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                              title="Delete Staff Account"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </ActionButton>
-                          )}
-                        </div>
+                      {/* ActionMenu */}
+                      <td className="py-4 px-6 text-right pr-6" onClick={(e) => e.stopPropagation()}>
+                        <ActionMenu
+                          items={[
+                            {
+                              label: 'View Staff Details',
+                              onClick: () => openStaffDetails(staff)
+                            },
+                            {
+                              label: 'Edit Staff Member',
+                              onClick: () => openEditModal(staff)
+                            },
+                            {
+                              label: staff.status === 'Active' ? 'Deactivate Account' : 'Activate Account',
+                              onClick: () => handleToggleStatus(staff)
+                            },
+                            {
+                              label: 'Delete Staff Account',
+                              variant: 'danger',
+                              onClick: () => handleDeleteStaff(staff._id)
+                            }
+                          ]}
+                        />
                       </td>
                     </tr>
                   );
@@ -578,12 +438,13 @@ export default function StaffManagement({ partnerData }) {
       </>
       )}
 
+      <ListPagination list={list} />
       {/* Add / Edit Staff Modal */}
       {isModalOpen && createPortal(
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs z-[9999] flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col my-auto">
+          <div className="workspace-list-frame bg-white border border-[#E2E8F0] rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150 max-h-[90vh] flex flex-col my-auto">
             {/* Modal Header */}
-            <div className="bg-[#0A0A0F] px-6 py-4 text-white flex items-center justify-between border-b border-white/10 shrink-0">
+            <div className="bg-white px-6 py-4 text-slate-900 flex items-center justify-between border-b border-slate-200 shrink-0">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-[#D99A1C] text-black flex items-center justify-center font-bold">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

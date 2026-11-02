@@ -5,8 +5,15 @@ import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
 
-export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUpdated }) {
+export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUpdated, onOpenRoles }) {
   const toast = useToast();
+  const role = partnerData?.role || 'AgencyAdmin';
+  const permissions = partnerData?.permissions || [];
+  const canManageRoles = !partnerData?.isStaff || role === 'AgencyAdmin' || (
+    Array.isArray(permissions) && permissions.length > 0
+      ? permissions.includes('staff:manage')
+      : !['Counselor', 'Staff'].includes(role)
+  );
   const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'password'
 
   // Profile Form State
@@ -190,7 +197,7 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex items-center gap-2 mt-6 pt-2 border-t border-white/10">
+          <div className="flex flex-wrap items-center gap-2 mt-6 pt-2 border-t border-white/10">
             <ActionButton
               onClick={() => {
                 setActiveTab('profile');
@@ -226,6 +233,12 @@ export default function ProfileModal({ isOpen, onClose, partnerData, onProfileUp
               </svg>
               <span>Edit / Reset Password</span>
             </ActionButton>
+            {canManageRoles && onOpenRoles && (
+              <ActionButton type="button" onClick={onOpenRoles} className="flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold text-slate-300 transition-colors hover:bg-white/5 hover:text-white">
+                <svg aria-hidden="true" className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                <span>Roles &amp; Permissions</span>
+              </ActionButton>
+            )}
           </div>
         </div>
 
