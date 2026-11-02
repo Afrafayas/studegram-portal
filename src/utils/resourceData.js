@@ -1,4 +1,4 @@
-import { formatFee } from './courseFee';
+import { formatFee } from './courseFee.js';
 export function mapNotice(notice) {
   return {
     ...notice, id: notice._id, message: notice.content || '', type: notice.category || 'General',

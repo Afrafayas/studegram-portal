@@ -1,3 +1,8 @@
+import ListFilterTabs from '../components/ListFilterTabs';
+import { listSourceVersion } from '../utils/serverList.mjs';
+import useServerList from '../hooks/useServerList';
+import ListToolbar, { ListPagination } from '../components/ListToolbar';
+import ActionMenu from '../components/ActionMenu';
 import SearchableSelect from '../components/SearchableSelect';
 import { parseFee, formatFee, feeCurrency } from '../utils/courseFee';
 import { ActionButton } from '../components/ActionControls';
@@ -15,18 +20,8 @@ export default function Commissions({
   const userPermissions = Array.isArray(partnerData?.permissions) ? partnerData.permissions : [];
   const canClaim = isOwner || partnerData?.role === 'Manager' || userPermissions.includes('commissions:claim') || userPermissions.includes('commissions:manage');
 
-  const [filterTab, setFilterTab] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
+  const list = useServerList('/commissions', { initialLimit: 10, params: { view: 'registry' }, reloadKey: listSourceVersion([...applications, ...commissions]) });
   const [selectedAppForClaim, setSelectedAppForClaim] = useState(null);
-
-  // Pagination State
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-
-  // Auto-reset to page 1 whenever filter tab or search query changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [filterTab, searchQuery]);
 
   // Combine application data strictly matching each individual application ID
   const combinedStudentCommissions = useMemo(() => {
@@ -136,44 +131,15 @@ export default function Commissions({
   const pendingCount = pendingStudents.length;
   const pendingSetAmount = pendingStudents.filter(item => item.isSet).reduce((sum, item) => sum + item.payableAmount, 0);
 
-  // Filtering for table
-  const filteredStudents = useMemo(() => {
-    return combinedStudentCommissions.filter(item => {
-      if (filterTab === 'Eligible to Claim' && (item.commissionStatusDisplay !== 'Eligible' || item.isClaimed || item.isPaid)) {
-        return false;
-      }
-      if (filterTab === 'Claimed' && (!item.isClaimed || item.isPaid)) {
-        return false;
-      }
-      if (filterTab === 'Paid' && !item.isPaid) {
-        return false;
-      }
-
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const nameMatch = (item.studentName || '').toLowerCase().includes(q);
-        const passportMatch = (item.passportNo || '').toLowerCase().includes(q);
-        const camsMatch = (item.camsId || '').toLowerCase().includes(q);
-        const uniMatch = (item.universityName || '').toLowerCase().includes(q);
-        const courseMatch = (item.courseName || '').toLowerCase().includes(q);
-        return nameMatch || passportMatch || camsMatch || uniMatch || courseMatch;
-      }
-
-      return true;
-    });
-  }, [combinedStudentCommissions, filterTab, searchQuery]);
-
-  // Pagination Math
-  const totalItems = filteredStudents.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  // const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-  const paginatedStudents = filteredStudents.slice(startIndex, startIndex + itemsPerPage);
+  const filteredStudents = list.records;
+  const paginatedStudents = filteredStudents;
+  const totalItems = list.total;
+  const startIndex = (list.page - 1) * list.limit;
 
   return (
-    <div className="flex-1 p-6 space-y-6 bg-[#F0F2F5] min-h-[calc(100vh-60px)]">
+    <div className="workspace-page flex-1 p-6 space-y-6 bg-[#F0F2F5] min-h-[calc(100vh-60px)]">
       {/* Top Banner / Header */}
-      <div className="bg-white border border-[#E2E8F0] border-t-4 border-t-[#D99A1C] p-6 rounded-2xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="workspace-panel bg-white border border-[#E2E8F0] border-t-4 border-t-[#D99A1C] p-6 rounded-2xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-xl">💰</span>
@@ -189,7 +155,7 @@ export default function Commissions({
 
         {onRefresh && (
           <ActionButton
-            onClick={onRefresh}
+            onClick={() => { list.refresh(); onRefresh?.(); }}
             className="self-start md:self-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-3.5 py-2 rounded-xl transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs"
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -200,136 +166,17 @@ export default function Commissions({
         )}
       </div>
 
-      {/* 4 Stat Cards with Amount AND Counts */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1: Total Enrolled Students */}
-        <div className="bg-white border border-[#E2E8F0] border-t-4 border-t-blue-500 rounded-2xl p-5 shadow-xs flex flex-col justify-between hover:shadow-md transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Enrolled Students</span>
-            <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">
-              🎓
-            </div>
-          </div>
-          <div className="mt-3">
-            <span className="text-3xl font-black text-slate-900 tracking-tight block">
-              {totalEnrolledCount}
-            </span>
-            <div className="mt-1 flex items-center gap-1.5 text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md w-fit border border-blue-100">
-              <span>Tuition: ₹{totalEnrolledTuitionVolume.toLocaleString()}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Card 2: Total Commission */}
-        <div className="bg-white border border-[#E2E8F0] border-t-4 border-t-purple-500 rounded-2xl p-5 shadow-xs flex flex-col justify-between hover:shadow-md transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Commission</span>
-            <div className="w-8 h-8 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-sm">
-              💎
-            </div>
-          </div>
-          <div className="mt-3">
-            <span className="text-3xl font-black text-slate-900 tracking-tight block">
-              {setEnrolledCommissions.length > 0 ? `₹${totalCommissionAmount.toLocaleString()}` : '—'}
-            </span>
-            <div className="mt-1 flex items-center gap-1.5 text-[11px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md w-fit border border-purple-100">
-              {setEnrolledCommissions.length > 0
-                ? <span>{setEnrolledCommissions.length} of {totalCommissionCases} Set</span>
-                : <span>{totalCommissionCases} Awaiting Admin Setting</span>}
-            </div>
-          </div>
-        </div>
-
-        {/* Card 3: Commissions Claimed */}
-        <div className="bg-white border border-[#E2E8F0] border-t-4 border-t-emerald-500 rounded-2xl p-5 shadow-xs flex flex-col justify-between hover:shadow-md transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Commissions Claimed</span>
-            <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">
-              💰
-            </div>
-          </div>
-          <div className="mt-3">
-            <span className="text-3xl font-black text-slate-900 tracking-tight block">
-              {claimedSetAmount > 0 ? `₹${claimedSetAmount.toLocaleString()}` : (claimedCount > 0 ? '—' : '₹0')}
-            </span>
-            <div className="mt-1 flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md w-fit border border-emerald-100">
-              <span>{claimedCount} Claimed</span>
-              <span>•</span>
-              <span>₹{paidAmount.toLocaleString()} Disbursed</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Card 4: Pending Commissions */}
-        <div className="bg-white border border-[#E2E8F0] border-t-4 border-t-amber-500 rounded-2xl p-5 shadow-xs flex flex-col justify-between hover:shadow-md transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Pending Commissions</span>
-            <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-sm">
-              ⏳
-            </div>
-          </div>
-          <div className="mt-3">
-            <span className="text-3xl font-black text-slate-900 tracking-tight block">
-              {pendingSetAmount > 0 ? `₹${pendingSetAmount.toLocaleString()}` : (pendingCount > 0 ? '—' : '₹0')}
-            </span>
-            <div className="mt-1 flex items-center gap-1.5 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md w-fit border border-amber-100">
-              <span>{pendingCount} Awaiting Admin Payout</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Student List with All Details */}
-      <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-xs overflow-hidden">
-        {/* Table Controls */}
-        <div className="px-6 py-4 border-b border-[#E2E8F0] flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <h2 className="text-xs font-black text-slate-900 uppercase tracking-wider">
-              Enrolled Students & Commission Pipeline
-            </h2>
-            <span className="px-2 py-0.5 bg-slate-100 text-slate-600 rounded-md text-[10px] font-bold">
-              {filteredStudents.length} files
-            </span>
-          </div>
+      <div className="workspace-panel workspace-list-frame bg-white border border-[#E2E8F0] border-t-4 border-t-[#D99A1C] rounded-2xl shadow-xs overflow-hidden">
+        {/* Scoping Tabs */}
+        <ListFilterTabs list={list} endpoint="/commissions" params={{view:'registry'}} field="commissionStatusDisplay" options={[{value:'All',label:'All commissions'},{value:'Eligible',label:'Eligible'},{value:'Claimed',label:'Claimed'},{value:'Paid',label:'Paid'},{value:'Not Eligible',label:'Not eligible'}]} />
+        <ListToolbar list={list} label="commissions" fields={[{key:'commissionStatusDisplay',label:'Commission Statuses'},{key:'universityPaymentStatus',label:'University Payments'},{key:'university',label:'Universities'},{key:'country',label:'Countries'}]} />
 
-          <div className="flex flex-col sm:flex-row items-center gap-3">
-            {/* Search Input */}
-            <div className="relative w-full sm:w-64">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search student, passport, university..."
-                className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D99A1C] focus:bg-white transition-all font-medium"
-              />
-              <svg className="w-4 h-4 text-slate-400 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-
-            {/* Filter Tabs */}
-            <div className="bg-slate-100 p-1 rounded-xl flex gap-1 text-[10px] font-bold w-full sm:w-auto">
-              {['All', 'Eligible to Claim', 'Claimed', 'Paid'].map((tab) => (
-                <ActionButton
-                  key={tab}
-                  onClick={() => setFilterTab(tab)}
-                  className={`px-3 py-1 rounded-lg transition-all flex-1 sm:flex-none text-center ${
-                    filterTab === tab
-                      ? 'bg-white text-[#D99A1C] shadow-sm font-black'
-                      : 'text-slate-500 hover:text-slate-900'
-                  }`}
-                >
-                  {tab}
-                </ActionButton>
-              ))}
-            </div>
-          </div>
-        </div>
 
         {/* Table View */}
         <div className="overflow-x-auto">
           {filteredStudents.length > 0 ? (
-            <table className="w-full text-left border-collapse">
+            <table className="workspace-table w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-[#E2E8F0]">
                   <th className="px-5 py-3 text-slate-400 text-[10px] font-extrabold uppercase tracking-wider">Student Details</th>
@@ -349,7 +196,7 @@ export default function Commissions({
                     : 'ST';
 
                   return (
-                    <tr key={app.id || app._id || index} className="hover:bg-slate-50/60 transition-colors">
+                    <tr tabIndex={0} onKeyDown={event => { if (event.target === event.currentTarget && event.key === "Enter") { event.preventDefault(); event.currentTarget.click(); } }} key={app.id || app._id || index} onClick={() => onViewDetails && onViewDetails(app)} className="hover:bg-amber-50/40 transition-colors cursor-pointer group">
                       {/* Student Profile */}
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
@@ -453,45 +300,19 @@ export default function Commissions({
                       </td>
 
                       {/* Action */}
-                      <td className="px-5 py-3.5 text-right pr-6 whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-2">
-                          {/* Claim Commission Button */}
-                          {app.isVisaApprovedOrEnrolled && !app.isClaimed && !app.isPaid ? (
-                            canClaim ? (
-                              <ActionButton
-                                type="button"
-                                onClick={() => setSelectedAppForClaim(app)}
-                                className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-[10px] uppercase px-3 py-1.5 rounded-xl transition-all shadow-sm active:scale-95 inline-flex items-center gap-1 cursor-pointer"
-                                title="Claim Agency Commission Payout"
-                              >
-                                <span>💰</span>
-                                <span>Claim Commission</span>
-                              </ActionButton>
-                            ) : (
-                              <span
-                                className="px-2.5 py-1 text-[9px] font-bold text-slate-400 bg-slate-100 rounded-lg border border-slate-200 select-none cursor-not-allowed"
-                                title="Claiming commission is restricted to Agency Admin / Manager"
-                              >
-                                Ready to Claim (Admin)
-                              </span>
-                            )
-                          ) : null}
-
-                          {/* View Application Details */}
-                          {onViewDetails && (
-                            <ActionButton
-                              type="button"
-                              onClick={() => onViewDetails(app)}
-                              className="p-1.5 hover:bg-slate-100 text-slate-400 hover:text-slate-700 rounded-lg transition-all"
-                              title="View Application Details"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                              </svg>
-                            </ActionButton>
-                          )}
-                        </div>
+                      <td className="px-5 py-3.5 text-right pr-6 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                        <ActionMenu
+                          items={[
+                            ...(onViewDetails ? [{
+                              label: 'View Application Details',
+                              onClick: () => onViewDetails(app)
+                            }] : []),
+                            ...(app.isVisaApprovedOrEnrolled && !app.isClaimed && !app.isPaid && canClaim ? [{
+                              label: '💰 Claim Commission',
+                              onClick: () => setSelectedAppForClaim(app)
+                            }] : [])
+                          ]}
+                        />
                       </td>
                     </tr>
                   );
@@ -505,63 +326,7 @@ export default function Commissions({
           )}
         </div>
 
-        {/* Pagination at bottom */}
-        {totalItems > 0 && (
-          <div className="px-6 py-4 bg-slate-50 border-t border-[#E2E8F0] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#64748B] font-semibold select-none">
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-semibold text-slate-500">Rows per page:</span>
-              <SearchableSelect
-                value={itemsPerPage}
-                onChange={(e) => {
-                  setItemsPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                className="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-700 focus:outline-none focus:border-[#D99A1C] cursor-pointer"
-              >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </SearchableSelect>
-              {/* <span className="text-xs font-semibold text-slate-400">
-                Showing {totalItems > 0 ? startIndex + 1 : 0} to {endIndex} of {totalItems} entries
-              </span> */}
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <ActionButton
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
-              >
-                ◀ Prev
-              </ActionButton>
-
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <ActionButton
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
-                    currentPage === page
-                      ? 'bg-[#D99A1C] text-white shadow-xs'
-                      : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-100'
-                  }`}
-                >
-                  {page}
-                </ActionButton>
-              ))}
-
-              <ActionButton
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
-              >
-                Next ▶
-              </ActionButton>
-            </div>
-          </div>
-        )}
+        <ListPagination list={list} />
       </div>
 
       {/* Claim Commission Modal */}
@@ -571,6 +336,7 @@ export default function Commissions({
           onClose={() => setSelectedAppForClaim(null)}
           application={selectedAppForClaim}
           onConfirmed={() => {
+            list.refresh();
             if (onRefresh) onRefresh();
             setSelectedAppForClaim(null);
           }}

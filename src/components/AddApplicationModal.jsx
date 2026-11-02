@@ -1,11 +1,14 @@
+import BatchDocumentUpload from './BatchDocumentUpload';
+import DocumentNameSelect from './DocumentNameSelect';
+import StudentDobInput from './StudentDobInput';
+import { getStudentDobError } from '../utils/studentAge.mjs';
 import SearchableSelect from './SearchableSelect';
 import ValidatedInput from './ValidatedInput';
 import { ActionButton, ActionForm } from './ActionControls';
-import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 
-export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
+export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRef }) {
 
   const [stepNumber, setStepNumber] = useState(1);
   const [students, setStudents] = useState([]);
@@ -31,6 +34,8 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
   const [newStudentGender, setNewStudentGender] = useState('');
   const [newStudentAddress, setNewStudentAddress] = useState('');
 
+  const [hasQueuedDocuments, setHasQueuedDocuments] = useState(false);
+  const [isUploadingDocuments, setIsUploadingDocuments] = useState(false);
   const [documentsList, setDocumentsList] = useState([
     { id: 1, name: '', fileName: '', url: '', isUploading: false, error: '' }
   ]);
@@ -81,78 +86,6 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
       (sel === 'united states' && (uCountry === 'usa' || uCountry === 'us'));
   });
 
-  const handleAddDocumentRow = () => {
-    setDocumentsList(prev => [
-      ...prev,
-      { id: Date.now() + Math.random(), name: '', fileName: '', url: '', isUploading: false, error: '' }
-    ]);
-  };
-
-  const handleRemoveDocumentRow = (id) => {
-    if (documentsList.length <= 1) {
-      setDocumentsList([{ id: Date.now(), name: '', fileName: '', url: '', isUploading: false, error: '' }]);
-    } else {
-      setDocumentsList(prev => prev.filter(doc => doc.id !== id));
-    }
-  };
-
-  const handleDocNameChange = (id, newName) => {
-    setDocumentsList(prev => prev.map(doc => doc.id === id ? { ...doc, name: newName, error: '' } : doc));
-  };
-
-  const handleClearFileForDoc = (id) => {
-    setDocumentsList(prev => prev.map(doc => 
-      doc.id === id ? { ...doc, fileName: '', url: '', isUploading: false, error: '' } : doc
-    ));
-  };
-
-  const handleFileUploadForDoc = async (id, file) => {
-    if (!file) return;
-
-    if (file.size > 15 * 1024 * 1024) {
-      setDocumentsList(prev => prev.map(doc => 
-        doc.id === id ? { ...doc, error: 'File size exceeds 15MB limit.' } : doc
-      ));
-      return;
-    }
-
-    setDocumentsList(prev => prev.map(doc => 
-      doc.id === id ? { ...doc, isUploading: true, error: '' } : doc
-    ));
-
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const uploadRes = await API.post('/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      const fileUrl = uploadRes.data?.url || uploadRes.data?.fileUrl;
-      if (!uploadRes.data?.success || !fileUrl) {
-        throw new Error('File was not stored in S3. Please retry.');
-      }
-
-      setDocumentsList(prev => prev.map(doc => {
-        if (doc.id === id) {
-          const cleanName = doc.name.trim() || file.name.replace(/\.[^/.]+$/, '');
-          return {
-            ...doc,
-            name: cleanName,
-            fileName: file.name,
-            url: fileUrl,
-            isUploading: false,
-            error: ''
-          };
-        }
-        return doc;
-      }));
-    } catch (err) {
-      console.error('File upload error:', err);
-      setDocumentsList(prev => prev.map(doc => 
-        doc.id === id ? { ...doc, isUploading: false, error: 'Failed to upload document file.' } : doc
-      ));
-    }
-  };
-
   const handleResetAndClose = () => {
     setSelectedStudent('');
     setSelectedCountry('');
@@ -176,8 +109,16 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
     onClose();
   };
 
+  React.useImperativeHandle(closeRef, () => ({ close: handleResetAndClose }));
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (hasQueuedDocuments || isUploadingDocuments) { setError('Upload or remove queued documents before submitting.'); return; }
+    const dobError = getStudentDobError(studentSelectionMode === 'new' ? newStudentDob : students.find(student => (student._id || student.id) === selectedStudent)?.dob);
+    if (dobError) {
+      setError(dobError);
+      return;
+    }
     if (studentSelectionMode === 'existing' && !selectedStudent) {
       setError('Please select a student.');
       return;
@@ -264,31 +205,33 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
 
   if (!isOpen) return null;
 
-  return createPortal(
+  return (
     <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 overflow-y-auto"
+      className="w-full min-w-0 p-4 sm:p-6 lg:p-8 [overflow-wrap:anywhere]"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-2xl w-full max-w-lg shadow-2xl relative flex flex-col max-h-[90vh]"
+        className="bg-white border border-slate-200 border-t-4 border-t-[#D99A1C] rounded-2xl w-full shadow-sm relative flex flex-col"
       >
         {/* Header */}
-        <div className="px-8 pt-8 pb-4 flex items-center justify-between sticky top-0 bg-white rounded-t-2xl z-10">
-          <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
-            Add New Application
-          </h2>
+        <div className="px-4 sm:px-6 py-5 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200">
+          <div>
+            <h2 className="text-lg sm:text-xl font-bold text-[#0F172A]">Create application</h2>
+            <p className="mt-1 text-xs text-slate-500 leading-relaxed">Add student information, choose a program, and upload supporting documents.</p>
+          </div>
           <ActionButton
             onClick={handleResetAndClose}
-            className="p-1.5 hover:bg-slate-100 rounded-full text-[#64748B] hover:text-[#0F172A] transition-colors"
+            className="shrink-0 self-start inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
             </svg>
+            Back
           </ActionButton>
         </div>
 
-        {/* Modal Scroll Content */}
-        <div className="overflow-y-auto p-8 flex-1">
+        {/* Application form content */}
+        <div className="p-4 sm:p-6 flex-1">
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl flex gap-3 text-xs shadow-sm mb-6">
               <svg className="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -316,12 +259,12 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                 <p className="text-[11px] text-[#64748B] font-semibold">Select the student profile, target university, and program course.</p>
               </div>
 
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 items-start">
                 {/* Student Dropdown / Register Switcher */}
-                <div>
-                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-2">Student Information</label>
+                <section className="min-w-0 rounded-xl border border-slate-200 p-4 sm:p-5 space-y-4">
+                  <label className="block text-[11px] font-extrabold text-[#64748B] uppercase tracking-wider mb-2">Student Information</label>
                   
-                  <div className="flex gap-4 mb-3">
+                  <div className="flex flex-wrap gap-3 mb-3">
                     <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-[#0F172A]">
                       <input
                         type="radio"
@@ -377,7 +320,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                   ) : (
                     <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 space-y-3 shadow-inner">
                       <div>
-                        <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Student Full Name *</label>
+                        <label className="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Student Full Name *</label>
                         <input
                           type="text"
                           required={studentSelectionMode === 'new'}
@@ -387,9 +330,9 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                           className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] font-semibold text-[#0F172A]"
                         />
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Email Address *</label>
+                          <label className="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Email Address *</label>
                           <input
                             type="email"
                             required={studentSelectionMode === 'new'}
@@ -400,7 +343,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                           />
                         </div>
                         <div>
-                          <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Passport Number *</label>
+                          <label className="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Passport Number *</label>
                           <ValidatedInput validationKind="passport"
                             type="text"
                             required={studentSelectionMode === 'new'}
@@ -411,9 +354,9 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                           />
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Phone Number</label>
+                          <label className="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Phone Number</label>
                           <ValidatedInput validationKind="phone"
                             type="text"
                             value={newStudentPhone}
@@ -423,9 +366,8 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                           />
                         </div>
                         <div>
-                          <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Date of Birth</label>
-                          <input
-                            type="date"
+                          <label className="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Date of Birth</label>
+                          <StudentDobInput
                             value={newStudentDob}
                             onChange={(e) => setNewStudentDob(e.target.value)}
                             className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#D99A1C] font-semibold text-[#0F172A]"
@@ -433,9 +375,9 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Gender</label>
+                          <label className="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Gender</label>
                           <SearchableSelect
                             value={newStudentGender}
                             onChange={(e) => setNewStudentGender(e.target.value)}
@@ -448,7 +390,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                           </SearchableSelect>
                         </div>
                         <div>
-                          <label className="block text-[9px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Resident Address</label>
+                          <label className="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Resident Address</label>
                           <input
                             type="text"
                             value={newStudentAddress}
@@ -460,11 +402,13 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                       </div>
                     </div>
                   )}
-                </div>
+                </section>
 
+                <section className="min-w-0 rounded-xl border border-slate-200 p-4 sm:p-5 space-y-4">
+                <h3 className="text-sm font-bold text-slate-900">Program & intake</h3>
                 {/* Destination Country Dropdown */}
                 <div>
-                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">
+                  <label className="block text-[11px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">
                     Destination Country *
                   </label>
                   <div className="relative">
@@ -494,7 +438,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                 {/* University Dropdown (filtered by selected country) */}
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
+                    <label className="block text-[11px] font-extrabold text-[#64748B] uppercase tracking-wider">
                       Select University *
                     </label>
                     {selectedCountry && (
@@ -542,7 +486,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
 
                 {/* Course Dropdown */}
                 <div>
-                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Select Course</label>
+                  <label className="block text-[11px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Select Course</label>
                   <div className="relative">
                     <SearchableSelect searchLabel="Search courses..."
                       required
@@ -573,7 +517,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
 
                 {/* Level of Study */}
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
+                  <label className="block text-[11px] font-extrabold text-[#64748B] uppercase tracking-wider">
                     Level of Study *
                   </label>
                   <div className="relative">
@@ -597,7 +541,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
 
                 {/* Requested Intake Season */}
                 <div className="space-y-1">
-                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
+                  <label className="block text-[11px] font-extrabold text-[#64748B] uppercase tracking-wider">
                     Requested Intake Season *
                   </label>
                   <div className="relative">
@@ -617,143 +561,21 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                     </div>
                   </div>
                 </div>
+                </section>
               </div>
 
-              {/* Supporting Documents Section */}
-              <div className="space-y-3 text-left">
-                <div className="flex items-center justify-between">
-                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
-                    Supporting Documents *
-                  </label>
-                  <span className="text-[10px] text-slate-400 font-semibold">
-                    {documentsList.filter(d => d.url).length} uploaded
-                  </span>
-                </div>
-
-                <div className="space-y-3">
-                  {documentsList.map((doc, idx) => (
-                    <div 
-                      key={doc.id}
-                      className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-3 transition-all"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-extrabold text-[#D99A1C] uppercase tracking-wider">
-                          Document #{idx + 1}
-                        </span>
-                        {documentsList.length > 1 && (
-                          <ActionButton
-                            type="button"
-                            onClick={() => handleRemoveDocumentRow(doc.id)}
-                            className="text-[11px] text-rose-500 hover:text-rose-700 font-bold flex items-center gap-1 cursor-pointer transition-colors"
-                          >
-                            ✕ Remove
-                          </ActionButton>
-                        )}
-                      </div>
-
-                      {/* File Name / Document Title Input Box */}
-                      <div className="space-y-1">
-                        <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">
-                          Document Name *
-                        </label>
-                        <input
-                          type="text"
-                          value={doc.name}
-                          onChange={(e) => handleDocNameChange(doc.id, e.target.value)}
-                          placeholder="e.g. Passport Bio Page, Degree Certificate, 12th Marksheet..."
-                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-[#0F172A] placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#D99A1C]"
-                        />
-                      </div>
-
-                      {/* File Upload Selector */}
-                      <div className="space-y-1">
-                        <label className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">
-                          Upload File (PDF, PNG, JPG, Word) *
-                        </label>
-                        {!doc.url ? (
-                          <div className="border-2 border-dashed border-slate-200 hover:border-[#D99A1C] transition-colors rounded-xl p-3.5 text-center relative bg-white cursor-pointer">
-                            <input
-                              type="file"
-                              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                              disabled={doc.isUploading}
-                              onChange={(e) => handleFileUploadForDoc(doc.id, e.target.files?.[0])}
-                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
-                            />
-                            {doc.isUploading ? (
-                              <div className="flex items-center justify-center gap-2 py-1 text-xs text-[#D99A1C] font-bold">
-                                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                </svg>
-                                <span>Uploading file, please wait...</span>
-                              </div>
-                            ) : (
-                              <div className="space-y-0.5 py-1">
-                                <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-[#0F172A]">
-                                  <svg className="w-4 h-4 text-[#D99A1C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                  </svg>
-                                  <span>Choose File to Upload</span>
-                                </div>
-                                <p className="text-[10px] text-slate-400 font-semibold">
-                                  PDF, PNG, JPG, Word up to 15MB
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center justify-between text-xs">
-                            <div className="flex items-center gap-2 truncate">
-                              <span className="text-emerald-600 font-bold text-base">📄</span>
-                              <div className="truncate text-left">
-                                <p className="font-bold text-slate-800 truncate">{doc.fileName}</p>
-                                <p className="text-[10px] text-emerald-700 font-semibold">✓ Uploaded successfully</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2 shrink-0">
-                              <label className="text-xs text-[#D99A1C] hover:text-[#B77E15] font-bold cursor-pointer">
-                                Change
-                                <input
-                                  type="file"
-                                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                                  className="hidden"
-                                  onChange={(e) => handleFileUploadForDoc(doc.id, e.target.files?.[0])}
-                                />
-                              </label>
-                              <ActionButton
-                                type="button"
-                                onClick={() => handleClearFileForDoc(doc.id)}
-                                className="text-xs text-rose-500 hover:text-rose-700 font-bold ml-1 cursor-pointer"
-                              >
-                                Remove
-                              </ActionButton>
-                            </div>
-                          </div>
-                        )}
-                        {doc.error && (
-                          <p className="text-[10px] text-rose-500 font-bold mt-1">{doc.error}</p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Add Another Document Button */}
-                <ActionButton
-                  type="button"
-                  onClick={handleAddDocumentRow}
-                  className="w-full py-2.5 border-2 border-dashed border-[#D99A1C]/50 hover:border-[#D99A1C] hover:bg-amber-50/40 rounded-xl text-xs font-bold text-[#D99A1C] flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
-                  </svg>
-                  <span>+ Add Another Document</span>
-                </ActionButton>
+              <div className="space-y-3 text-left rounded-xl border border-slate-200 p-4 sm:p-5">
+                <h3 className="text-xs font-bold text-slate-700">Supporting Documents *</h3>
+                <BatchDocumentUpload role="Student" disabled={isSubmitting} onBusyChange={setIsUploadingDocuments} onPendingChange={setHasQueuedDocuments} onComplete={async uploaded => { setDocumentsList(prev => [...prev.filter(doc => doc.url), ...uploaded.map(doc => ({ ...doc, id: crypto.randomUUID(), isUploading: false, error: '' }))]); }} />
+                {documentsList.filter(doc => doc.url).map(doc => <div key={doc.id} className="rounded-xl border border-slate-200 p-3 space-y-2">
+                  <div className="flex items-center justify-between gap-2 text-xs"><span className="break-all">{doc.fileName}</span><ActionButton type="button" disabled={isSubmitting} className="font-bold text-red-700" onClick={() => setDocumentsList(prev => prev.filter(item => item.id !== doc.id))}>Remove</ActionButton></div>
+                  <DocumentNameSelect role="Student" multiple={false} value={doc.name} disabled={isSubmitting} onChange={name => setDocumentsList(prev => prev.map(item => item.id === doc.id ? { ...item, name: name || item.fileName, title: name || item.fileName } : item))} />
+                </div>)}
               </div>
 
               {/* Application-Level General Comment */}
               <div className="space-y-1.5 mt-4 text-left">
-                <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">
+                <label className="block text-[11px] font-extrabold text-[#64748B] uppercase tracking-wider">
                   💬 COMMENTS
                 </label>
                 <textarea
@@ -770,14 +592,14 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
                 type="submit"
                 disabled={
                   isSubmitting ||
-                  documentsList.some(d => d.isUploading) ||
+                  documentsList.some(d => d.isUploading) || hasQueuedDocuments || isUploadingDocuments ||
                   !documentsList.some(d => d.url) ||
                   (studentSelectionMode === 'existing' && !selectedStudent) ||
                   (studentSelectionMode === 'new' && (!newStudentName || !newStudentEmail || !newStudentPhone)) ||
                   !selectedUniversity ||
                   !selectedCourse
                 }
-                className="w-full bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.02] text-white font-bold py-3 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider mt-6 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
+                className="w-full sm:w-auto sm:ml-auto bg-[#D99A1C] hover:bg-[#C28410] text-white font-bold py-3 px-6 rounded-xl text-sm transition-colors mt-6 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (
                   <>
@@ -825,7 +647,6 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit }) {
           )}
         </div>
       </div>
-    </div>,
-    document.body
+    </div>
   );
 }

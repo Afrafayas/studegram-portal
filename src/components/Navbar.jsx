@@ -156,12 +156,12 @@ export default function Navbar({
   };
 
   return (
-    <nav className="h-[60px] min-h-[60px] bg-[#0A0A0F] border-b border-white/5 px-4 md:px-6 flex items-center justify-between sticky top-0 z-40 select-none text-white">
+    <nav className="workspace-header w-full min-w-0 h-[60px] min-h-[60px] bg-[#0A0A0F] border-b border-white/5 px-3 sm:px-4 md:px-6 flex items-center justify-between gap-2 sticky top-0 z-40 select-none text-white">
       {/* Left section: Logo & Hamburger toggle */}
-      <div className="flex items-center gap-2 md:gap-3">
+      <div className="flex min-w-0 items-center gap-1 sm:gap-2 md:gap-3">
         <ActionButton 
           onClick={onToggleSidebar}
-          className="md:hidden p-1.5 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg focus:outline-none"
+          className="md:hidden shrink-0 p-1.5 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg focus:outline-none"
           title="Toggle Navigation"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,7 +172,7 @@ export default function Navbar({
         {onBack && (
           <ActionButton
             onClick={onBack}
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg focus:outline-none transition-all flex items-center justify-center active:scale-95 duration-100"
+            className="shrink-0 p-1.5 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg focus:outline-none transition-all flex items-center justify-center active:scale-95 duration-100"
             title="Go Back"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -181,19 +181,19 @@ export default function Navbar({
           </ActionButton>
         )}
  
-        <div className="w-8 h-8 md:w-9 h-9 rounded-xl bg-gradient-to-tr from-[#D99A1C] to-[#F5B025] flex items-center justify-center font-extrabold text-black text-sm md:text-lg shadow-sm">
+        <div className="shrink-0 w-8 h-8 md:w-9 md:h-9 rounded-xl bg-gradient-to-tr from-[#D99A1C] to-[#F5B025] flex items-center justify-center font-extrabold text-black text-sm md:text-lg shadow-sm">
           U
         </div>
-        <div className="flex items-center gap-1.5">
-          <span className="font-extrabold text-base md:text-xl tracking-tight text-white">
+        <div className="flex min-w-0 items-center gap-1.5">
+          <span className="shrink-0 font-extrabold text-sm sm:text-base md:text-xl tracking-tight text-white">
             Unigather
           </span>
           {activePage && (
             <>
-              <svg className="w-3.5 h-3.5 text-slate-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="hidden sm:block shrink-0 w-3.5 h-3.5 text-slate-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7-7" />
               </svg>
-              <span className="text-[#D99A1C] font-extrabold text-xs md:text-sm mt-0.5">
+              <span className="hidden sm:inline truncate text-[#D99A1C] font-extrabold text-xs md:text-sm mt-0.5">
                 {activePage}
               </span>
             </>
@@ -202,10 +202,10 @@ export default function Navbar({
       </div>
  
       {/* Right section: Agency Info, Comments, Notifications & Profile */}
-      <div className="flex items-center gap-3 md:gap-4 relative">
+      <div className="flex shrink-0 items-center gap-1 sm:gap-3 md:gap-4 relative">
         
         {/* Agency and Role details */}
-        <div className="text-right hidden sm:block">
+        <div className="text-right hidden lg:block">
           <p className="text-xs font-bold text-white truncate max-w-[180px]">{partnerData?.companyName || partnerData?.name || 'Agent Portal'}</p>
           <p className="text-[10px] text-[#D99A1C] font-semibold">{userRoleDisplay}</p>
         </div>
@@ -270,11 +270,11 @@ export default function Navbar({
                             <span>{comm.camsId && !/[0-9a-fA-F]{24}/.test(comm.camsId) ? `${comm.camsId} · ` : ''}{comm.studentName}</span>
                           </h5>
                           <span className="text-[9px] text-slate-400 font-semibold shrink-0">
-                            {comm.createdAt ? new Date(comm.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now'}
+                            {comm.createdAt ? new Date(comm.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : 'Just now'}
                           </span>
                         </div>
                         <p className="text-[10px] text-slate-400 font-medium truncate mt-0.5">{comm.universityName} - {comm.courseName}</p>
-                        <p className="text-[11px] font-semibold mt-1 leading-snug break-words">"{comm.text}"</p>
+                        <div className="flex items-start gap-2 mt-1"><svg aria-hidden="true" className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4" /><path d="M5 21v-2a7 7 0 0 1 14 0v2" /></svg><p className="min-w-0 text-[11px] font-semibold leading-snug break-words">"{comm.text}"</p></div>
                         <div className="mt-2 flex items-center justify-between text-[9px]">
                           <span className={`px-2 py-0.5 rounded font-extrabold uppercase ${comm.isUnreplied ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-800 text-slate-400'}`}>
                             {comm.isUnreplied ? (comm.lastRepliedBy === 'Admin' ? '💬 New Admin Reply' : '💬 Not Replied') : '✓ Replied / Read'}
@@ -357,7 +357,7 @@ export default function Navbar({
                             <span>{n.title}</span>
                           </p>
                           <span className="text-[9px] text-slate-400 font-normal shrink-0">
-                            {n.createdAt ? new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now'}
+                            {n.createdAt ? new Date(n.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : 'Just now'}
                           </span>
                         </div>
                         <p className="text-slate-300 text-[11px] font-medium mt-1 leading-snug">{n.message}</p>
@@ -419,7 +419,7 @@ export default function Navbar({
                     <svg className="w-4 h-4 text-[#D99A1C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    <span>My Profile & Password</span>
+                    <span>Settings</span>
                   </ActionButton>
 
                   <ActionButton

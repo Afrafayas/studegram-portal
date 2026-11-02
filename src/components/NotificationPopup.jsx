@@ -1,139 +1,81 @@
 import { ActionButton } from './ActionControls';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import API from '../api/axios';
-import { mapNotice } from '../utils/resourceData';
-
-
-
+import { useToast } from '../context/ToastContext';
+import { reminderDue, snoozeKey } from '../utils/noticeReminder.mjs';
+const mapNotice = notice => ({ ...notice, id: notice._id, message: notice.content || '', type: notice.category || 'General', badge: notice.badge || notice.priority, image: notice.image || '' });
 export default function NotificationPopup({ onViewNotice }) {
-  const [initialNotifications, setInitialNotifications] = useState([]);
+  const toast = useToast();
+  const [notifications, setNotifications] = useState([]);
+  const [closed, setClosed] = useState({});
+  const [now, setNow] = useState(Date.now());
+  const [busy, setBusy] = useState(false);
+  const [imageLayout, setImageLayout] = useState(null);
+  const generation = useRef(0);
+  const storageKey = snoozeKey(localStorage);
   useEffect(() => {
     let active = true;
-    const load = () => API.get('/notices').then(response => {
-      if (active && response.data?.success) {
-        setInitialNotifications(response.data.data.filter(n => n.status === 'Active' && ['All', 'Agents'].includes(n.targetAudience)).map(mapNotice).filter(n => n.popup));
-      }
-    }).catch(() => {});
-    load();
-    const timer = setInterval(load, 60000);
-    window.addEventListener('notices-updated', load);
-    return () => { active = false; clearInterval(timer); window.removeEventListener('notices-updated', load); };
-  }, []);
-  const [readIds, setReadIds] = useState(() => {
-    try {
-      const stored = localStorage.getItem('studegram_read_notifications');
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [closedTimestamps, setClosedTimestamps] = useState(() => {
-    try {
-      const stored = localStorage.getItem('studegram_closed_notifications');
-      return stored ? JSON.parse(stored) : {};
-    } catch {
-      return {};
-    }
-  });
-
-  const [now, setNow] = useState(Date.now());
-  const [isClosing, setIsClosing] = useState(false);
-  const [activeNotification, setActiveNotification] = useState(null);
-
-  // Periodically update the time to refresh the 5-minute timer
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setNow(Date.now());
-    }, 5000); // Check every 5 seconds for highly responsive updates
-    return () => clearInterval(interval);
-  }, []);
-
-  // Filter visible notifications
-  const visibleNotifications = initialNotifications.filter((n) => {
-    // 1. If marked as read, do not show
-    if (readIds.includes(n.id)) return false;
-
-    // 2. If closed, check if 5 minutes have passed
-    const closedTime = closedTimestamps[n.id];
-    if (closedTime && now - closedTime < 5 * 60 * 1000) {
-      return false;
-    }
-
-    return true;
-  });
-
-  const nextNotification = visibleNotifications[0] || null;
-
-  // Handle setting active notification with transition
-  useEffect(() => {
-    if (nextNotification?.id !== activeNotification?.id) {
-      if (nextNotification) {
-        setIsClosing(false);
-        setActiveNotification(nextNotification);
-      } else {
-        // If there's no next notification, animate out first
-        setIsClosing(true);
-        const timer = setTimeout(() => {
-          setActiveNotification(null);
-        }, 300);
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [nextNotification, activeNotification]);
-
-  // Lock background scrolling when activeNotification is present
-  useEffect(() => {
-    if (activeNotification) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
+    const readClosed = () => { try { setClosed(JSON.parse(localStorage.getItem(storageKey) || '{}')); } catch { setClosed({}); } };
+    readClosed();
+    const load = async () => {
+      const version = ++generation.current;
+      try {
+        const response = await API.get('/notices?reminders=true');
+        if (active && version === generation.current && response.data?.success) setNotifications(response.data.data.map(mapNotice));
+      } catch { /* Keep current reminders on transient network failures. */ }
     };
-  }, [activeNotification]);
-
-  if (!activeNotification) return null;
-
+    const changed = () => { setNotifications([]); load(); };
+    const storageChanged = event => { if (event.key === storageKey) readClosed(); if (event.key === storageKey + ':read') changed(); };
+    load();
+    const poll = setInterval(load, 15000);
+    const clock = setInterval(() => setNow(Date.now()), 1000);
+    window.addEventListener('notices-updated', changed);
+    window.addEventListener('storage', storageChanged);
+    window.addEventListener('focus', load);
+    return () => { active = false; clearInterval(poll); clearInterval(clock); window.removeEventListener('notices-updated', changed); window.removeEventListener('storage', storageChanged); window.removeEventListener('focus', load); };
+  }, [storageKey]);
+  const activeNotification = notifications.find(n => reminderDue(n, closed, now)) || null;
+  const isClosing = false;
   const handleClose = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      const updatedClosed = { ...closedTimestamps, [activeNotification.id]: Date.now() };
-      setClosedTimestamps(updatedClosed);
-      localStorage.setItem('studegram_closed_notifications', JSON.stringify(updatedClosed));
-      setIsClosing(false);
-    }, 300); // Match animation duration
+    if (busy) return;
+    const next = { ...closed, [activeNotification.id]: Date.now() };
+    setClosed(next); setNow(Date.now());
+    try { localStorage.setItem(storageKey, JSON.stringify(next)); } catch { /* Session snooze still works. */ }
   };
-
-  const handleMarkAsRead = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      const updatedRead = [...readIds, activeNotification.id];
-      setReadIds(updatedRead);
-      localStorage.setItem('studegram_read_notifications', JSON.stringify(updatedRead));
-      setIsClosing(false);
-    }, 300);
+  const handleMarkAsRead = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await API.patch('/notices/' + activeNotification.id + '/read');
+      generation.current++;
+      setNotifications(prev => prev.filter(n => n.id !== activeNotification.id));
+      window.dispatchEvent(new Event('notices-updated'));
+      try { localStorage.setItem(storageKey + ':read', String(Date.now())); } catch { /* Polling also synchronizes receipts. */ }
+    } catch (error) { toast.error(error.response?.data?.message || 'Unable to mark notice as read. Please retry.'); }
+    finally { setBusy(false); }
   };
-
   const handleView = () => {
-    setIsClosing(true);
-    setTimeout(() => {
-      const updatedRead = [...readIds, activeNotification.id];
-      setReadIds(updatedRead);
-      localStorage.setItem('studegram_read_notifications', JSON.stringify(updatedRead));
-      setIsClosing(false);
-      if (onViewNotice) {
-        onViewNotice(activeNotification.id);
-      }
-    }, 300);
+    if (busy) return;
+    handleClose();
+    onViewNotice?.(activeNotification.id);
   };
-
+  useEffect(() => {
+    if (!activeNotification) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = previous; };
+  }, [Boolean(activeNotification)]);
+  if (!activeNotification) return null;
   const isImportant = activeNotification.type === 'important';
+  const isPortrait = imageLayout?.src === activeNotification.image && imageLayout.portrait;
 
-  return (
+  return createPortal(
+    <>
+      <div aria-hidden="true" className="fixed inset-0 z-[9999] bg-slate-900/20 backdrop-blur-sm" />
     <div
-      className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 max-w-3xl w-[calc(100%-2rem)] p-8 rounded-3xl border border-slate-200/50 transition-all duration-300
+      role="dialog" aria-modal="true" aria-label="Notice reminder"
+      className={`fixed top-20 left-1/2 -translate-x-1/2 z-[10000] ${isPortrait ? 'max-w-xl' : 'max-w-3xl'} w-[calc(100%-2rem)] p-6 rounded-2xl border border-slate-200/50 transition-all duration-300
         backdrop-blur-md bg-white/95 shadow-[0_32px_64px_-16px_rgba(15,23,42,0.15)]
         overflow-y-auto max-h-[calc(100vh-6rem)]
         ${isClosing ? 'animate-slide-out-top' : 'animate-slide-in-top'}
@@ -148,7 +90,7 @@ export default function NotificationPopup({ onViewNotice }) {
 
       {/* Floating Highlighted Close Button */}
       <ActionButton
-        onClick={handleClose}
+        disabled={busy} onClick={handleClose}
         className="absolute top-5 right-5 z-50 w-8 h-8 rounded-full bg-white/90 hover:bg-rose-50 text-slate-700 hover:text-rose-600 shadow-sm border border-slate-200/60 flex items-center justify-center transition-all duration-150 hover:scale-105 active:scale-95 group"
         aria-label="Close notification"
       >
@@ -157,13 +99,17 @@ export default function NotificationPopup({ onViewNotice }) {
         </svg>
       </ActionButton>
 
-      {/* Top Banner Area (always rendered with same height for uniform sizing) */}
-      <div className="mb-6 overflow-hidden rounded-2xl border border-slate-100 shadow-inner h-64 relative bg-slate-50">
+      {/* Keep uploaded artwork fully visible in its original orientation. */}
+      <div className={`mb-3 overflow-hidden rounded-xl border border-slate-100 shadow-inner relative bg-slate-50 ${activeNotification.image ? 'flex items-center justify-center' : 'h-40'}`}>
         {activeNotification.image ? (
           <img
             src={activeNotification.image}
             alt={activeNotification.title}
-            className="w-full h-full object-cover hover:scale-103 transition-transform duration-500"
+            onLoad={(event) => {
+              const image = event.currentTarget;
+              setImageLayout({ src: activeNotification.image, portrait: image.naturalHeight > image.naturalWidth });
+            }}
+            className="block w-full h-auto max-h-[35vh] sm:max-h-[280px] object-contain"
           />
         ) : (
           /* Premium fallback gradient banner with abstract icon */
@@ -213,8 +159,8 @@ export default function NotificationPopup({ onViewNotice }) {
         </span>
       </div>
 
-      <div className="mt-4 space-y-2 min-h-[96px]">
-        <h4 className="text-xl md:text-2xl font-extrabold text-slate-900 leading-snug tracking-tight">
+      <div className="mt-3 space-y-2">
+        <h4 className="text-base md:text-lg font-extrabold text-slate-900 leading-snug tracking-tight">
           {activeNotification.title}
         </h4>
         <p className="text-xs md:text-sm text-slate-600 leading-relaxed font-semibold line-clamp-3">
@@ -222,22 +168,22 @@ export default function NotificationPopup({ onViewNotice }) {
         </p>
       </div>
 
-      <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
+      <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap gap-2 items-center justify-between">
         <ActionButton
-          onClick={handleClose}
+          disabled={busy} onClick={handleClose}
           className="px-4 py-2.5 rounded-xl text-slate-400 hover:text-slate-600 text-xs font-bold transition-all duration-150 hover:bg-slate-50"
         >
           Remind Me Later
         </ActionButton>
         <div className="flex items-center gap-2.5">
           <ActionButton
-            onClick={handleMarkAsRead}
+            disabled={busy} onClick={handleMarkAsRead}
             className="px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 text-xs font-bold transition-all duration-150 border border-slate-200/50"
           >
             Mark as Read
           </ActionButton>
           <ActionButton
-            onClick={handleView}
+            disabled={busy} onClick={handleView}
             className={`px-5 py-2.5 rounded-xl text-white text-xs font-bold transition-all duration-150 hover:scale-[1.02] active:scale-95 shadow-md flex items-center gap-1.5
               ${isImportant ? 'bg-gradient-to-r from-rose-500 to-amber-500 shadow-rose-200/50' : 'bg-gradient-to-r from-indigo-500 to-violet-500 shadow-indigo-200/50'}
             `}
@@ -250,5 +196,6 @@ export default function NotificationPopup({ onViewNotice }) {
         </div>
       </div>
     </div>
+    </>, document.body
   );
 }

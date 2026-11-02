@@ -1,3 +1,8 @@
+import ListRecordView from '../components/ListRecordView';
+import ListFilterTabs from '../components/ListFilterTabs';
+import useServerList from '../hooks/useServerList';
+import ListToolbar, { ListPagination } from '../components/ListToolbar';
+import ActionMenu from '../components/ActionMenu';
 import { ActionButton, ActionForm } from '../components/ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
@@ -27,9 +32,13 @@ const AGENT_FEATURE_ACTIONS = [
 ];
 
 export default function AgentRolePermissions({ partnerData }) {
+  const [listRecord, setListRecord] = React.useState(null);
+
   const toast = useToast();
+  const list = useServerList('/roles', { fixedFilters: { portalType: 'Agent' } });
   const [roles, setRoles] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('All');
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,6 +53,7 @@ export default function AgentRolePermissions({ partnerData }) {
   const [isSaving, setIsSaving] = useState(false);
 
   const fetchAgentRoles = async () => {
+    list.refresh();
     setIsLoading(true);
     try {
       const res = await API.get('/roles');
@@ -61,6 +71,18 @@ export default function AgentRolePermissions({ partnerData }) {
   useEffect(() => {
     fetchAgentRoles();
   }, []);
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    if (tab === 'All') {
+      list.setFilter('isPreset', undefined);
+    } else if (tab === 'Preset') {
+      list.setFilter('isPreset', 'true');
+    } else if (tab === 'Custom') {
+      list.setFilter('isPreset', 'false');
+    }
+    list.setPage(1);
+  };
 
   const openCreateModal = () => {
     setEditingRole(null);
@@ -99,261 +121,275 @@ export default function AgentRolePermissions({ partnerData }) {
 
   const handleSaveRole = async (e) => {
     e.preventDefault();
-    if (!roleForm.displayName.trim() || (!editingRole && !roleForm.name.trim())) {
-      toast.error('Role display title and identifier are required.');
+    if (!roleForm.displayName.trim()) {
+      toast.error('Role name is required.');
       return;
     }
-
     setIsSaving(true);
     try {
-      if (editingRole && editingRole._id && !editingRole._id.startsWith('ar')) {
-        const res = await API.put(`/roles/${editingRole._id}`, {
-          displayName: roleForm.displayName,
-          description: roleForm.description,
-          permissions: roleForm.permissions
-        });
+      if (editingRole && editingRole._id) {
+        const res = await API.put(`/roles/${editingRole._id}`, roleForm);
         if (res.data?.success) {
-          toast.success(`Role '${roleForm.displayName}' permissions updated in database!`);
+          toast.success('Agent role updated successfully');
           setIsModalOpen(false);
           fetchAgentRoles();
+        } else {
+          throw new Error(res.data?.message || 'Failed to update role');
         }
       } else {
-        const res = await API.post('/roles', {
-          name: roleForm.name || roleForm.displayName.replace(/\s+/g, ''),
-          displayName: roleForm.displayName,
-          portalType: 'Agent',
-          description: roleForm.description,
-          permissions: roleForm.permissions
-        });
+        const generatedKey = roleForm.displayName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        const payload = {
+          ...roleForm,
+          name: roleForm.name || generatedKey
+        };
+        const res = await API.post('/roles', payload);
         if (res.data?.success) {
-          toast.success(`Role '${roleForm.displayName}' saved to database!`);
+          toast.success('New agency role created successfully');
           setIsModalOpen(false);
           fetchAgentRoles();
+        } else {
+          throw new Error(res.data?.message || 'Failed to create role');
         }
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || err.message || 'Failed to save role permissions.');
+      toast.error(err.response?.data?.message || err.message || 'Operation failed');
     } finally {
       setIsSaving(false);
     }
   };
 
+  const totalRolesCount = roles.length;
+  const presetRolesCount = roles.filter(r => r.isPreset).length;
+  const customRolesCount = roles.filter(r => !r.isPreset).length;
+
   return (
-    <div className="flex-1 p-4 md:p-8 space-y-6 max-w-7xl mx-auto w-full select-text">
+    listRecord ? <div className="workspace-page flex-1 p-4 sm:p-6"><ListRecordView record={listRecord} title={listRecord.displayName || listRecord.title || listRecord.name || listRecord.university || 'Record details'} onBack={() => setListRecord(null)} /></div> : (<div className="workspace-page flex-1 p-4 sm:p-6 space-y-6 bg-[#F0F2F5] select-text">
       {/* Top Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border border-[#E2E8F0] rounded-2xl p-6 shadow-sm">
+      <div className="workspace-panel flex flex-wrap gap-3 justify-between items-center bg-white border border-[#E2E8F0] border-t-4 border-t-[#D99A1C] p-6 rounded-2xl shadow-xs">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-[#0F172A] tracking-tight">
-              Agency Roles & Permissions Checklist
-            </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-purple-50 text-purple-700 border border-purple-200">
-              Agency RBAC
-            </span>
-          </div>
-          <p className="text-xs text-[#64748B] font-medium">
+          <h1 className="text-xl font-black text-slate-900 tracking-tight">
+            Agency Roles & Permissions Checklist
+          </h1>
+          <p className="text-xs text-slate-500 font-medium">
             Manage your agency staff operational roles, sidebar item checklists, and feature access clearance.
           </p>
         </div>
         <ActionButton
           onClick={openCreateModal}
-          className="bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.02] text-black font-extrabold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 active:scale-95"
+          className="bg-[#D99A1C] hover:bg-[#F5B025] text-white font-extrabold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
           </svg>
-          Create Agency Role
+          <span>Create Agency Role</span>
         </ActionButton>
       </div>
 
-      {/* Roles Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {roles.map((role) => (
-          <div key={role._id || role.name} className="bg-white border border-[#E2E8F0] hover:border-[#D99A1C] rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-4 transition-all">
-            <div className="space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <span className="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-purple-50 text-purple-700 border border-purple-200">
-                    🏢 Agency Role
-                  </span>
-                  <h3 className="text-lg font-bold text-[#0F172A] pt-1">{role.displayName || role.name}</h3>
-                </div>
-                {role.isPreset && (
-                  <span className="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded border border-slate-200">
-                    Preset Role
-                  </span>
-                )}
-              </div>
+      {/* Table Frame */}
+      <div className="workspace-panel workspace-list-frame bg-white border border-[#E2E8F0] border-t-4 border-t-[#D99A1C] rounded-2xl shadow-xs overflow-hidden">
+        {/* Scoping Tabs */}
+        <ListFilterTabs list={list} endpoint="/roles" field="isPreset" fixedFilters={{portalType:'Agent'}} options={[{value:'All',label:'All roles'},{value:'true',label:'Preset roles'},{value:'false',label:'Custom roles'}]} />
 
-              <p className="text-xs text-[#64748B] font-medium leading-relaxed">
-                {role.description || 'Configured agency staff access level.'}
-              </p>
+        {/* ListToolbar */}
+        <ListToolbar
+          list={list}
+          label="roles"
+          fields={[
+            {
+              key: 'isPreset',
+              label: 'Role Types',
+              options: [
+                { value: 'true', label: 'Preset' },
+                { value: 'false', label: 'Custom' }
+              ]
+            }
+          ]}
+        />
 
-              <div className="pt-3 border-t border-slate-100 space-y-1.5">
-                <span className="text-[10px] font-black uppercase text-slate-400 tracking-wider block">Assigned Permissions ({role.permissions?.length || 0}):</span>
-                <div className="flex flex-wrap gap-1 max-h-28 overflow-y-auto">
-                  {role.permissions?.map((pKey) => (
-                    <span key={pKey} className="bg-slate-100 text-slate-700 text-[10px] font-bold px-2.5 py-1 rounded-lg border border-slate-200">
-                      {pKey}
-                    </span>
-                  ))}
-                </div>
-              </div>
+        
+
+        <div className="overflow-x-auto">
+          {list.records.length > 0 ? (
+            <table className="workspace-table w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b border-[#E2E8F0]">
+                  <th className="px-6 py-4 text-slate-400 text-[10px] font-extrabold uppercase tracking-wider">Role Title</th>
+                  <th className="px-6 py-4 text-slate-400 text-[10px] font-extrabold uppercase tracking-wider">Role Type</th>
+                  <th className="px-6 py-4 text-slate-400 text-[10px] font-extrabold uppercase tracking-wider">Assigned Permissions</th>
+                  <th className="px-6 py-4 text-slate-400 text-[10px] font-extrabold uppercase tracking-wider">Description</th>
+                  <th className="px-6 py-4 text-slate-400 text-[10px] font-extrabold uppercase tracking-wider text-right pr-6">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
+                {list.records.map((role) => (
+                  <tr tabIndex={0} onKeyDown={event => { if (event.target === event.currentTarget && event.key === "Enter") { event.preventDefault(); event.currentTarget.click(); } }}
+                    key={role._id || role.name}
+                    onClick={() => setListRecord(role)}
+                    className="hover:bg-amber-50/40 transition-colors cursor-pointer group"
+                  >
+                    <td className="px-6 py-4">
+                      <p className="font-black text-slate-900 text-xs group-hover:text-[#D99A1C] transition-colors">
+                        {role.displayName || role.name}
+                      </p>
+                      <p className="text-[10px] text-slate-400 font-semibold">{role.name}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      {role.isPreset ? (
+                        <span className="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold border bg-slate-100 text-slate-700 border-slate-200">
+                          Preset Role
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold border bg-purple-50 text-purple-700 border-purple-200">
+                          Custom Role
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-1.5 flex-wrap max-w-sm">
+                        <span className="bg-amber-50 text-amber-800 border border-amber-200 text-[9px] font-black px-2 py-0.5 rounded-full">
+                          {role.permissions?.length || 0} permissions
+                        </span>
+                        {role.permissions?.slice(0, 2).map((pKey) => (
+                          <span key={pKey} className="bg-slate-100 text-slate-600 text-[9px] font-bold px-1.5 py-0.5 rounded">
+                            {pKey}
+                          </span>
+                        ))}
+                        {(role.permissions?.length || 0) > 2 && (
+                          <span className="text-[9px] text-slate-400">+{role.permissions.length - 2} more</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-slate-500 font-medium text-[11px] max-w-xs truncate">
+                      {role.description || 'Configured agency staff access level.'}
+                    </td>
+                    <td className="px-6 py-4 text-right pr-6" onClick={(e) => e.stopPropagation()}>
+                      <ActionMenu
+                        items={[
+                          {
+                            label: 'Edit Permissions Checklist',
+                            onClick: () => openEditModal(role)
+                          }
+                        ]}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="p-12 text-center text-xs text-slate-400 font-semibold">
+              No matching agency roles found.
             </div>
+          )}
+        </div>
 
-            <ActionButton
-              onClick={() => openEditModal(role)}
-              className="w-full bg-[#0F172A] hover:bg-black text-white font-bold text-xs py-2.5 rounded-xl transition-all uppercase tracking-wider flex items-center justify-center gap-1.5"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-              <span>Edit Permissions Checklist</span>
-            </ActionButton>
-          </div>
-        ))}
+        <ListPagination list={list} />
       </div>
 
       {/* MODAL */}
       {isModalOpen && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-xs select-none p-4 overflow-y-auto">
-          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] my-auto">
-            <div className="flex justify-between items-center p-4 bg-[#0F172A] text-white">
+          <div className="workspace-list-frame bg-white border border-slate-200 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] my-auto">
+            <div className="flex justify-between items-center p-4 bg-white text-slate-900 border-b border-slate-200">
               <div>
                 <h3 className="text-sm font-bold uppercase tracking-wider">
                   {editingRole ? `Edit Agency Role — ${editingRole.displayName}` : 'Create Agency Security Role'}
                 </h3>
                 <p className="text-[10px] text-slate-400 font-semibold">Checklist sidebar navigation and operational rights</p>
               </div>
-              <ActionButton onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-white font-bold text-sm">
+              <ActionButton onClick={() => setIsModalOpen(false)} className="text-slate-500 hover:text-slate-900 font-bold text-sm">
                 ✕
               </ActionButton>
             </div>
 
             <ActionForm onSubmit={handleSaveRole} className="p-6 space-y-6 overflow-y-auto flex-1">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Role Title / Display Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={roleForm.displayName}
-                    onChange={(e) => setRoleForm({ ...roleForm, displayName: e.target.value })}
-                    placeholder="e.g. Branch Supervisor"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#D99A1C]"
-                  />
-                </div>
-
-                {!editingRole && (
-                  <div className="space-y-1">
-                    <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Identifier (No spaces) *</label>
-                    <input
-                      type="text"
-                      required
-                      value={roleForm.name}
-                      onChange={(e) => setRoleForm({ ...roleForm, name: e.target.value })}
-                      placeholder="e.g. BranchSupervisor"
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#D99A1C]"
-                    />
-                  </div>
-                )}
-
-                <div className="space-y-1 md:col-span-2">
-                  <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Role Description</label>
-                  <input
-                    type="text"
-                    value={roleForm.description}
-                    onChange={(e) => setRoleForm({ ...roleForm, description: e.target.value })}
-                    placeholder="Describe staff operational rights..."
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-[#0F172A] focus:outline-none focus:border-[#D99A1C]"
-                  />
-                </div>
+              <div>
+                <label className="text-[10px] font-black uppercase text-slate-500 tracking-wider block mb-1">
+                  Role Display Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={roleForm.displayName}
+                  onChange={(e) => setRoleForm({ ...roleForm, displayName: e.target.value })}
+                  placeholder="e.g. Senior Branch Counselor"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:border-[#D99A1C]"
+                />
               </div>
 
-              {/* SIDEBAR ITEMS CHECKLIST */}
-              <div className="space-y-3 border-t border-slate-100 pt-4">
-                <h4 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
-                  📌 Agency Sidebar Navigation Checklist
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div>
+                <label className="text-[10px] font-black uppercase text-slate-500 tracking-wider block mb-1">
+                  Description
+                </label>
+                <textarea
+                  rows={2}
+                  value={roleForm.description}
+                  onChange={(e) => setRoleForm({ ...roleForm, description: e.target.value })}
+                  placeholder="Explain the scope and responsibilities of this agency staff role..."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:outline-none focus:border-[#D99A1C]"
+                />
+              </div>
+
+              {/* Sidebar Checklist */}
+              <div className="space-y-3">
+                <span className="text-[11px] font-black text-slate-900 uppercase tracking-wider block">
+                  1. Sidebar Navigation Checklist
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
                   {AGENT_SIDEBAR_ITEMS.map((item) => {
                     const isChecked = roleForm.permissions.includes(item.key);
                     return (
-                      <label
-                        key={item.key}
-                        onClick={() => togglePermissionKey(item.key)}
-                        className={`p-2.5 rounded-xl border flex items-center gap-2.5 cursor-pointer transition-all ${
-                          isChecked ? 'bg-amber-50 border-[#D99A1C] text-[#0F172A] font-bold' : 'bg-slate-50 border-slate-200 text-[#64748B]'
-                        }`}
-                      >
+                      <label key={item.key} className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-slate-700 select-none p-1.5 hover:bg-white rounded-lg transition-colors">
                         <input
                           type="checkbox"
                           checked={isChecked}
-                          onChange={() => {}}
+                          onChange={() => togglePermissionKey(item.key)}
                           className="w-4 h-4 text-[#D99A1C] rounded border-slate-300 focus:ring-[#D99A1C]"
                         />
-                        <div className="truncate">
-                          <p className="text-xs">{item.label}</p>
-                          <span className="text-[9px] text-[#64748B] block font-mono">{item.key}</span>
-                        </div>
+                        <span>{item.label}</span>
                       </label>
                     );
                   })}
                 </div>
               </div>
 
-              {/* FEATURE ACTION CHECKLIST */}
-              <div className="space-y-3 border-t border-slate-100 pt-4">
-                <h4 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">
-                  ⚡ Agency Feature Capabilities Checklist
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {AGENT_FEATURE_ACTIONS.map((act) => {
-                    const isChecked = roleForm.permissions.includes(act.key);
+              {/* Features Checklist */}
+              <div className="space-y-3">
+                <span className="text-[11px] font-black text-slate-900 uppercase tracking-wider block">
+                  2. Operations & Feature Actions Checklist
+                </span>
+                <div className="space-y-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                  {AGENT_FEATURE_ACTIONS.map((item) => {
+                    const isChecked = roleForm.permissions.includes(item.key);
                     return (
-                      <label
-                        key={act.key}
-                        onClick={() => togglePermissionKey(act.key)}
-                        className={`p-2.5 rounded-xl border flex items-center gap-2.5 cursor-pointer transition-all ${
-                          isChecked ? 'bg-purple-50 border-purple-500 text-purple-950 font-bold' : 'bg-slate-50 border-slate-200 text-[#64748B]'
-                        }`}
-                      >
+                      <label key={item.key} className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-slate-700 select-none p-1.5 hover:bg-white rounded-lg transition-colors">
                         <input
                           type="checkbox"
                           checked={isChecked}
-                          onChange={() => {}}
-                          className="w-4 h-4 text-purple-600 rounded border-slate-300 focus:ring-purple-500"
+                          onChange={() => togglePermissionKey(item.key)}
+                          className="w-4 h-4 text-[#D99A1C] rounded border-slate-300 focus:ring-[#D99A1C]"
                         />
-                        <div className="truncate">
-                          <p className="text-xs">{act.label}</p>
-                          <span className="text-[9px] text-[#64748B] block font-mono">{act.key}</span>
-                        </div>
+                        <span>{item.label}</span>
                       </label>
                     );
                   })}
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
                 <ActionButton
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all"
+                  className="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50"
                 >
                   Cancel
                 </ActionButton>
                 <ActionButton
                   type="submit"
                   disabled={isSaving}
-                  className="bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.01] text-black font-bold text-xs px-6 py-2.5 rounded-xl transition-all shadow-md uppercase tracking-wider disabled:opacity-50 flex items-center gap-2"
+                  className="px-5 py-2 bg-[#D99A1C] hover:bg-[#F5B025] text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-md"
                 >
-                  {isSaving && (
-                    <svg className="animate-spin h-3.5 w-3.5 text-black" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                  )}
-                  {isSaving ? 'Saving to Database...' : 'Save Role & Permissions ✓'}
+                  {isSaving ? 'Saving...' : 'Save Role Permissions'}
                 </ActionButton>
               </div>
             </ActionForm>
@@ -361,6 +397,6 @@ export default function AgentRolePermissions({ partnerData }) {
         </div>,
         document.body
       )}
-    </div>
+    </div>)
   );
 }

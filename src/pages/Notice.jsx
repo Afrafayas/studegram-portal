@@ -1,10 +1,14 @@
+import useServerList from '../hooks/useServerList';
+import ListToolbar, { ListPagination } from '../components/ListToolbar';
+import ActionMenu from '../components/ActionMenu';
+import { splitNoticeSections } from '../utils/noticeSections.mjs';
 import SearchableSelect from '../components/SearchableSelect';
 import { getDisplayId } from '../utils/displayId';
 import API from '../api/axios';
 import { ActionButton, ActionForm } from '../components/ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState, useEffect } from 'react';
-import { mapNotice } from '../utils/resourceData';
+const mapNotice = notice => ({ ...notice, id: notice._id, message: notice.content || '', type: notice.category || 'General', badge: notice.badge || notice.priority, date: notice.createdAt ? new Date(notice.createdAt).toLocaleDateString('en-GB') : '', isNew: !notice.isRead, image: notice.image || '' });
 import { useToast } from '../context/ToastContext';
 
 const CATEGORIES_LIST = [
@@ -22,17 +26,62 @@ const CATEGORIES_LIST = [
 export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
   const toast = useToast();
   const [localNotices, setLocalNotices] = useState([]);
+  const [activeNoticeTab, setActiveNoticeTab] = useState('received');
+  const list = useServerList('/notices', { fixedFilters: { direction: activeNoticeTab } });
+  useEffect(() => { const changed = () => list.refresh(); window.addEventListener('notices-updated', changed); return () => window.removeEventListener('notices-updated', changed); }, [list.refresh]);
   const [loadError, setLoadError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     let active = true;
-    API.get('/notices').then(response => {
+    const load = () => API.get('/notices').then(response => {
       if (!response.data?.success || !Array.isArray(response.data.data)) throw new Error('Unable to load notices.');
-      if (active) setLocalNotices(response.data.data.filter(n => n.status === 'Active' && ['All', 'Agents'].includes(n.targetAudience)).map(mapNotice));
+      if (active) { setLocalNotices(response.data.data.map(mapNotice)); setLoadError(''); }
     }).catch(error => { if (active) setLoadError(error.response?.data?.message || error.message); })
       .finally(() => { if (active) setIsLoading(false); });
-    return () => { active = false; };
+    load();
+    const timer = setInterval(load, 60000);
+    window.addEventListener('notices-updated', load);
+    return () => { active = false; clearInterval(timer); window.removeEventListener('notices-updated', load); };
   }, []);
+
+  const [editingId, setEditingId] = useState(null);
+  const [formExpiresOn, setFormExpiresOn] = useState('');
+  const [formStatus, setFormStatus] = useState('Active');
+  const [formPriority, setFormPriority] = useState('Medium');
+  const [formAudience, setFormAudience] = useState('Agents');
+  const [readError, setReadError] = useState('');
+  const markRead = async id => {
+    try {
+      const response = await API.patch('/notices/' + id + '/read');
+      setLocalNotices(prev => prev.map(n => n.id === id ? mapNotice(response.data.data) : n));
+      setReadError('');
+      window.dispatchEvent(new Event('notices-updated'));
+    } catch (error) { setReadError(error.response?.data?.message || 'Unable to mark as read. Please retry.'); }
+  };
+  const selected = localNotices.find(n => n.id === selectedNoticeId);
+  useEffect(() => {
+    if (selected?.id && !selected.isRead) markRead(selected.id);
+  }, [selected?.id, selected?.isRead]);
+  const editNotice = notice => {
+    setFileName('');
+    setEditingId(notice.id); setFormTitle(notice.title); setFormMessage(notice.content || notice.message || '');
+    setFormType(notice.category); setFormBadge(notice.badge || ''); setFormPosterUrl(notice.image || '');
+    setFormExpiresOn(notice.expiresOn || ''); setFormStatus(notice.status); setFormPriority(notice.priority);
+    setFormAudience(notice.targetAudience); setShowUploadModal(true);
+  };
+  const deleteNotice = async notice => {
+    if (!window.confirm('Delete this notice permanently?')) return;
+    try {
+      await API.delete('/notices/' + notice.id);
+      setLocalNotices(prev => prev.filter(n => n.id !== notice.id));
+      setSelectedNoticeId(null); window.dispatchEvent(new Event('notices-updated'));
+    } catch (error) { toast.error(error.response?.data?.message || 'Unable to delete notice.'); }
+  };
+  const noticeActions = (notice, showEdit = true) => <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] py-1" onClick={e => e.stopPropagation()}>
+    <span>{notice.status}{notice.isExpired ? ' � Expired' : ''} � {notice.isRead ? 'Read' : 'Unread'}{notice.expiresOn ? ' � Show until ' + notice.expiresOn + ' (India time)' : ''}</span>
+    {!notice.isRead && <ActionButton onClick={() => markRead(notice.id)} className="text-amber-700 font-bold">Mark as Read</ActionButton>}
+    {notice.canManage && <>{showEdit && <ActionButton type="button" onClick={() => editNotice(notice)} className="text-amber-700 font-bold">Edit</ActionButton>}<ActionButton onClick={() => deleteNotice(notice)} className="text-red-700 font-bold">Delete</ActionButton></>}
+  </div>;
 
   // Form State
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -120,12 +169,14 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
     setIsSubmitting(true);
 
     try {
-      const response = await API.post('/notices', {
+      const response = await API[editingId ? 'put' : 'post'](editingId ? '/notices/' + editingId : '/notices', {
         title: formTitle.trim(), content: formMessage.trim(), category: formType,
-        priority: 'Medium', targetAudience: 'Agents', status: 'Active', image: formPosterUrl || '', badge: formBadge.trim()
+        priority: formPriority, targetAudience: formAudience, status: formStatus, expiresOn: formExpiresOn, image: formPosterUrl || '', badge: formBadge.trim()
       });
       if (!response.data?.success) throw new Error(response.data?.message || 'Unable to save notice.');
-      setLocalNotices(prev => [mapNotice(response.data.data), ...prev]);
+      setLocalNotices(prev => editingId ? prev.map(n => n.id === editingId ? mapNotice(response.data.data) : n) : [mapNotice(response.data.data), ...prev]);
+      toast.success(editingId ? 'Notice updated successfully.' : 'Notice published successfully.');
+      if (!editingId) setActiveNoticeTab('sent');
       window.dispatchEvent(new Event('notices-updated'));
     } catch (error) {
       toast.error(error.response?.data?.message || error.message);
@@ -134,6 +185,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
     }
 
     // Reset Form & Close Modal
+    setEditingId(null); setFormExpiresOn(''); setFormStatus('Active'); setFormPriority('Medium'); setFormAudience('Agents');
     setFormTitle('');
     setFormType(CATEGORIES_LIST[0]);
     setFormBadge('');
@@ -145,7 +197,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
   };
 
   // Single Notice Detail View Page
-  if (selectedNoticeId) {
+  if (selectedNoticeId && !showUploadModal) {
     const notice = localNotices.find((n) => n.id === selectedNoticeId);
     if (notice) {
       return (
@@ -191,6 +243,8 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
               </span>
             </div>
 
+            {noticeActions(notice)}
+            {readError && <p role="alert" className="text-red-700">{readError}</p>}
             {/* Notice Title */}
             <h2 className="text-xl font-bold text-[#0F172A] leading-snug">
               {notice.title}
@@ -209,12 +263,12 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
 
             {/* Detailed Content */}
             <div className="space-y-4 text-sm text-[#334155] leading-relaxed font-medium">
-              <p>{notice.message}</p>
+              <p className="whitespace-pre-wrap">{notice.message}</p>
             </div>
 
             {/* Metadata Footer */}
             <div className="pt-6 border-t border-slate-100 text-[10px] text-[#64748B] font-semibold flex items-center justify-between">
-              <span>Ref: {getDisplayId(notice)} • Posted by Admin</span>
+              <span>Ref: {getDisplayId(notice)} • Posted by {notice.senderName || notice.senderPortal || 'Admin'}</span>
               <span className="flex items-center gap-1.5 text-indigo-600">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
@@ -228,9 +282,11 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
     }
   }
 
+  const noticeSections = splitNoticeSections(localNotices, 'Agent');
+
   // Notices List View
   return (
-    <div className="flex-1 p-8 space-y-6 bg-[#F0F2F5] animate-fade-in-up">
+    <div className="workspace-page flex-1 p-8 space-y-6 bg-[#F0F2F5] animate-fade-in-up">
       {/* Title & Action */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
@@ -240,7 +296,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
 
         {/* Action Button */}
         <ActionButton
-          onClick={() => setShowUploadModal(true)}
+          onClick={() => { setEditingId(null); setFormTitle(''); setFormMessage(''); setFormBadge(''); setFormPosterUrl(''); setFileName(''); setFormType(CATEGORIES_LIST[0]); setFormExpiresOn(''); setFormStatus('Active'); setFormPriority('Medium'); setFormAudience('Agents'); setShowUploadModal(true); }}
           className="self-start md:self-auto bg-[#D99A1C] hover:bg-[#C28410] text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all duration-150 hover:scale-[1.02] active:scale-95 shadow-md flex items-center gap-2"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -250,95 +306,129 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
         </ActionButton>
       </div>
 
-      {/* Notices Cards List */}
-      <div className="space-y-4">
-        {localNotices.map((notice) => (
-          <div
-            key={notice.id}
-            onClick={() => setSelectedNoticeId(notice.id)}
-            className="bg-white border-l-4 border-l-[#D99A1C] border-y border-r border-[#E2E8F0] rounded-r-xl rounded-l-md p-5 shadow-sm hover:shadow-md hover:scale-[1.005] active:scale-[0.998] transition-all duration-200 relative group flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer"
-          >
-            {/* Left Content */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 flex-wrap">
-                {/* Notice Type Tag */}
-                <span className="bg-slate-100 text-[#64748B] border border-slate-200 text-[8px] font-extrabold px-2 py-0.5 rounded-full tracking-wider uppercase">
-                  {notice.type}
-                </span>
-
-                {/* Notice Badge (if any) */}
-                {notice.badge && (
-                  <span className="bg-indigo-50 text-[#D99A1C] border border-indigo-100 text-[8px] font-extrabold px-2 py-0.5 rounded-full tracking-wider uppercase">
-                    {notice.badge}
-                  </span>
-                )}
-                
-                {/* New Badge */}
-                {notice.isNew && (
-                  <span className="bg-indigo-50 text-[#D99A1C] border border-indigo-100 text-[8px] font-extrabold px-2 py-0.5 rounded-full tracking-wider uppercase animate-pulse">
-                    New
-                  </span>
-                )}
-              </div>
-
-              {/* Title */}
-              <h3 className="text-xs font-bold text-[#0F172A] leading-relaxed group-hover:text-[#D99A1C] transition-colors pr-12">
-                {notice.title}
-              </h3>
-
-              <p className="text-[10px] text-[#64748B] font-semibold">Ref: {getDisplayId(notice)} • Posted by Admin</p>
-            </div>
-
-            {/* Right Date Chip */}
-            <div className="sm:text-right shrink-0 flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3">
-              <span className="bg-slate-100 text-[#0F172A] text-[9px] font-bold px-2.5 py-1 rounded-lg">
-                {notice.date}
-              </span>
-              <ActionButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedNoticeId(notice.id);
-                }}
-                className="text-xs text-[#D99A1C] font-semibold hover:underline flex items-center gap-1"
-              >
-                Details
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </ActionButton>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Pagination with prev/next buttons */}
-      <div className="bg-white border border-[#E2E8F0] rounded-2xl px-6 py-4 shadow-sm flex items-center justify-between text-xs text-[#64748B] font-semibold">
-        {/* <span>Showing 1-{localNotices.length} of {localNotices.length} notices</span> */}
-        <div className="flex gap-2 ml-auto">
-          <ActionButton className="px-4 py-2 border border-[#E2E8F0] bg-white rounded-xl hover:bg-slate-50 disabled:opacity-50 transition-all shadow-sm flex items-center gap-1.5 font-bold" disabled>
-            <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-            </svg>
-            Prev
-          </ActionButton>
-          <ActionButton className="px-4 py-2 border border-[#E2E8F0] bg-white rounded-xl hover:bg-slate-50 disabled:opacity-50 transition-all shadow-sm flex items-center gap-1.5 font-bold" disabled>
-            Next
-            <svg className="w-4 h-4 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </ActionButton>
+      {readError && <p role="alert" className="text-red-700">{readError}</p>}
+      {!isLoading && !loadError && localNotices.length === 0 && <p>No notices yet.</p>}
+      {isLoading && <p className="text-sm text-slate-500">Loading notices...</p>}
+      {loadError && <p role="alert" className="text-sm text-red-600">{loadError}</p>}
+      <div className="workspace-panel workspace-list-frame bg-white border border-[#E2E8F0] border-t-4 border-t-[#D99A1C] rounded-2xl shadow-xs overflow-hidden">
+        {/* Scoping Tabs on top of table */}
+        <div className="flex items-center gap-2 overflow-x-auto p-4 border-b border-slate-100 bg-slate-50/50">
+          {noticeSections.map(section => (
+            <button
+              key={section.key}
+              type="button"
+              onClick={() => setActiveNoticeTab(section.key)}
+              className={`px-4 py-2 text-xs font-black rounded-xl transition-all cursor-pointer whitespace-nowrap ${
+                activeNoticeTab === section.key ? 'bg-[#0A0A0F] text-white shadow-sm' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+              }`}
+            >
+              {section.title} ({section.notices.length})
+            </button>
+          ))}
         </div>
+
+        <ListToolbar
+          list={list}
+          label="notices"
+          fields={[
+            { key: 'category', label: 'Categories' },
+            { key: 'priority', label: 'Priorities' },
+            { key: 'status', label: 'Statuses' },
+            { key: 'readStatus', label: 'Read States' }
+          ]}
+        />
+
+        
+
+        <div className="overflow-x-auto">
+          {list.records.length > 0 ? (
+            <table className="workspace-table w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b border-[#E2E8F0]">
+                  <th className="px-6 py-3.5 text-slate-400 text-[10px] font-extrabold uppercase tracking-wider pl-6">Notice Title & Details</th>
+                  <th className="px-6 py-3.5 text-slate-400 text-[10px] font-extrabold uppercase tracking-wider">Category</th>
+                  <th className="px-6 py-3.5 text-slate-400 text-[10px] font-extrabold uppercase tracking-wider">Priority</th>
+                  <th className="px-6 py-3.5 text-slate-400 text-[10px] font-extrabold uppercase tracking-wider">Published By</th>
+                  <th className="px-6 py-3.5 text-slate-400 text-[10px] font-extrabold uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-3.5 text-slate-400 text-[10px] font-extrabold uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3.5 text-slate-400 text-[10px] font-extrabold uppercase tracking-wider text-right pr-6">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
+                {list.records.map(mapNotice).map((notice) => (
+                  <tr tabIndex={0} onKeyDown={event => { if (event.target === event.currentTarget && event.key === "Enter") { event.preventDefault(); event.currentTarget.click(); } }}
+                    key={notice.id}
+                    onClick={() => setSelectedNoticeId(notice.id)}
+                    className="hover:bg-amber-50/40 transition-colors cursor-pointer group"
+                  >
+                    <td className="px-6 py-4 pl-6">
+                      <div className="flex items-center gap-3">
+                        {notice.image ? (
+                          <img src={notice.image} alt="" className="w-10 h-10 object-cover rounded-lg border border-slate-200 shrink-0" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-amber-50 text-[#D99A1C] border border-amber-200 flex items-center justify-center font-bold text-sm shrink-0">
+                            📢
+                          </div>
+                        )}
+                        <div>
+                          <p className="font-black text-slate-900 group-hover:text-[#D99A1C] transition-colors line-clamp-1">{notice.title}</p>
+                          <p className="text-[10px] text-slate-400 font-medium">Ref: {getDisplayId(notice)}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="bg-slate-100 text-[#64748B] border border-slate-200 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase">
+                        {notice.type}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase border ${
+                        notice.priority === 'Urgent' || notice.badge === 'Urgent' ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-amber-50 text-amber-700 border-amber-200'
+                      }`}>
+                        {notice.badge || notice.priority || 'Normal'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-slate-600 font-medium">{notice.senderName || notice.senderPortal || 'Admin'}</td>
+                    <td className="px-6 py-4 text-slate-400 font-medium">{notice.date}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-0.5 border rounded-full text-[9px] font-extrabold ${notice.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                        {notice.status || 'Active'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right pr-6" onClick={(e) => e.stopPropagation()}>
+                      <ActionMenu
+                        items={[
+                          { label: 'View Notice Details', onClick: () => setSelectedNoticeId(notice.id) },
+                          ...(notice.canManage ? [
+                            { label: 'Edit Notice', onClick: () => editNotice(notice) },
+                            { label: 'Delete Notice', variant: 'danger', onClick: () => deleteNotice(notice) }
+                          ] : []),
+                          ...(!notice.isRead ? [
+                            { label: 'Mark as Read', onClick: () => markRead(notice.id) }
+                          ] : [])
+                        ]}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="p-12 text-center text-xs text-slate-400 font-semibold">No notices found</div>
+          )}
+        </div>
+        <ListPagination list={list} />
       </div>
 
       {/* Add Notice Modal Sheet */}
       {showUploadModal && createPortal(
         <div className="fixed inset-0 z-[9999] overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 animate-fadeIn">
-          <div className="bg-white border border-slate-100 rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden animate-scaleIn max-h-[90vh] flex flex-col my-auto">
+          <div className="workspace-list-frame bg-white border border-slate-100 rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden animate-scaleIn max-h-[90vh] flex flex-col my-auto">
             
             {/* Modal Header */}
             <div className="bg-slate-950 p-6 text-white border-b border-slate-900 flex justify-between items-center">
               <div>
-                <h3 className="text-sm font-extrabold tracking-tight">Post Announcement / Upload Poster</h3>
+                <h3 className="text-sm font-extrabold tracking-tight">{editingId ? 'Edit Notice' : 'Post Announcement / Upload Poster'}</h3>
                 <p className="text-[10px] text-slate-400 font-semibold mt-1">Publish critical updates and media directly to the portal feed.</p>
               </div>
               <ActionButton
@@ -403,6 +493,19 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
                   </div>
                 </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <label className="text-xs font-bold">Show until (India time, inclusive)
+                    <input type="date" value={formExpiresOn} onChange={e => setFormExpiresOn(e.target.value)} className="block w-full border rounded-xl p-2 mt-1" />
+                    <span className="text-xs font-normal">Leave blank for no expiry.</span>
+                  </label>
+                  <label className="text-xs font-bold">Status
+                    <select value={formStatus} onChange={e => setFormStatus(e.target.value)} className="block w-full border rounded-xl p-2 mt-1"><option>Active</option><option>Archived</option></select>
+                  </label>
+                  <label className="text-xs font-bold">Priority
+                    <select value={formPriority} onChange={e => setFormPriority(e.target.value)} className="block w-full border rounded-xl p-2 mt-1">{['Low', 'Medium', 'High', 'Urgent'].map(p => <option key={p}>{p}</option>)}</select>
+                  </label>
+                  <p className="text-xs text-slate-500">Sent to the admin portal. Every priority receives reminders.</p>
+                </div>
                 {/* Announcement Message */}
                 <div className="space-y-1">
                   <label className="text-[10px] font-extrabold text-[#475569] uppercase tracking-wider">Message Description *</label>
@@ -452,7 +555,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
                         <p className="text-xs font-bold text-[#0F172A]">
                           {isUploadingPoster ? 'Processing poster image...' : fileName ? `File Selected: ${fileName}` : 'Click to Upload or Drag Poster here'}
                         </p>
-                        <p className="text-[10px] text-[#64748B] font-medium mt-0.5">Supports PNG, JPG, JPEG (will be compressed locally)</p>
+                        <p className="text-[10px] text-[#64748B] font-medium mt-0.5">Supports PNG, JPG, JPEG</p>
                       </div>
                     </label>
                   </div>
@@ -488,7 +591,7 @@ export default function Notice({ selectedNoticeId, setSelectedNoticeId }) {
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
                     )}
-                    {isSubmitting ? 'Publishing Notice...' : 'Publish Notice Announcement'}
+                    {isSubmitting ? (editingId ? 'Saving Notice...' : 'Publishing Notice...') : editingId ? 'Save Notice' : 'Publish Notice Announcement'}
                   </ActionButton>
                 </div>
               </ActionForm>

@@ -1,6 +1,6 @@
+import BatchDocumentUpload from './BatchDocumentUpload';
 import { applicationFee } from '../utils/courseFee';
 import { ActionButton, ActionForm } from './ActionControls';
-import { createPortal } from 'react-dom';
 import React, { useState, useEffect, useRef } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
@@ -19,10 +19,6 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
   const [showClaimModal, setShowClaimModal] = useState(false);
 
   const [localDocuments, setLocalDocuments] = useState([]);
-  const [isUploadingDoc, setIsUploadingDoc] = useState(false);
-  const [uploadDocError, setUploadDocError] = useState('');
-  const [uploadComment, setUploadComment] = useState('');
-  const [selectedUploadFile, setSelectedUploadFile] = useState(null);
   const [editingDocIdx, setEditingDocIdx] = useState(null);
   const [editDocComment, setEditDocComment] = useState('');
   const [replaceFile, setReplaceFile] = useState(null);
@@ -65,8 +61,6 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
     if (application) {
       setLocalDocuments(application.documents || []);
       setAppComments(application.applicationComments || []);
-      setUploadComment('');
-      setSelectedUploadFile(null);
     }
   }, [application]);
 
@@ -251,7 +245,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
   const [newNote, setNewNote] = useState('');
   const notes = appComments.map(comment => ({
     author: comment.author || comment.name || 'User', role: comment.role || '', text: comment.text || '',
-    date: comment.createdAt ? new Date(comment.createdAt).toLocaleString() : '', avatarColor: 'bg-blue-500'
+    date: comment.createdAt ? new Date(comment.createdAt).toLocaleString('en-US', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true }) : '', avatarColor: 'bg-blue-500'
   }));
   const handleAddNote = async event => {
     event.preventDefault();
@@ -337,39 +331,40 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
     /\badmin\b/i.test(latestComment.authorRole || latestComment.role || latestComment.author || '')
   );
 
-  return createPortal(
+  return (
     <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 overflow-y-auto"
+      className="w-full min-w-0 p-4 sm:p-6 lg:p-8 [overflow-wrap:anywhere]"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-2xl w-full max-w-4xl shadow-2xl relative flex flex-col max-h-[90vh] overflow-hidden transition-all duration-300 transform scale-100"
+        className="bg-white border border-slate-200 border-t-4 border-t-[#D99A1C] rounded-2xl w-full shadow-sm relative flex flex-col overflow-hidden"
       >
         {/* Top Header & close button */}
-        <div className="px-6 py-4 flex items-center justify-between border-b border-slate-100 sticky top-0 bg-white z-10">
+        <div className="px-4 sm:px-6 py-5 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 bg-white">
           <div className="flex items-center gap-3">
             <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-[#D99A1C] flex items-center justify-center font-bold"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" /></svg></div>
             <div>
-              <h2 className="text-sm font-bold text-[#0F172A] tracking-tight">
+              <h2 className="text-lg sm:text-xl font-bold text-[#0F172A] tracking-tight">
                 Application details for {application.studentName}
               </h2>
-              <p className="text-[10px] text-[#64748B] font-semibold mt-0.5">
+              <p className="text-xs leading-relaxed text-[#64748B] font-semibold mt-1">
                 Application ID: <span className="text-[#D99A1C] font-bold">{application.camsId}</span> &middot; Passport: <span className="font-bold text-[#0F172A]">{application.passportNo}</span> &middot; Level: <span className="font-bold text-indigo-600">{application.level || 'Not provided'}</span>
               </p>
             </div>
           </div>
           <ActionButton
             onClick={onClose}
-            className="p-1.5 hover:bg-slate-100 rounded-full text-[#64748B] hover:text-[#0F172A] transition-colors"
+            className="shrink-0 self-start inline-flex items-center gap-2 px-3 py-2 border border-slate-200 bg-slate-50 hover:bg-slate-100 rounded-lg text-xs font-semibold text-slate-700 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
             </svg>
+            <span>Back</span>
           </ActionButton>
         </div>
 
         {/* Brand Main Toggle Tab Bar */}
-        <div className="flex bg-slate-50 border-b border-slate-200/80 px-6 py-2 gap-4">
+        <div className="flex flex-wrap bg-slate-50 border-b border-slate-200/80 px-4 sm:px-6 py-2 gap-2">
           <ActionButton
             onClick={() => setMainTab('details')}
             className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all ${
@@ -395,9 +390,9 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
 
         {/* Modal Main Content Container */}
         {mainTab === 'details' ? (
-          <div className="flex-1 overflow-y-auto flex flex-col md:flex-row min-h-0 bg-slate-50/50">
+          <div className="grid grid-cols-1 xl:grid-cols-[minmax(240px,0.7fr)_minmax(0,2fr)] bg-slate-50/50">
             {/* Left Column: Progress Timeline Stepper */}
-            <div className="md:w-5/12 p-6 border-b md:border-b-0 md:border-r border-slate-100 bg-white">
+            <div className="p-4 sm:p-6 border-b xl:border-b-0 xl:border-r border-slate-200 bg-white">
               <h3 className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-5">
                 Application Progress Timeline
               </h3>
@@ -449,7 +444,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
             {/* Right Column: Tabbed Details Section */}
             <div className="flex-grow flex flex-col min-w-0">
               {/* Sub-Tabs Bar */}
-              <div className="flex bg-white border-b border-slate-100 px-6">
+              <div className="flex flex-wrap bg-white border-b border-slate-100 px-4 sm:px-6">
                 {[
                   { id: 'profile', label: 'Student Profile' },
                   { id: 'documents', label: 'Uploaded Documents' }
@@ -469,7 +464,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
               </div>
 
               {/* Tab Panels */}
-              <div className="flex-1 p-6 overflow-y-auto">
+              <div className="flex-1 p-4 sm:p-6">
                 
                 {/* Tab 1: Profile View */}
                 {activeTab === 'profile' && (
@@ -478,7 +473,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                       <h4 className="text-[10px] font-extrabold text-[#D99A1C] uppercase tracking-wider flex items-center gap-1.5">
                         <span className="flex items-center gap-1.5"><svg className="w-3.5 h-3.5 text-[#D99A1C]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" /></svg> Application Choice</span>
                       </h4>
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">University</span>
                           <span className="text-xs font-bold text-[#0F172A]">{application.universityName}</span>
@@ -539,7 +534,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                       <h4 className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider border-b border-slate-100 pb-2">
                         Student Personal Profile
                       </h4>
-                      <div className="grid grid-cols-2 gap-y-4 gap-x-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-4">
                         <div>
                           <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Full Name</span>
                           <span className="text-xs font-bold text-[#0F172A]">{application.studentName}</span>
@@ -602,8 +597,8 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                       <div className="space-y-2.5 max-h-52 overflow-y-auto pr-1">
                         {application.notes && (
                           <div className="bg-white border border-amber-200/60 rounded-xl p-3 space-y-1 shadow-3xs">
-                            <div className="flex items-center justify-between text-[9px] font-extrabold">
-                              <span className="bg-amber-100/70 text-amber-800 px-2 py-0.5 rounded-md border border-amber-200/80">Submission Note</span>
+                            <div className="flex flex-wrap items-center justify-between gap-2 text-[9px] font-extrabold">
+                              <span className="inline-flex items-center gap-1.5 bg-amber-100/70 text-amber-800 px-2 py-0.5 rounded-md border border-amber-200/80"><svg aria-hidden="true" className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4" /><path d="M5 21v-2a7 7 0 0 1 14 0v2" /></svg>Submission Note</span>
                               <span className="text-slate-400">Filed on submission</span>
                             </div>
                             <p className="text-xs font-semibold text-slate-800 whitespace-pre-wrap leading-relaxed">
@@ -622,9 +617,9 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                                 New · Awaiting your reply
                               </span>
                             )}
-                            <div className="flex items-center justify-between text-[9px] font-extrabold">
-                              <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md border border-slate-200">{comment.author || 'Agent'}</span>
-                              <span className="text-slate-400">{comment.createdAt ? new Date(comment.createdAt).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Just now'}</span>
+                            <div className="flex flex-wrap items-center justify-between gap-2 text-[9px] font-extrabold">
+                              <span className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md border border-slate-200"><svg aria-hidden="true" className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4" /><path d="M5 21v-2a7 7 0 0 1 14 0v2" /></svg>{comment.author || 'Agent'}</span>
+                              <span className="text-slate-400">{comment.createdAt ? new Date(comment.createdAt).toLocaleString('en-US', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : 'Just now'}</span>
                             </div>
                             <p className="text-xs font-semibold text-slate-800 whitespace-pre-wrap leading-relaxed">
                               {comment.text}
@@ -673,106 +668,14 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                       </span>
                     </div>
 
-                    {/* Additional File Uploader */}
-                    {selectedUploadFile ? (
-                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2 text-left shadow-3xs">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 truncate pr-2">
-                            <svg className="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            <span className="text-xs font-bold text-slate-800 truncate max-w-[250px]">
-                              {selectedUploadFile.name}
-                            </span>
-                          </div>
-                          <ActionButton
-                            type="button"
-                            onClick={() => {
-                              setSelectedUploadFile(null);
-                              setUploadComment('');
-                            }}
-                            className="text-xs text-rose-500 hover:text-rose-700 font-bold transition-colors cursor-pointer shrink-0"
-                          >
-                            ✕ Remove
-                          </ActionButton>
-                        </div>
-                        <input
-                          type="text"
-                          placeholder="Document description (e.g. Passport Front Page, Semester 1-6 Marksheet)..."
-                          value={uploadComment}
-                          onChange={(e) => setUploadComment(e.target.value)}
-                          className="w-full bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#D99A1C] shadow-3xs"
-                        />
-                      </div>
-                    ) : (
-                      <div className="border-2 border-dashed border-[#E2E8F0] hover:border-[#D99A1C] transition-colors rounded-xl p-4 text-center cursor-pointer relative bg-slate-50">
-                        <input
-                          type="file"
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              setSelectedUploadFile(file);
-                              setUploadDocError('');
-                            }
-                          }}
-                        />
-                        <div className="space-y-1 text-slate-500">
-                          <svg className="w-6 h-6 mx-auto text-[#D99A1C]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                          <p className="text-xs font-semibold text-slate-700">Click to upload additional document</p>
-                          <p className="text-[10px] text-slate-400 font-semibold">Attach any supporting file (PDF, PNG, JPG, Word)</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Submit Button */}
-                    <div className="flex justify-end pt-1">
-                      <ActionButton
-                        type="button"
-                        disabled={isUploadingDoc || !selectedUploadFile}
-                        onClick={async () => {
-                          setIsUploadingDoc(true);
-                          setUploadDocError('');
-                          try {
-                            const formData = new FormData();
-                            formData.append('file', selectedUploadFile);
-                            const res = await API.post('/upload', formData, {
-                              headers: { 'Content-Type': 'multipart/form-data' }
-                            });
-                            const newDoc = { 
-                              name: selectedUploadFile.name, 
-                              url: res.data.url,
-                              comment: uploadComment.trim()
-                            };
-                            const updatedDocs = [...localDocuments, newDoc];
-                            await API.put(`/applications/${application?.id || application?._id}`, { documents: updatedDocs });
-                            setLocalDocuments(updatedDocs);
-
-                            setSelectedUploadFile(null);
-                            setUploadComment('');
-                          } catch (err) {
-                            console.error('File upload failed:', err);
-                            setUploadDocError('Failed to upload document. Please check your connection.');
-                          } finally {
-                            setIsUploadingDoc(false);
-                          }
-                        }}
-                        className="bg-[#D99A1C] hover:bg-[#C28410] disabled:opacity-50 text-white font-bold px-4 py-2 rounded-xl text-[10px] uppercase tracking-wider transition-all duration-150 active:scale-95 shadow-md flex items-center gap-1.5 cursor-pointer"
-                      >
-                        {isUploadingDoc && (
-                          <svg className="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                          </svg>
-                        )}
-                        {isUploadingDoc ? 'Uploading...' : 'Upload Document'}
-                      </ActionButton>
-                    </div>
-
-                    {isUploadingDoc && !selectedUploadFile && (
-                      <p className="text-[10px] text-[#D99A1C] font-semibold animate-pulse">â³ Uploading file, please wait...</p>
-                    )}
-                    {uploadDocError && (
-                      <p className="text-[10px] text-red-500 font-semibold">âŒ {uploadDocError}</p>
-                    )}
+                    <BatchDocumentUpload key={application?.id || application?._id} role="Student" onComplete={async uploaded => {
+                      const id = application?.id || application?._id;
+                      if (!id) throw new Error('Application ID is missing. Refresh and retry.');
+                      const updatedDocs = [...localDocuments, ...uploaded];
+                      const response = await API.put('/applications/' + id, { documents: updatedDocs });
+                      if (!response.data?.success) throw new Error(response.data?.message || 'Documents could not be saved.');
+                      setLocalDocuments(updatedDocs);
+                    }} />
 
                     <div className="divide-y divide-slate-100 border border-slate-100 bg-white rounded-xl overflow-hidden shadow-sm">
                       {localDocuments.length > 0 ? (
@@ -885,9 +788,9 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
           </div>
         ) : (
           /* Messages & Activity Tab Content: Dual Column Layout */
-          <div className="flex-1 flex flex-col md:flex-row min-h-0 bg-slate-50/50 overflow-hidden">
+          <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.5fr)_minmax(260px,1fr)] bg-slate-50/50">
             {/* Left Column: Application Chat Thread */}
-            <div className="md:w-7/12 flex flex-col h-[520px] md:h-auto min-h-0 bg-white border-b md:border-b-0 md:border-r border-slate-100 relative">
+            <div className="flex flex-col h-[560px] sm:h-[640px] min-h-0 min-w-0 bg-white border-b xl:border-b-0 xl:border-r border-slate-200 relative">
               {/* Chat Secure Banner Header */}
               <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-white z-10 shrink-0">
                 <div className="flex items-center gap-2">
@@ -974,7 +877,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                             </svg>
                             <span>{msg.message}</span>
                             <span className="text-[8px] text-slate-400 font-bold select-none">
-                              &middot; {new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                              &middot; {new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
                             </span>
                           </div>
                         </div>
@@ -993,6 +896,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                       >
                         {/* Header metadata */}
                         <div className="flex items-center gap-1.5 mb-1 px-1.5 text-[9px] font-extrabold uppercase tracking-wider text-slate-400 select-none">
+                          <svg aria-hidden="true" className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4" /><path d="M5 21v-2a7 7 0 0 1 14 0v2" /></svg>
                           <span>{msg.sender?.name || (isPartner ? 'You' : 'Admin')}</span>
                           <span>&middot;</span>
                           <span className={isPartner ? 'text-[#D99A1C]' : 'text-slate-400'}>
@@ -1038,7 +942,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                             <circle cx="12" cy="12" r="9" />
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 7v5l3 2" />
                           </svg>
-                          {new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(msg.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
                         </span>
                       </div>
                     );
@@ -1130,7 +1034,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
             </div>
 
             {/* Right Column: Activity Logs & Notes */}
-            <div className="md:w-5/12 p-6 flex flex-col min-h-0 bg-slate-50/30 overflow-y-auto">
+            <div className="p-4 sm:p-6 flex flex-col min-w-0 bg-slate-50/30">
               <div className="space-y-6">
                 {/* Note Input Box */}
                 <ActionForm onSubmit={handleAddNote} className="space-y-2">
@@ -1162,10 +1066,10 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                     {notes.map((note, idx) => (
                       <div key={idx} className="flex gap-3 bg-white p-3.5 border border-slate-100 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                         <div className={`w-8 h-8 rounded-full ${note.avatarColor} text-white flex items-center justify-center font-bold text-xs shrink-0 select-none shadow-sm`}>
-                          {note.author[0]}
+                          <svg aria-hidden="true" className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4" /><path d="M5 21v-2a7 7 0 0 1 14 0v2" /></svg>
                         </div>
                         <div className="space-y-1">
-                          <div className="flex items-baseline gap-2">
+                          <div className="flex flex-wrap items-baseline gap-2">
                             <h5 className="text-xs font-bold text-slate-800">{note.author}</h5>
                             <span className="text-[9px] text-[#D99A1C] font-extrabold uppercase tracking-wider bg-indigo-50/50 px-1.5 py-0.2 rounded border border-indigo-100/50">
                               {note.role}
@@ -1204,8 +1108,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
           if (onUpdateSuccess) onUpdateSuccess();
         }}
       />
-    </div>,
-    document.body
+    </div>
   );
 }
 

@@ -89,6 +89,7 @@ export default function App() {
     }
   } : null;
   const [showModal, setShowModal] = useState(false);
+  const createApplicationCloseRef = useRef(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedAppForDetails, setSelectedAppForDetails] = useState(null);
   const [selectedAppForEdit, setSelectedAppForEdit] = useState(null);
@@ -284,11 +285,11 @@ export default function App() {
       case 'UniversityDeadline':
         return <UniversityDeadline />;
       case 'Universities':
-        return <Universities setActivePage={setActivePage} />;
+        return <Universities setActivePage={(page) => { closeApplicationForms(); setSelectedAppForDetails(null); setActivePage(page); }} />;
       case 'KnowledgeHub':
         return <KnowledgeHub />;
       case 'Scholarships':
-        return <Scholarships setActivePage={setActivePage} />;
+        return <Scholarships setActivePage={(page) => { closeApplicationForms(); setSelectedAppForDetails(null); setActivePage(page); }} />;
       case 'Webinar':
         return <Webinar />;
       case 'StaffManagement':
@@ -354,6 +355,11 @@ export default function App() {
     setShowModal(true);
   };
 
+  const closeApplicationForms = () => {
+    if (showModal) createApplicationCloseRef.current?.close();
+    setSelectedAppForEdit(null);
+  };
+
   // Full Portal Routing
   return (
     <div className="min-h-screen bg-[#F0F2F5] flex flex-col font-sans text-[#0F172A] select-text">
@@ -361,13 +367,14 @@ export default function App() {
       <Navbar 
         activePage={activePage}
         partnerData={partnerData}
-        onBack={handleBack}
+        onBack={showModal || selectedAppForEdit ? closeApplicationForms : selectedAppForDetails ? () => setSelectedAppForDetails(null) : handleBack}
         onNewApplicationClick={handleOpenNewApplicationModal} 
         onLogout={() => setShowLogoutConfirmModal(true)} 
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-        onNavigatePage={(page) => setActivePage(page)}
+        onNavigatePage={(page) => { closeApplicationForms(); setSelectedAppForDetails(null); setActivePage(page); }}
         onOpenProfile={() => setShowProfileModal(true)}
         onSelectApplication={async (appId) => {
+          closeApplicationForms();
           setActivePage('ApplicationHistory');
           if (typeof appId === 'object' && appId !== null) {
             setSelectedAppForDetails(appId);
@@ -390,7 +397,7 @@ export default function App() {
         {/* Left Sidebar */}
         <Sidebar 
           activePage={activePage} 
-          setActivePage={setActivePage} 
+          setActivePage={(page) => { closeApplicationForms(); setSelectedAppForDetails(null); setActivePage(page); }} 
           partnerData={partnerData}
           onLogout={() => setShowLogoutConfirmModal(true)} 
           isOpen={sidebarOpen}
@@ -400,37 +407,40 @@ export default function App() {
         />
 
         {/* Content Area */}
-        <main className="flex-1 flex flex-col overflow-y-auto">
-          {renderActivePage()}
+        <main className="workspace-main flex-1 flex flex-col overflow-y-auto">
+          <div className={selectedAppForDetails || showModal || selectedAppForEdit ? 'hidden' : 'contents'}>
+            {renderActivePage()}
+          </div>
+          <div className={showModal || selectedAppForEdit ? 'hidden' : 'contents'}>
+          <ApplicationDetailsModal
+            isOpen={!!selectedAppForDetails}
+            onClose={() => setSelectedAppForDetails(null)}
+            application={selectedAppForDetails}
+            onUpdateSuccess={fetchApplications}
+          />
+          </div>
+          <AddApplicationModal
+            isOpen={showModal}
+            onClose={() => setShowModal(false)}
+            onSubmit={handleAddApplicationSubmit}
+            closeRef={createApplicationCloseRef}
+          />
+          <div className={showModal ? 'hidden' : 'contents'}>
+            <EditApplicationModal
+              isOpen={!!selectedAppForEdit}
+              onClose={() => setSelectedAppForEdit(null)}
+              application={selectedAppForEdit}
+              onUpdateSuccess={fetchApplications}
+            />
+          </div>
         </main>
       </div>
-
-      {/* Add Application Multi-step Modal */}
-      <AddApplicationModal 
-        isOpen={showModal} 
-        onClose={() => setShowModal(false)} 
-        onSubmit={handleAddApplicationSubmit}
-      />
-
-      {/* Application Details Modal */}
-      <ApplicationDetailsModal
-        isOpen={!!selectedAppForDetails}
-        onClose={() => setSelectedAppForDetails(null)}
-        application={selectedAppForDetails}
-        onUpdateSuccess={fetchApplications}
-      />
-
-      {/* Edit Application Modal */}
-      <EditApplicationModal
-        isOpen={!!selectedAppForEdit}
-        onClose={() => setSelectedAppForEdit(null)}
-        application={selectedAppForEdit}
-        onUpdateSuccess={fetchApplications}
-      />
 
       {/* Persistent Notification Popups */}
       <NotificationPopup
         onViewNotice={(noticeId) => {
+          closeApplicationForms();
+          setSelectedAppForDetails(null);
           setActivePage('Notice');
           setSelectedNoticeId(noticeId);
         }}
@@ -448,6 +458,12 @@ export default function App() {
         isOpen={showProfileModal}
         onClose={() => setShowProfileModal(false)}
         partnerData={partnerData}
+        onOpenRoles={() => {
+          setShowProfileModal(false);
+          closeApplicationForms();
+          setSelectedAppForDetails(null);
+          setActivePage('RoleManagement');
+        }}
         onProfileUpdated={fetchPartnerProfile}
       />
 

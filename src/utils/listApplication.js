@@ -1,0 +1,4 @@
+import { getDisplayId } from './displayId';
+export function mapListApplication(app) {
+ return { ...app, id: app.id || app._id, camsId: app.camsId || getDisplayId(app), studentName: app.studentName || app.student?.name || 'N/A', passportNo: app.passportNo || app.student?.passportNo || 'N/A', email: app.email || app.student?.email || '', phone: app.phone || app.student?.phone || '', universityName: app.universityName || app.university?.name || 'N/A', courseName: app.courseName || app.course?.title || 'N/A', secondaryStatus: app.status || 'Submitted', status: app.status || 'Submitted', dateAdded: app.dateAdded || (app.createdAt ? new Date(app.createdAt).toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'}) : ''), commissionStatus: app.commissionStatus || 'Unclaimed', paymentStatus: app.paymentStatus || 'Pending' };
+}

@@ -40,15 +40,6 @@ export default function Sidebar({ activePage, setActivePage, partnerData, onLogo
     });
   }
 
-  if (isOwner || checkPermission('staff:manage')) {
-    rawMainItems.push({
-      id: 'RoleManagement',
-      permKey: 'staff:manage',
-      label: 'Role & Permissions',
-      icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'
-    });
-  }
-
   const mainItems = rawMainItems.filter(item => checkPermission(item.permKey));
 
   const rawResourceItems = [
@@ -75,8 +66,8 @@ export default function Sidebar({ activePage, setActivePage, partnerData, onLogo
         }}
         className={`w-[calc(100%-16px)] flex items-center gap-3 px-4 py-2.5 rounded-xl mx-2 my-0.5 text-left text-xs font-bold select-none transition-all duration-150 ${
           isActive
-            ? 'bg-gradient-to-r from-[#D99A1C] to-[#F5B025] text-black shadow-md'
-            : 'text-[#94A3B8] hover:bg-[#1A1A2E] hover:text-white'
+            ? 'bg-[#EFB62C] text-[#191b1f] shadow-sm'
+            : 'text-[#94A3B8] hover:bg-[#242528] hover:text-white'
         }`}
       >
         <svg
@@ -103,7 +94,7 @@ export default function Sidebar({ activePage, setActivePage, partnerData, onLogo
       )}
 
       {/* Sidebar drawer container */}
-      <div className={`fixed inset-y-0 left-0 z-50 md:z-30 md:static w-[240px] min-w-[240px] bg-[#0A0A0F] h-screen md:h-[calc(100vh-60px)] md:sticky md:top-[60px] overflow-y-auto flex flex-col justify-between py-4 select-none text-white transform ${
+      <div className={`workspace-sidebar fixed inset-y-0 left-0 z-50 md:z-30 md:static w-[240px] min-w-[240px] bg-[#0A0A0F] h-screen md:h-[calc(100vh-60px)] md:sticky md:top-[60px] overflow-y-auto flex flex-col justify-between py-4 select-none text-white transform ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       } md:translate-x-0 transition-transform duration-200 ease-in-out`}>
         
@@ -173,7 +164,7 @@ export default function Sidebar({ activePage, setActivePage, partnerData, onLogo
                   if (onClose) onClose();
                 }}
                 className="text-[#94A3B8] hover:text-[#D99A1C] transition-colors p-1.5 hover:bg-white/5 rounded-lg cursor-pointer" 
-                title="Profile & Password Reset"
+                title="Settings" aria-label="Settings"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
