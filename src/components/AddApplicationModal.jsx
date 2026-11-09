@@ -1,3 +1,4 @@
+import DocumentPreview from './DocumentPreview';
 import BatchDocumentUpload from './BatchDocumentUpload';
 import DocumentNameSelect from './DocumentNameSelect';
 import StudentDobInput from './StudentDobInput';
@@ -124,7 +125,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
       return;
     }
     if (studentSelectionMode === 'new') {
-      if (!newStudentName || !newStudentEmail || !newStudentPhone) {
+      if (!newStudentName.trim() || !newStudentEmail.trim() || !newStudentPhone.trim()) {
         setError('Please fill in all required new student details (Name, Email, Phone).');
         return;
       }
@@ -289,6 +290,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
 
                   {studentSelectionMode === 'existing' ? (
                     <div>
+                      <label className="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Select Student <span className="text-red-600">*</span></label>
                       <div className="relative">
                         <SearchableSelect
                           required={studentSelectionMode === 'existing'}
@@ -320,7 +322,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
                   ) : (
                     <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 space-y-3 shadow-inner">
                       <div>
-                        <label className="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Student Full Name *</label>
+                        <label className="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Student Full Name <span className="text-red-600">*</span></label>
                         <input
                           type="text"
                           required={studentSelectionMode === 'new'}
@@ -332,7 +334,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Email Address *</label>
+                          <label className="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Email Address <span className="text-red-600">*</span></label>
                           <input
                             type="email"
                             required={studentSelectionMode === 'new'}
@@ -343,7 +345,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
                           />
                         </div>
                         <div>
-                          <label className="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Passport Number *</label>
+                          <label className="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Passport Number <span className="text-red-600">*</span></label>
                           <ValidatedInput validationKind="passport"
                             type="text"
                             required={studentSelectionMode === 'new'}
@@ -356,9 +358,10 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Phone Number</label>
+                          <label className="block text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-1">Phone Number <span className="text-red-600">*</span></label>
                           <ValidatedInput validationKind="phone"
                             type="text"
+                            required={studentSelectionMode === 'new'}
                             value={newStudentPhone}
                             onChange={(e) => setNewStudentPhone(e.target.value)}
                             placeholder="+91 9876543210"
@@ -409,7 +412,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
                 {/* Destination Country Dropdown */}
                 <div>
                   <label className="block text-[11px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">
-                    Destination Country *
+                    Destination Country <span className="text-red-600">*</span>
                   </label>
                   <div className="relative">
                     <SearchableSelect
@@ -439,7 +442,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="block text-[11px] font-extrabold text-[#64748B] uppercase tracking-wider">
-                      Select University *
+                      Select University <span className="text-red-600">*</span>
                     </label>
                     {selectedCountry && (
                       <span className="text-[10px] font-bold text-[#D99A1C]">
@@ -486,7 +489,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
 
                 {/* Course Dropdown */}
                 <div>
-                  <label className="block text-[11px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Select Course</label>
+                  <label className="block text-[11px] font-extrabold text-[#64748B] uppercase tracking-wider mb-1.5">Select Course <span className="text-red-600">*</span></label>
                   <div className="relative">
                     <SearchableSelect searchLabel="Search courses..."
                       required
@@ -518,7 +521,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
                 {/* Level of Study */}
                 <div className="space-y-1">
                   <label className="block text-[11px] font-extrabold text-[#64748B] uppercase tracking-wider">
-                    Level of Study *
+                    Level of Study <span className="text-red-600">*</span>
                   </label>
                   <div className="relative">
                     <SearchableSelect
@@ -542,7 +545,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
                 {/* Requested Intake Season */}
                 <div className="space-y-1">
                   <label className="block text-[11px] font-extrabold text-[#64748B] uppercase tracking-wider">
-                    Requested Intake Season *
+                    Requested Intake Season <span className="text-red-600">*</span>
                   </label>
                   <div className="relative">
                     <SearchableSelect
@@ -565,11 +568,16 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
               </div>
 
               <div className="space-y-3 text-left rounded-xl border border-slate-200 p-4 sm:p-5">
-                <h3 className="text-xs font-bold text-slate-700">Supporting Documents *</h3>
+                <h3 className="text-xs font-bold text-slate-700">Supporting Documents <span className="text-red-600">*</span></h3>
                 <BatchDocumentUpload role="Student" disabled={isSubmitting} onBusyChange={setIsUploadingDocuments} onPendingChange={setHasQueuedDocuments} onComplete={async uploaded => { setDocumentsList(prev => [...prev.filter(doc => doc.url), ...uploaded.map(doc => ({ ...doc, id: crypto.randomUUID(), isUploading: false, error: '' }))]); }} />
                 {documentsList.filter(doc => doc.url).map(doc => <div key={doc.id} className="rounded-xl border border-slate-200 p-3 space-y-2">
                   <div className="flex items-center justify-between gap-2 text-xs"><span className="break-all">{doc.fileName}</span><ActionButton type="button" disabled={isSubmitting} className="font-bold text-red-700" onClick={() => setDocumentsList(prev => prev.filter(item => item.id !== doc.id))}>Remove</ActionButton></div>
+                  <div className="grid min-w-0 grid-cols-1 items-start gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
+                    <div className="min-w-0">
                   <DocumentNameSelect role="Student" multiple={false} value={doc.name} disabled={isSubmitting} onChange={name => setDocumentsList(prev => prev.map(item => item.id === doc.id ? { ...item, name: name || item.fileName, title: name || item.fileName } : item))} />
+                    </div>
+                    <DocumentPreview url={doc.url} name={doc.fileName || doc.name} type={doc.type} />
+                  </div>
                 </div>)}
               </div>
 
@@ -595,7 +603,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
                   documentsList.some(d => d.isUploading) || hasQueuedDocuments || isUploadingDocuments ||
                   !documentsList.some(d => d.url) ||
                   (studentSelectionMode === 'existing' && !selectedStudent) ||
-                  (studentSelectionMode === 'new' && (!newStudentName || !newStudentEmail || !newStudentPhone)) ||
+                  (studentSelectionMode === 'new' && (!newStudentName.trim() || !newStudentEmail.trim() || !newStudentPhone.trim())) ||
                   !selectedUniversity ||
                   !selectedCourse
                 }

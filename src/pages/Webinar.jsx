@@ -1,3 +1,4 @@
+import DocumentPreview from '../components/DocumentPreview';
 import ListFilterTabs from '../components/ListFilterTabs';
 import useServerList from '../hooks/useServerList';
 import ListToolbar, { ListPagination } from '../components/ListToolbar';
@@ -84,6 +85,7 @@ export default function Webinar() {
   const [formPosterUrl, setFormPosterUrl] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const [fileName, setFileName] = useState('');
+  const [posterFile, setPosterFile] = useState(null);
   const [isUploadingPoster, setIsUploadingPoster] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -91,6 +93,7 @@ export default function Webinar() {
   const processFile = async (file) => {
     if (file && file.type.startsWith('image/')) {
       setIsUploadingPoster(true);
+      setPosterFile(file);
       setFileName(file.name);
       try {
         const uploadFormData = new FormData();
@@ -106,7 +109,7 @@ export default function Webinar() {
         }
       } catch (uploadErr) {
         toast.error(uploadErr.response?.data?.message || 'Failed to upload poster file. Please try again.');
-        setFileName('');
+        setFileName(''); setPosterFile(null);
       } finally {
         setIsUploadingPoster(false);
       }
@@ -159,7 +162,7 @@ export default function Webinar() {
         setFormDescription('');
         setFormYoutube('');
         setFormPosterUrl('');
-        setFileName('');
+        setFileName(''); setPosterFile(null);
         setShowUploadModal(false);
         toast.success('Webinar hosted successfully!');
       }
@@ -409,6 +412,7 @@ export default function Webinar() {
                     className="hidden"
                     onChange={handleFileSelect}
                   />
+                  <DocumentPreview file={posterFile} />
                   {isUploadingPoster ? (
                     <p className="text-xs text-amber-600 font-bold">Uploading poster...</p>
                   ) : fileName ? (
