@@ -1,12 +1,20 @@
+import DocumentPreview from '../components/DocumentPreview';
 import BatchDocumentUpload from '../components/BatchDocumentUpload';
 import SearchableSelect from '../components/SearchableSelect';
 import ValidatedInput from '../components/ValidatedInput';
 import { ActionButton, ActionForm } from '../components/ActionControls';
 import { createPortal } from 'react-dom';
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import API from '../api/axios';
 
 export default function Register({ onNavigate }) {
+  useLayoutEffect(() => {
+    const elements = [document.documentElement, document.body];
+    const previous = elements.map(element => element.style.overflow);
+    elements.forEach(element => { element.style.overflow = 'hidden'; });
+    return () => elements.forEach((element, index) => { element.style.overflow = previous[index]; });
+  }, []);
+
   // Wizard Window Steps: 1 = Personal Details, 2 = Company Details & Legal Upload, 3 = OTP Verification, 4 = Under Review
   const [step, setStep] = useState(1);
 
@@ -179,10 +187,10 @@ export default function Register({ onNavigate }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#F0F2F5] flex items-stretch select-none">
+    <div className="fixed inset-0 h-dvh overflow-hidden bg-[#F0F2F5] flex items-stretch select-none">
       
       {/* Left side (50%): Brand detail graphic panel */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#D99A1C] text-white p-16 flex-col justify-between relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 min-w-0 shrink-0 bg-[#D99A1C] text-white p-16 flex-col justify-between relative overflow-hidden">
         <div 
           className="absolute inset-0 bg-cover bg-center opacity-25 mix-blend-multiply"
           style={{ backgroundImage: 'url(/assets/login_hero_pattern.png)' }}
@@ -230,8 +238,8 @@ export default function Register({ onNavigate }) {
       </div>
 
       {/* Right side (50%): Wizard Form Window */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 overflow-y-auto">
-        <div className="w-full max-w-lg bg-white border border-[#E2E8F0] rounded-2xl shadow-xl p-8 space-y-6 my-6">
+      <div className="w-full lg:w-1/2 min-w-0 h-full flex items-center justify-center p-4 sm:p-6 lg:p-12 overflow-hidden">
+        <div className="w-full min-w-0 max-w-lg max-h-full overflow-y-auto overflow-x-hidden overscroll-contain [scrollbar-gutter:stable] bg-white border border-[#E2E8F0] rounded-2xl shadow-xl p-4 sm:p-8 space-y-6">
           
           {/* Top Progress bar */}
           <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
@@ -483,6 +491,7 @@ export default function Register({ onNavigate }) {
                       <div key={idx} className="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2 truncate">
                           <span className="text-emerald-600 font-bold">📄</span>
+                          <DocumentPreview url={doc.url || doc.previewUrl} name={doc.fileName || doc.name} type={doc.type} />
                           <span className="font-bold text-[#0F172A] truncate">{doc.name}</span>
                         </div>
                         <ActionButton
