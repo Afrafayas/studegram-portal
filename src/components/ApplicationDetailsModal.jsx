@@ -202,7 +202,11 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
     if (!chatInput.trim() && chatFiles.length === 0) return;
 
     const token = localStorage.getItem('partner_token');
-    if (!token || !application?.id) return;
+    const targetAppId = application?.id || application?._id;
+    if (!token || !targetAppId) {
+      toast.error(!token ? 'Please sign in before sending a message.' : 'No application selected.');
+      return;
+    }
 
     setIsChatSending(true);
     setChatError('');
@@ -214,7 +218,6 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
     });
 
     try {
-      const targetAppId = application?.id || application?._id;
       const res = await API.post(`/applications/${targetAppId}/chat`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'

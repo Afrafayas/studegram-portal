@@ -140,16 +140,9 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
     try {
       const studentId = application.student?._id || application.student;
 
-      // Run both API calls in parallel
-      await Promise.all([
-        API.put(`/applications/${application.id}`, {
-          university: selectedUniversity,
-          course: selectedCourse,
-          level: selectedLevel,
-          notes: notes.trim()
-        }),
-        studentId
-          ? API.put(`/students/${studentId}`, {
+      // Save the student first so application emails use the saved student details.
+      if (studentId) {
+        const studentRes = await API.put(`/students/${studentId}`, {
             name: studentName.trim(),
             email: studentEmail.trim(),
             phone: studentPhone.trim(),
@@ -157,9 +150,16 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
             dob: studentDob.trim(),
             gender: studentGender,
             address: studentAddress.trim()
-          })
-          : Promise.resolve()
-      ]);
+        });
+        if (!studentRes.data?.success) throw new Error(studentRes.data?.message || 'Failed to save student details.');
+      }
+      const applicationRes = await API.put(`/applications/${application.id || application._id}`, {
+        university: selectedUniversity,
+        course: selectedCourse,
+        level: selectedLevel,
+        notes: notes.trim()
+      });
+      if (!applicationRes.data?.success) throw new Error(applicationRes.data?.message || 'Failed to save application.');
 
       toast.success('Application & student details updated successfully!');
       onUpdateSuccess();
