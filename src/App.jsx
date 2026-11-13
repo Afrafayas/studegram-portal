@@ -97,6 +97,7 @@ export default function App() {
 
   const [applications, setApplications] = useState([]);
   const [commissions, setCommissions] = useState([]);
+  const [dashboardFilter, setDashboardFilter] = useState(null);
 
   const fetchCommissions = async () => {
     const token = localStorage.getItem('partner_token') || localStorage.getItem('token');
@@ -132,9 +133,9 @@ export default function App() {
         passportNo: app.student?.passportNo || 'N/A',
         universityName: app.university?.name || 'N/A',
         courseName: app.course?.title || 'N/A',
-        primaryStatus: app.status || 'Submitted',
-        secondaryStatus: app.status || 'Submitted',
-        status: app.status || 'Submitted',
+        primaryStatus: app.status || 'Application Received',
+        secondaryStatus: app.status || 'Application Received',
+        status: app.status || 'Application Received',
         statusHistory: app.statusHistory || [],
         dateAdded: new Date(app.createdAt).toLocaleDateString('en-GB', {
           day: '2-digit',
@@ -240,21 +241,27 @@ export default function App() {
     switch (activePage) {
       case 'Dashboard':
         return (
-          <Dashboard 
+          <Dashboard
             applications={applications}
             commissions={commissions}
             partnerName={partnerData?.name || partnerData?.companyName || 'Partner'}
             onViewDetails={(app) => setSelectedAppForDetails(app)}
-            onViewHistory={() => setActivePage('ApplicationHistory')}
+            onViewHistory={(filterType) => {
+              setDashboardFilter(filterType || null);
+              setActivePage('ApplicationHistory');
+            }}
             onNavigateDeadlines={() => setActivePage('UniversityDeadline')}
             onNewApplicationClick={handleOpenNewApplicationModal}
           />
         );
       case 'ApplicationHistory':
         return (
-          <ApplicationHistory 
-            onAddApplicationClick={handleOpenNewApplicationModal} 
+          <ApplicationHistory
+            onAddApplicationClick={handleOpenNewApplicationModal}
             applications={applications}
+            commissions={commissions}
+            dashboardFilter={dashboardFilter}
+            onClearDashboardFilter={() => setDashboardFilter(null)}
             duplicateAlert={duplicateAlert}
             setDuplicateAlert={setDuplicateAlert}
             onViewDetails={(app) => setSelectedAppForDetails(app)}
@@ -267,7 +274,7 @@ export default function App() {
         );
       case 'Commissions':
         return (
-          <Commissions 
+          <Commissions
             applications={applications}
             commissions={commissions}
             partnerData={partnerData}
@@ -309,7 +316,7 @@ export default function App() {
                 <h2 className="text-xs font-bold text-[#0F172A] uppercase tracking-wider">{activePage.replace(/([A-Z])/g, ' $1').trim()}</h2>
                 <p className="text-[11px] text-[#64748B] font-semibold leading-relaxed">This section is being synchronized under the new Unigather data framework.</p>
               </div>
-              <ActionButton 
+              <ActionButton
                 onClick={() => setActivePage('Dashboard')}
                 className="bg-[#D99A1C] hover:bg-[#C28410] text-white text-xs font-bold px-4 py-2 rounded-xl transition-all duration-150 hover:scale-[1.02] active:scale-95 shadow-md inline-flex items-center gap-1.5"
               >
@@ -326,8 +333,8 @@ export default function App() {
 
   if (currentPage === 'login') {
     return (
-      <Login 
-        onNavigate={setCurrentPage} 
+      <Login
+        onNavigate={setCurrentPage}
         onLoginSuccess={() => {
           setCurrentPage('dashboard');
           setActivePage('Dashboard');
@@ -337,8 +344,8 @@ export default function App() {
           try {
             const saved = localStorage.getItem('partner_data');
             setPartnerData(saved ? JSON.parse(saved) : null);
-          } catch {}
-        }} 
+          } catch { }
+        }}
       />
     );
   }
@@ -364,14 +371,14 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#F0F2F5] flex flex-col font-sans text-[#0F172A] select-text">
       {/* Top Navbar */}
-      <Navbar 
+      <Navbar
         activePage={activePage}
         partnerData={partnerData}
         onBack={showModal || selectedAppForEdit ? closeApplicationForms : selectedAppForDetails ? () => setSelectedAppForDetails(null) : handleBack}
-        onNewApplicationClick={handleOpenNewApplicationModal} 
-        onLogout={() => setShowLogoutConfirmModal(true)} 
+        onNewApplicationClick={handleOpenNewApplicationModal}
+        onLogout={() => setShowLogoutConfirmModal(true)}
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-        onNavigatePage={(page) => { closeApplicationForms(); setSelectedAppForDetails(null); setActivePage(page); }}
+        onNavigatePage={(page) => { closeApplicationForms(); setSelectedAppForDetails(null); setDashboardFilter(null); setActivePage(page); }}
         onOpenProfile={() => setShowProfileModal(true)}
         onSelectApplication={async (appId) => {
           closeApplicationForms();
@@ -395,11 +402,11 @@ export default function App() {
       {/* Main Body */}
       <div className="flex flex-1">
         {/* Left Sidebar */}
-        <Sidebar 
-          activePage={activePage} 
-          setActivePage={(page) => { closeApplicationForms(); setSelectedAppForDetails(null); setActivePage(page); }} 
+        <Sidebar
+          activePage={activePage}
+          setActivePage={(page) => { closeApplicationForms(); setSelectedAppForDetails(null); setDashboardFilter(null); setActivePage(page); }}
           partnerData={partnerData}
-          onLogout={() => setShowLogoutConfirmModal(true)} 
+          onLogout={() => setShowLogoutConfirmModal(true)}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
           onNewApplicationClick={handleOpenNewApplicationModal}
@@ -412,12 +419,12 @@ export default function App() {
             {renderActivePage()}
           </div>
           <div className={showModal || selectedAppForEdit ? 'hidden' : 'contents'}>
-          <ApplicationDetailsModal
-            isOpen={!!selectedAppForDetails}
-            onClose={() => setSelectedAppForDetails(null)}
-            application={selectedAppForDetails}
-            onUpdateSuccess={fetchApplications}
-          />
+            <ApplicationDetailsModal
+              isOpen={!!selectedAppForDetails}
+              onClose={() => setSelectedAppForDetails(null)}
+              application={selectedAppForDetails}
+              onUpdateSuccess={fetchApplications}
+            />
           </div>
           <AddApplicationModal
             isOpen={showModal}

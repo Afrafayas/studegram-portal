@@ -1,4 +1,4 @@
-import DocumentPreview from './DocumentPreview';
+﻿import DocumentPreview from './DocumentPreview';
 import BatchDocumentUpload from './BatchDocumentUpload';
 import { applicationFee } from '../utils/courseFee';
 import { ActionButton, ActionForm } from './ActionControls';
@@ -41,7 +41,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
         updatedName = replaceFile.name;
       }
 
-      const updatedDocs = localDocuments.map((d, i) => 
+      const updatedDocs = localDocuments.map((d, i) =>
         i === idx ? { ...d, name: updatedName, url: updatedUrl, comment: editDocComment.trim() } : d
       );
 
@@ -130,7 +130,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
     if (!silent) {
       setIsChatLoading(true);
     }
-    
+
     try {
       const targetAppId = application?.id || application?._id;
       const res = await API.get(`/applications/${targetAppId}/chat`);
@@ -263,16 +263,14 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
     } catch (error) { toast.error(error.response?.data?.message || error.message); }
   };
 
-  const currentAppStatus = application?.status || application?.secondaryStatus || 'Submitted';
-
+  const currentAppStatus = application?.status || application?.secondaryStatus || 'Application Received';
   const getTimelineStepIndex = (statusStr) => {
     const s = (statusStr || '').toLowerCase();
-    if (s.includes('enrolled') || s.includes('closed')) return 6;
-    if (s.includes('visa approved') || s.includes('approved')) return 5;
-    if (s.includes('visa processing') || s.includes('visa filed') || s.includes('visa pending')) return 4;
-    if (s.includes('cas') || s.includes('i-20')) return 3;
+    if (s.includes('enrolled') || s.includes('closed')) return 5;
+    if (s.includes('visa received') || s.includes('visa approved')) return 4;
+    if (s.includes('cas') || s.includes('fees paid')) return 3;
     if (s.includes('offer')) return 2;
-    if (s.includes('review') || s.includes('verification') || s.includes('processed') || s.includes('sent')) return 1;
+    if (s.includes('review') || s.includes('documents') || s.includes('processed')) return 1;
     return 0;
   };
 
@@ -280,7 +278,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
 
   const findStatusDate = (keywords) => {
     if (!application?.statusHistory || !Array.isArray(application.statusHistory)) return null;
-    const historyItem = application.statusHistory.find(h => 
+    const historyItem = application.statusHistory.find(h =>
       keywords.some(kw => (h.status || '').toLowerCase().includes(kw))
     );
     if (historyItem && historyItem.updatedAt) {
@@ -290,40 +288,35 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
   };
 
   const timelineSteps = [
-    { 
-      label: 'Application Submitted', 
-      desc: 'Agent filed application on portal', 
-      date: application?.dateAdded || findStatusDate(['submitted', 'pending']) || 'Filed' 
+    {
+      label: 'Application Received',
+      desc: 'Application received and registered on portal',
+      date: application?.dateAdded || findStatusDate(['received', 'submitted', 'pending']) || 'Filed'
     },
-    { 
-      label: 'Document Verification', 
-      desc: 'Unigather team & admissions office reviewing eligibility', 
-      date: findStatusDate(['review', 'verification', 'sent', 'processed']) 
+    {
+      label: 'Under Review & Processing',
+      desc: 'Eligibility & document review by admissions team',
+      date: findStatusDate(['review', 'processed', 'documents'])
     },
-    { 
-      label: 'Offer Letter Issued', 
-      desc: 'Conditional or Unconditional Offer letter received from university', 
-      date: findStatusDate(['offer']) 
+    {
+      label: 'Offer Letter Issued',
+      desc: 'Conditional or Unconditional Offer received from university',
+      date: findStatusDate(['offer'])
     },
-    { 
-      label: 'CAS / I-20 Released', 
-      desc: 'Confirmation of Acceptance for Studies issued', 
-      date: findStatusDate(['cas', 'i-20']) 
+    {
+      label: 'Fees Paid & CAS Issued',
+      desc: 'Tuition fees deposited and CAS / I-20 released',
+      date: findStatusDate(['fees', 'cas'])
     },
-    { 
-      label: 'Visa Processing / Filed', 
-      desc: 'Student visa application submitted to embassy', 
-      date: findStatusDate(['visa processing', 'visa filed', 'visa pending']) 
+    {
+      label: 'Visa Received',
+      desc: 'Student visa successfully received from embassy',
+      date: findStatusDate(['visa received', 'visa approved', 'visa'])
     },
-    { 
-      label: 'Visa Approved', 
-      desc: 'Visa application approved by embassy', 
-      date: findStatusDate(['visa approved', 'approved']) 
-    },
-    { 
-      label: 'Enrolled / Closed', 
-      desc: 'Student arrived & enrolled. Application completed and closed', 
-      date: findStatusDate(['enrolled', 'closed']) 
+    {
+      label: 'Student Enrolled & Closed',
+      desc: 'Student arrived & enrolled. Application completed and closed',
+      date: findStatusDate(['enrolled', 'closed'])
     }
   ];
 
@@ -371,21 +364,19 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
         <div className="flex flex-wrap bg-slate-50 border-b border-slate-200/80 px-4 sm:px-6 py-2 gap-2">
           <ActionButton
             onClick={() => setMainTab('details')}
-            className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all ${
-              mainTab === 'details'
-                ? 'bg-white text-[#D99A1C] shadow-sm border border-slate-200'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-            }`}
+            className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all ${mainTab === 'details'
+              ? 'bg-white text-[#D99A1C] shadow-sm border border-slate-200'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+              }`}
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 002 2z" /></svg> App Details
           </ActionButton>
           <ActionButton
             onClick={() => setMainTab('activity')}
-            className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all relative ${
-              mainTab === 'activity'
-                ? 'bg-white text-[#D99A1C] shadow-sm border border-slate-200'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-            }`}
+            className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all relative ${mainTab === 'activity'
+              ? 'bg-white text-[#D99A1C] shadow-sm border border-slate-200'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+              }`}
           >
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg> Messages & Activity
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
@@ -400,7 +391,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
               <h3 className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-5">
                 Application Progress Timeline
               </h3>
-              
+
               <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-200">
                 {timelineSteps.map((step, idx) => {
                   const isCompleted = idx < currentStepIndex;
@@ -419,7 +410,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
 
                   return (
                     <div key={idx} className="relative flex gap-4 text-left">
-                      <span 
+                      <span
                         className={`absolute -left-[20.5px] top-1 w-4 h-4 rounded-full flex items-center justify-center text-[8px] font-bold text-white z-10 transition-all duration-300 border ${iconBg} ${iconBorder}`}
                       >
                         {isCompleted && 'âœ“'}
@@ -456,11 +447,10 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                   <ActionButton
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`py-3 px-4 font-bold text-xs border-b-2 transition-all ${
-                      activeTab === tab.id
-                        ? 'border-[#D99A1C] text-[#D99A1C]'
-                        : 'border-transparent text-[#64748B] hover:text-[#0F172A]'
-                    }`}
+                    className={`py-3 px-4 font-bold text-xs border-b-2 transition-all ${activeTab === tab.id
+                      ? 'border-[#D99A1C] text-[#D99A1C]'
+                      : 'border-transparent text-[#64748B] hover:text-[#0F172A]'
+                      }`}
                   >
                     {tab.label}
                   </ActionButton>
@@ -469,7 +459,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
 
               {/* Tab Panels */}
               <div className="flex-1 p-4 sm:p-6">
-                
+
                 {/* Tab 1: Profile View */}
                 {activeTab === 'profile' && (
                   <div className="space-y-6">
@@ -614,21 +604,21 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                         {appComments.map((comment, cIdx) => {
                           const isUnreplied = latestCommentIsUnreplied && cIdx === appComments.length - 1;
                           return (
-                          <div key={comment._id || cIdx} className={`border rounded-xl p-3 space-y-1 shadow-3xs ${isUnreplied ? 'bg-blue-50 border-blue-400 ring-1 ring-blue-200' : 'bg-white border-slate-200/80'}`}>
-                            {isUnreplied && (
-                              <span className="inline-flex items-center gap-1.5 text-[9px] font-extrabold text-blue-800">
-                                <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
-                                New · Awaiting your reply
-                              </span>
-                            )}
-                            <div className="flex flex-wrap items-center justify-between gap-2 text-[9px] font-extrabold">
-                              <span className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md border border-slate-200"><svg aria-hidden="true" className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4" /><path d="M5 21v-2a7 7 0 0 1 14 0v2" /></svg>{comment.author || 'Agent'}</span>
-                              <span className="text-slate-400">{comment.createdAt ? new Date(comment.createdAt).toLocaleString('en-US', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : 'Just now'}</span>
+                            <div key={comment._id || cIdx} className={`border rounded-xl p-3 space-y-1 shadow-3xs ${isUnreplied ? 'bg-blue-50 border-blue-400 ring-1 ring-blue-200' : 'bg-white border-slate-200/80'}`}>
+                              {isUnreplied && (
+                                <span className="inline-flex items-center gap-1.5 text-[9px] font-extrabold text-blue-800">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
+                                  New · Awaiting your reply
+                                </span>
+                              )}
+                              <div className="flex flex-wrap items-center justify-between gap-2 text-[9px] font-extrabold">
+                                <span className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md border border-slate-200"><svg aria-hidden="true" className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4" /><path d="M5 21v-2a7 7 0 0 1 14 0v2" /></svg>{comment.author || 'Agent'}</span>
+                                <span className="text-slate-400">{comment.createdAt ? new Date(comment.createdAt).toLocaleString('en-US', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }) : 'Just now'}</span>
+                              </div>
+                              <p className="text-xs font-semibold text-slate-800 whitespace-pre-wrap leading-relaxed">
+                                {comment.text}
+                              </p>
                             </div>
-                            <p className="text-xs font-semibold text-slate-800 whitespace-pre-wrap leading-relaxed">
-                              {comment.text}
-                            </p>
-                          </div>
                           );
                         })}
 
@@ -894,7 +884,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                     const bubbleClass = isPartner
                       ? 'bg-gradient-to-r from-[#D99A1C] to-[#C28410] text-white rounded-l-xl rounded-tr-xl self-end ml-auto shadow-sm border border-amber-600/10'
                       : 'bg-slate-700 text-slate-100 rounded-r-xl rounded-tl-xl self-start mr-auto shadow-sm border border-slate-600';
-                    
+
                     return (
                       <div
                         key={msg._id || index}
@@ -913,7 +903,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                         {/* Message body text */}
                         <div className={`p-3 text-xs leading-relaxed font-medium ${bubbleClass}`}>
                           <p className="whitespace-pre-wrap">{msg.message}</p>
-                          
+
                           {/* Secure attachments file view */}
                           {msg.attachments && msg.attachments.length > 0 && (
                             <div className="mt-2.5 space-y-1.5 border-t border-white/15 pt-2.5">
@@ -925,11 +915,10 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                                     href={att}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className={`flex items-center gap-2 text-[10px] font-bold px-2.5 py-1.5 rounded-lg border transition-all truncate hover:scale-[1.01] ${
-                                      isPartner
-                                        ? 'bg-white/10 hover:bg-white/20 text-white border-white/10'
-                                        : 'bg-slate-900/40 hover:bg-slate-900/60 text-slate-100 border-slate-600'
-                                    }`}
+                                    className={`flex items-center gap-2 text-[10px] font-bold px-2.5 py-1.5 rounded-lg border transition-all truncate hover:scale-[1.01] ${isPartner
+                                      ? 'bg-white/10 hover:bg-white/20 text-white border-white/10'
+                                      : 'bg-slate-900/40 hover:bg-slate-900/60 text-slate-100 border-slate-600'
+                                      }`}
                                   >
                                     <svg className="w-3.5 h-3.5 shrink-0 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -980,8 +969,8 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
               )}
 
               {/* Chat Input Form */}
-              <ActionForm 
-                onSubmit={handleSendChatMessage} 
+              <ActionForm
+                onSubmit={handleSendChatMessage}
                 className="bg-white p-3 border-t border-slate-100 flex items-center gap-2 shrink-0"
               >
                 <div className="relative">
@@ -995,9 +984,8 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                   />
                   <label
                     htmlFor="chat-file-upload"
-                    className={`p-2.5 bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-[#0F172A] rounded-xl border border-slate-200 transition-all flex items-center justify-center cursor-pointer shadow-sm ${
-                      (isChatSending || isUnauthorized) ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
-                    }`}
+                    className={`p-2.5 bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-[#0F172A] rounded-xl border border-slate-200 transition-all flex items-center justify-center cursor-pointer shadow-sm ${(isChatSending || isUnauthorized) ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
+                      }`}
                     title="Upload attachment (max 5 files, 10MB limit)"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1009,10 +997,10 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                 <input
                   type="text"
                   placeholder={
-                    isUnauthorized 
-                      ? "Conversation restricted..." 
-                      : chatFiles.length > 0 
-                        ? "Add details for uploaded file(s)..." 
+                    isUnauthorized
+                      ? "Conversation restricted..."
+                      : chatFiles.length > 0
+                        ? "Add details for uploaded file(s)..."
                         : "Type message to resolve issues with admissions..."
                   }
                   value={chatInput}
@@ -1068,7 +1056,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                   <h4 className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider border-b border-slate-100 pb-2">
                     Communication Stream & Audit Logs
                   </h4>
-                  
+
                   <div className="space-y-4">
                     {notes.map((note, idx) => (
                       <div key={idx} className="flex gap-3 bg-white p-3.5 border border-slate-100 rounded-xl shadow-sm hover:shadow-md transition-shadow">
