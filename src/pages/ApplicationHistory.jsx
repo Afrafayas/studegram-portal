@@ -6,14 +6,33 @@ import ActionMenu from '../components/ActionMenu';
 import { mapListApplication } from '../utils/listApplication';
 import SearchableSelect from '../components/SearchableSelect';
 import { ActionButton } from '../components/ActionControls';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
 import ClaimCommissionConfirmModal from '../components/ClaimCommissionConfirmModal';
+export const STATUS_STEPS = [
+  'Application Received',
+  'Application Under Review',
+  'Application Not Processed',
+  'Application Processed',
+  'Additional Documents Required',
+  'Conditional Offer Issued',
+  'Unconditional Offer Issued',
+  'Fees Paid',
+  'CAS Requested',
+  'CAS Issued',
+  'Visa Received',
+  'Rejected & Closed',
+  'Withdrawn & Closed',
+  'Student Enrolled & Closed'
+];
 
 export default function ApplicationHistory({
   onAddApplicationClick,
   applications = [],
+  commissions = [],
+  dashboardFilter = null,
+  onClearDashboardFilter,
   duplicateAlert,
   setDuplicateAlert,
   onViewDetails,
@@ -33,10 +52,15 @@ export default function ApplicationHistory({
   const intakeFilter = list.filters.intake || 'All';
 
   // Pagination State
-  const currentPage = list.page;
-  const itemsPerPage = list.limit;
+  const [localPage, setLocalPage] = useState(1);
+  const [localLimit, setLocalLimit] = useState(5);
+
+  useEffect(() => {
+    setLocalPage(1);
+  }, [dashboardFilter]);
 
   const handleTabChange = (tab) => {
+    if (onClearDashboardFilter) onClearDashboardFilter();
     setActiveTab(tab);
     if (tab === 'All') {
       list.setFilter('status', 'All');
@@ -46,23 +70,153 @@ export default function ApplicationHistory({
     list.setPage(1);
   };
 
+  // Human-readable label for active dashboard filter
+  const getFilterBadgeLabel = () => {
+    switch (dashboardFilter) {
+      case 'in_progress':
+        return 'Under Review / In Progress';
+      case 'closed':
+        return 'Case Closed';
+      case 'claimed':
+        return 'Commissions Claimed';
+      case 'pending_commission':
+        return 'Commission Pending';
+      case 'all':
+      case 'total':
+        return 'Total Applications';
+      default:
+        return dashboardFilter;
+    }
+  };
+
+  // Applications matching dashboard filter
+  const rawDashboardApps = useMemo(() => {
+    if (!dashboardFilter) return null;
+    let records = applications || [];
+    if (dashboardFilter === 'in_progress') {
+      records = records.filter(a => {
+        const s = (a.status || a.secondaryStatus || '').toLowerCase();
+        return (
+          s.includes('received') ||
+          s.includes('submitted') ||
+          s.includes('review') ||
+          s.includes('processing') ||
+          s.includes('processed') ||
+          s.includes('documents') ||
+          s.includes('pending') ||
+          s.includes('draft') ||
+          s.includes('cas') ||
+          s.includes('offer') ||
+          s.includes('fees')
+        );
+      });
+    } else if (dashboardFilter === 'closed') {
+      records = records.filter(a => {
+        const s = (a.status || a.secondaryStatus || '').toLowerCase();
+        return (
+          s.includes('closed') ||
+          s.includes('approved') ||
+          s.includes('rejected') ||
+          s.includes('withdrawn') ||
+          s.includes('enrolled')
+        );
+      });
+    } else if (dashboardFilter === 'claimed') {
+      records = records.filter(a => {
+        const aId = String(a._id || a.id || '');
+        if (a.commissionClaimed || a.commissionStatus === 'Claimed' || a.commissionStatus === 'Paid') return true;
+        if (commissions && commissions.length > 0) {
+          return commissions.some(c => {
+            const cAppId = typeof c.application === 'object' && c.application !== null
+              ? String(c.application._id || c.application.id || '')
+              : String(c.application || '');
+            return cAppId && cAppId === aId && (c.status === 'Claimed' || c.status === 'Pending Approval' || c.status === 'Paid');
+          });
+        }
+        return false;
+      });
+    } else if (dashboardFilter === 'pending_commission') {
+      records = records.filter(a => {
+        const aId = String(a._id || a.id || '');
+        if (a.commissionStatus === 'Claimed' || (['Visa Approved', 'Enrolled / Closed'].includes(a.status) && a.commissionStatus !== 'Paid')) return true;
+        if (commissions && commissions.length > 0) {
+          return commissions.some(c => {
+            const cAppId = typeof c.application === 'object' && c.application !== null
+              ? String(c.application._id || c.application.id || '')
+              : String(c.application || '');
+            return cAppId && cAppId === aId && (c.status === 'Claimed' || c.status === 'Pending Approval' || c.status === 'Under Review');
+          });
+        }
+        return false;
+      });
+    }
+    return records.map(mapListApplication);
+  }, [applications, commissions, dashboardFilter]);
+
+  // Search filter applied over dashboard filter if search term exists
+  const displayedList = useMemo(() => {
+    if (!dashboardFilter) {
+      return list.records.map(mapListApplication);
+    }
+    let records = rawDashboardApps || [];
+    if (list.search && list.search.trim()) {
+      const q = list.search.toLowerCase().trim();
+      records = records.filter(a =>
+        (a.studentName && a.studentName.toLowerCase().includes(q)) ||
+        (a.passportNo && a.passportNo.toLowerCase().includes(q)) ||
+        (a.camsId && a.camsId.toLowerCase().includes(q)) ||
+        (a.universityName && a.universityName.toLowerCase().includes(q)) ||
+        (a.courseName && a.courseName.toLowerCase().includes(q))
+      );
+    }
+    return records;
+  }, [dashboardFilter, rawDashboardApps, list.records, list.search]);
+
+  // Paginated records for table view
+  const paginatedApps = useMemo(() => {
+    if (!dashboardFilter) {
+      return displayedList;
+    }
+    const start = (localPage - 1) * localLimit;
+    return displayedList.slice(start, start + localLimit);
+  }, [dashboardFilter, displayedList, localPage, localLimit]);
+
+  // Pagination adapter for ListPagination component
+  const paginationList = useMemo(() => {
+    if (!dashboardFilter) return list;
+    return {
+      ...list,
+      total: displayedList.length,
+      page: localPage,
+      limit: localLimit,
+      totalPages: Math.max(1, Math.ceil(displayedList.length / localLimit)),
+      loading: false,
+      setPage: (p) => setLocalPage(p),
+      setLimit: (l) => { setLocalLimit(Number(l)); setLocalPage(1); }
+    };
+  }, [dashboardFilter, list, displayedList.length, localPage, localLimit]);
+
   // Export filtered applications to UTF-8 CSV
   const handleExportCSV = async () => {
     let exportApps;
-    try {
-      const response = await API.get('/applications', {
-        params: {
-          list: true,
-          export: true,
-          search: list.search,
-          filters: JSON.stringify(list.filters)
-        }
-      });
-      if (!response.data?.success) throw new Error('Unable to export applications.');
-      exportApps = response.data.data.map(mapListApplication);
-    } catch (error) {
-      toast.error(error.response?.data?.message || error.message);
-      return;
+    if (dashboardFilter) {
+      exportApps = displayedList;
+    } else {
+      try {
+        const response = await API.get('/applications', {
+          params: {
+            list: true,
+            export: true,
+            search: list.search,
+            filters: JSON.stringify(list.filters)
+          }
+        });
+        if (!response.data?.success) throw new Error('Unable to export applications.');
+        exportApps = response.data.data.map(mapListApplication);
+      } catch (error) {
+        toast.error(error.response?.data?.message || error.message);
+        return;
+      }
     }
     if (!exportApps.length) {
       if (toast?.info) toast.info('No applications available to export.');
@@ -125,15 +279,13 @@ export default function ApplicationHistory({
     }
   };
 
-  const filteredApps = list.records.map(mapListApplication);
-
   // Tab counts calculation from prop
   const totalCount = applications.length;
-  const submittedCount = applications.filter(a => (a.status || a.secondaryStatus) === 'Submitted').length;
-  const underReviewCount = applications.filter(a => (a.status || a.secondaryStatus) === 'Under Review').length;
-  const offersCount = applications.filter(a => (a.status || a.secondaryStatus || '').includes('Offer')).length;
-  const visaCount = applications.filter(a => (a.status || a.secondaryStatus || '').includes('Visa')).length;
-  const enrolledCount = applications.filter(a => (a.status || a.secondaryStatus) === 'Enrolled / Closed').length;
+  const submittedCount = applications.filter(a => ['Application Received', 'Submitted'].includes(a.status || a.secondaryStatus)).length;
+  const underReviewCount = applications.filter(a => (a.status || a.secondaryStatus || '').toLowerCase().includes('review')).length;
+  const offersCount = applications.filter(a => (a.status || a.secondaryStatus || '').toLowerCase().includes('offer')).length;
+  const visaCount = applications.filter(a => (a.status || a.secondaryStatus || '').toLowerCase().includes('visa')).length;
+  const enrolledCount = applications.filter(a => (a.status || a.secondaryStatus || '').toLowerCase().includes('enrolled')).length;
 
   return (
     <div className="workspace-page flex-1 p-4 sm:p-6 space-y-6 bg-[#F0F2F5] animate-fade-in-up">
@@ -171,8 +323,8 @@ export default function ApplicationHistory({
               Duplicate Alert: This passport number ({duplicateAlert}) has already been submitted by another agent. Please verify before proceeding.
             </p>
           </div>
-          <ActionButton 
-            onClick={() => setDuplicateAlert(null)} 
+          <ActionButton
+            onClick={() => setDuplicateAlert(null)}
             className="text-red-800 hover:text-red-950 font-bold px-2 py-1 rounded hover:bg-red-100 transition-colors"
           >
             Dismiss
@@ -180,24 +332,46 @@ export default function ApplicationHistory({
         </div>
       )}
 
+      {/* Active Dashboard Filter Banner */}
+      {dashboardFilter && (
+        <div className="bg-amber-50 border border-amber-200 text-amber-900 p-4 rounded-xl flex items-center justify-between gap-3 text-xs shadow-xs animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <span className="text-amber-600 shrink-0 text-base">📊</span>
+            <div>
+              <span className="font-extrabold text-amber-900">Dashboard Filter Active: </span>
+              <span className="bg-white border border-amber-300 text-amber-900 px-2.5 py-0.5 rounded-full font-bold ml-1">
+                {getFilterBadgeLabel()} ({displayedList.length} application{displayedList.length === 1 ? '' : 's'})
+              </span>
+            </div>
+          </div>
+          <ActionButton
+            onClick={() => {
+              if (onClearDashboardFilter) onClearDashboardFilter();
+            }}
+            className="text-amber-800 hover:text-amber-950 font-bold px-3 py-1 rounded-lg border border-amber-300 bg-white hover:bg-amber-100 transition-colors cursor-pointer inline-flex items-center gap-1 shadow-xs"
+          >
+            <span>✕ Clear Filter</span>
+          </ActionButton>
+        </div>
+      )}
+
       {/* Table Directory Frame */}
       <div className="workspace-panel workspace-list-frame bg-white border border-[#E2E8F0] border-t-4 border-t-[#D99A1C] rounded-2xl shadow-xs overflow-hidden">
         {/* Scoping Tabs */}
-        <ListFilterTabs list={list} endpoint="/applications" field="status" options={[{value:'All',label:'All'},...(list.facets.status || []).map(value=>({value,label:value}))]} />
+        <ListFilterTabs list={list} endpoint="/applications" field="status" options={[{ value: 'All', label: 'All' }, ...(list.facets.status || []).map(value => ({ value, label: value }))]} />
 
         {/* ListToolbar */}
         <ListToolbar
           list={list}
           label="applications"
           fields={[
-            { key: 'status', label: 'Statuses' },
+            { key: 'status', label: 'Statuses', options: STATUS_STEPS },
             { key: 'university', label: 'Universities' },
             { key: 'intake', label: 'Intakes' },
             { key: 'country', label: 'Countries' }
           ]}
         />
 
-        
 
         <div className="overflow-x-auto">
           <table className="workspace-table w-full text-left border-collapse">
@@ -212,25 +386,29 @@ export default function ApplicationHistory({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredApps.length > 0 ? (
-                filteredApps.map((app, index) => {
-                  const currentStatus = app.status || app.secondaryStatus || 'Submitted';
-                  const isClosed = currentStatus.includes('Closed') || currentStatus === 'Enrolled / Closed';
-                  const isApproved = currentStatus.includes('Approved');
-                  const isOffer = currentStatus.includes('Offer');
-                  const isCAS = currentStatus.includes('CAS');
-                  const isRejected = currentStatus.includes('Rejected');
+              {paginatedApps.length > 0 ? (
+                paginatedApps.map((app, index) => {
+                  const currentStatus = app.status || app.secondaryStatus || 'Application Received';
+                  const s = currentStatus.toLowerCase();
+
+                  const isClosed = s.includes('enrolled') || s.includes('visa received') || s.includes('fees paid');
+                  const isOffer = s.includes('offer') || s.includes('cas') || s.includes('processed');
+                  const isRejected = s.includes('rejected') || s.includes('withdrawn') || s.includes('not processed');
+                  const isDocs = s.includes('additional documents');
 
                   let badgeStyle = 'bg-amber-50 text-amber-700 border-amber-200';
-                  if (isClosed || isApproved) {
+                  if (isClosed) {
                     badgeStyle = 'bg-emerald-50 text-emerald-700 border-emerald-200 font-extrabold';
-                  } else if (isOffer || isCAS) {
+                  } else if (isOffer) {
                     badgeStyle = 'bg-blue-50 text-blue-700 border-blue-200';
                   } else if (isRejected) {
                     badgeStyle = 'bg-rose-50 text-rose-700 border-rose-200';
+                  } else if (isDocs) {
+                    badgeStyle = 'bg-purple-50 text-purple-700 border-purple-200';
                   }
 
-                  const canClaim = ['Visa Approved', 'Enrolled / Closed'].includes(currentStatus) &&
+
+                  const canClaim = ['Visa Received', 'Student Enrolled & Closed', 'Visa Approved', 'Enrolled / Closed'].includes(currentStatus) &&
                     app.commissionStatus !== 'Claimed' &&
                     app.commissionStatus !== 'Paid' &&
                     app.commissionStatus !== 'Approved';
@@ -304,7 +482,7 @@ export default function ApplicationHistory({
           </table>
         </div>
 
-        <ListPagination list={list} />
+        <ListPagination list={paginationList} />
       </div>
 
       {/* Claim Commission Confirmation Modal */}
