@@ -217,7 +217,7 @@ export default function App() {
       }
 
       fetchApplications();
-      return true;
+      return data.data || true;
     } catch (err) {
       console.error(err);
       toast.error(err.message || 'Error submitting application');
@@ -305,7 +305,7 @@ export default function App() {
         return <AgentRolePermissions partnerData={partnerData} />;
       default:
         return (
-          <div className="flex-1 p-8 flex items-center justify-center min-h-[calc(100vh-100px)] bg-[#F0F2F5]">
+          <div className="flex-1 p-8 flex items-center justify-center min-h-[calc(100vh-100px)] bg-[#F8FAFC]">
             <div className="bg-white border border-[#E2E8F0] rounded-2xl p-8 max-w-sm text-center shadow-md space-y-4 hover:shadow-lg transition-all duration-200">
               <div className="w-14 h-14 bg-indigo-50 text-[#D99A1C] rounded-full flex items-center justify-center mx-auto shadow-inner">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -369,7 +369,7 @@ export default function App() {
 
   // Full Portal Routing
   return (
-    <div className="min-h-screen bg-[#F0F2F5] flex flex-col font-sans text-[#0F172A] select-text">
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans text-[#0F172A] select-text">
       {/* Top Navbar */}
       <Navbar
         activePage={activePage}
@@ -431,6 +431,11 @@ export default function App() {
             onClose={() => setShowModal(false)}
             onSubmit={handleAddApplicationSubmit}
             closeRef={createApplicationCloseRef}
+            onViewHistory={() => {
+              setShowModal(false);
+              setDashboardFilter(null);
+              setActivePage('ApplicationHistory');
+            }}
           />
           <div className={showModal ? 'hidden' : 'contents'}>
             <EditApplicationModal

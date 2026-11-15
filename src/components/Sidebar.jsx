@@ -66,12 +66,12 @@ export default function Sidebar({ activePage, setActivePage, partnerData, onLogo
         }}
         className={`w-[calc(100%-16px)] flex items-center gap-3 px-4 py-2.5 rounded-xl mx-2 my-0.5 text-left text-xs font-bold select-none transition-all duration-150 ${
           isActive
-            ? 'bg-[#EFB62C] text-[#191b1f] shadow-sm'
-            : 'text-[#94A3B8] hover:bg-[#242528] hover:text-white'
+            ? 'bg-[#D99A1C] text-[#07163B] font-extrabold shadow-sm'
+            : 'text-slate-300 hover:bg-[#0D2357]/60 hover:text-white'
         }`}
       >
         <svg
-          className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-black' : 'text-[#94A3B8]'}`}
+          className={`w-4 h-4 shrink-0 transition-colors ${isActive ? 'text-[#07163B]' : 'text-slate-400'}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -94,7 +94,7 @@ export default function Sidebar({ activePage, setActivePage, partnerData, onLogo
       )}
 
       {/* Sidebar drawer container */}
-      <div className={`workspace-sidebar fixed inset-y-0 left-0 z-50 md:z-30 md:static w-[240px] min-w-[240px] bg-[#0A0A0F] h-screen md:h-[calc(100vh-60px)] md:sticky md:top-[60px] overflow-y-auto flex flex-col justify-between py-4 select-none text-white transform ${
+      <div className={`workspace-sidebar fixed inset-y-0 left-0 z-50 md:z-30 md:static w-[240px] min-w-[240px] bg-[#07163B] border-r border-[#0D2357] h-screen md:h-[calc(100vh-60px)] md:sticky md:top-[60px] overflow-y-auto flex flex-col justify-between py-4 select-none text-white transform ${
         isOpen ? 'translate-x-0' : '-translate-x-full'
       } md:translate-x-0 transition-transform duration-200 ease-in-out`}>
         
@@ -107,9 +107,9 @@ export default function Sidebar({ activePage, setActivePage, partnerData, onLogo
                   onNewApplicationClick();
                   if (onClose) onClose();
                 }}
-                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:from-[#C28410] hover:to-[#D99A1C] text-black font-extrabold text-xs py-2.5 px-4 rounded-xl shadow-md transition-all duration-150 hover:scale-[1.02] active:scale-95 cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 bg-[#D99A1C] hover:bg-[#C28410] active:scale-95 text-[#07163B] font-extrabold text-xs py-2.5 px-4 rounded-xl shadow-md shadow-amber-500/15 transition-all duration-150 cursor-pointer"
               >
-                <svg className="w-4 h-4 text-black shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-[#07163B] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
                 </svg>
                 <span className="truncate">New Application</span>
@@ -119,7 +119,7 @@ export default function Sidebar({ activePage, setActivePage, partnerData, onLogo
 
           {/* MAIN section */}
           <div>
-            <span className="px-6 block text-[9px] font-extrabold text-[#475569] uppercase tracking-wider mb-2">MAIN</span>
+            <span className="px-6 block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">MAIN</span>
             <div className="flex flex-col">
               {mainItems.map(renderNavButton)}
             </div>
@@ -127,7 +127,7 @@ export default function Sidebar({ activePage, setActivePage, partnerData, onLogo
 
           {/* RESOURCES section */}
           <div>
-            <span className="px-6 block text-[9px] font-extrabold text-[#475569] uppercase tracking-wider mb-2">RESOURCES</span>
+            <span className="px-6 block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">RESOURCES</span>
             <div className="flex flex-col">
               {resourceItems.map(renderNavButton)}
             </div>
@@ -135,9 +135,9 @@ export default function Sidebar({ activePage, setActivePage, partnerData, onLogo
         </div>
 
         {/* Support & Agent wrapper */}
-        <div className="mt-auto flex flex-col gap-2 mx-2 border-t border-white/5 pt-3">
+        <div className="mt-auto flex flex-col gap-2 mx-2 border-t border-[#0D2357] pt-3">
           {/* Bottom Agent Section */}
-          <div className="px-4 py-3 flex items-center justify-between bg-white/5 rounded-xl">
+          <div className="px-4 py-3 flex items-center justify-between bg-[#0D2357]/60 border border-[#0D2357] rounded-xl">
             <div 
               onClick={() => {
                 if (onOpenProfile) onOpenProfile();

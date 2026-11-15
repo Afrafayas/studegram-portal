@@ -36,7 +36,7 @@ export default function Universities({ setActivePage }) {
   const countriesList = Array.from(new Set(universities.map(u => u.country).filter(Boolean)));
 
   return (
-    listRecord ? <div className="workspace-page flex-1 p-4 sm:p-6"><ListRecordView record={listRecord} title={listRecord.displayName || listRecord.title || listRecord.name || listRecord.university || 'Record details'} onBack={() => setListRecord(null)} /></div> : (<div className="workspace-page flex-1 p-4 sm:p-6 space-y-6 bg-[#F0F2F5] animate-fade-in-up">
+    listRecord ? <div className="workspace-page flex-1 p-4 sm:p-6"><ListRecordView record={listRecord} title={listRecord.displayName || listRecord.title || listRecord.name || listRecord.university || 'Record details'} onBack={() => setListRecord(null)} /></div> : (<div className="workspace-page flex-1 p-4 sm:p-6 space-y-6 bg-[#F8FAFC] animate-fade-in-up">
       {/* Page Header */}
       <div className="workspace-panel flex flex-wrap gap-3 justify-between items-center bg-white border border-[#E2E8F0] border-t-4 border-t-[#D99A1C] p-6 rounded-2xl shadow-xs">
         <div className="space-y-1">

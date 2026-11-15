@@ -6,6 +6,7 @@ import { ActionButton, ActionForm } from '../components/ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useLayoutEffect, useState } from 'react';
 import API from '../api/axios';
+import unigatherLogo from '../assets/unigather-logo.jpg';
 
 export default function Register({ onNavigate }) {
   useLayoutEffect(() => {
@@ -187,27 +188,30 @@ export default function Register({ onNavigate }) {
   };
 
   return (
-    <div className="fixed inset-0 h-dvh overflow-hidden bg-[#F0F2F5] flex items-stretch select-none">
+    <div className="fixed inset-0 h-dvh overflow-hidden bg-[#F8FAFC] flex items-stretch select-none">
       
-      {/* Left side (50%): Brand detail graphic panel */}
+      {/* Left side (50%): Brand detail graphic panel in Mustard Yellow */}
       <div className="hidden lg:flex lg:w-1/2 min-w-0 shrink-0 bg-[#D99A1C] text-white p-16 flex-col justify-between relative overflow-hidden">
+        {/* Transparent Icon Pattern Background */}
         <div 
-          className="absolute inset-0 bg-cover bg-center opacity-25 mix-blend-multiply"
+          className="absolute inset-0 bg-cover bg-center opacity-25 mix-blend-multiply pointer-events-none"
           style={{ backgroundImage: 'url(/assets/login_hero_pattern.png)' }}
         ></div>
-        <div className="absolute inset-0 bg-black/5"></div>
+        <div className="absolute inset-0 bg-black/5 pointer-events-none"></div>
 
         {/* Logo Brand */}
         <div className="flex items-center gap-3 relative z-10">
-          <div className="w-10 h-10 rounded-xl bg-white text-[#D99A1C] flex items-center justify-center font-extrabold text-xl shadow-lg">
-            U
-          </div>
-          <span className="font-extrabold text-2xl tracking-wider uppercase">Unigather</span>
+          <img
+            src={unigatherLogo}
+            alt="Unigather"
+            className="w-10 h-10 rounded-xl object-cover shadow-lg"
+          />
+          <span className="font-extrabold text-2xl tracking-wider uppercase text-white">Unigather</span>
         </div>
 
         {/* Center: Hero text */}
         <div className="space-y-6 max-w-md relative z-10 my-auto">
-          <h2 className="text-4xl font-extrabold tracking-tight leading-tight">
+          <h2 className="text-4xl font-extrabold tracking-tight leading-tight text-white">
             Agency Onboarding & Partnership
           </h2>
           <p className="text-xs text-white/90 font-medium leading-relaxed">
@@ -217,22 +221,22 @@ export default function Register({ onNavigate }) {
           {/* Stepper Indicator */}
           <div className="pt-6 space-y-4">
             <div className="flex items-center gap-3 text-xs font-bold">
-              <span className={`w-7 h-7 rounded-full flex items-center justify-center shadow-sm ${step >= 1 ? 'bg-white text-[#D99A1C]' : 'bg-white/20 text-white'}`}>1</span>
-              <span className={step === 1 ? 'text-white font-extrabold underline' : 'text-white/80'}>Personal Details & Address</span>
+              <span className={`w-7 h-7 rounded-full flex items-center justify-center shadow-sm ${step >= 1 ? 'bg-white text-[#D99A1C] font-black' : 'bg-white/20 text-white'}`}>1</span>
+              <span className={step === 1 ? 'text-white font-black underline' : 'text-white/80'}>Personal Details & Address</span>
             </div>
             <div className="flex items-center gap-3 text-xs font-bold">
-              <span className={`w-7 h-7 rounded-full flex items-center justify-center shadow-sm ${step >= 2 ? 'bg-white text-[#D99A1C]' : 'bg-white/20 text-white'}`}>2</span>
-              <span className={step === 2 ? 'text-white font-extrabold underline' : 'text-white/80'}>Company Info & Registration Documents</span>
+              <span className={`w-7 h-7 rounded-full flex items-center justify-center shadow-sm ${step >= 2 ? 'bg-white text-[#D99A1C] font-black' : 'bg-white/20 text-white'}`}>2</span>
+              <span className={step === 2 ? 'text-white font-black underline' : 'text-white/80'}>Company Info & Registration Documents</span>
             </div>
             <div className="flex items-center gap-3 text-xs font-bold">
-              <span className={`w-7 h-7 rounded-full flex items-center justify-center shadow-sm ${step >= 3 ? 'bg-white text-[#D99A1C]' : 'bg-white/20 text-white'}`}>3</span>
-              <span className={step === 3 ? 'text-white font-extrabold underline' : 'text-white/80'}>Email OTP Verification</span>
+              <span className={`w-7 h-7 rounded-full flex items-center justify-center shadow-sm ${step >= 3 ? 'bg-white text-[#D99A1C] font-black' : 'bg-white/20 text-white'}`}>3</span>
+              <span className={step === 3 ? 'text-white font-black underline' : 'text-white/80'}>Email OTP Verification</span>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="text-[10px] text-white/60 font-semibold relative z-10">
+        <div className="text-[10px] text-white/70 font-semibold relative z-10">
           © 2026 Unigather Inc. All rights reserved.
         </div>
       </div>

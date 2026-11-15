@@ -5,6 +5,7 @@ import ActionMenu from '../components/ActionMenu';
 import { mapListApplication } from '../utils/listApplication';
 import { ActionButton } from '../components/ActionControls';
 import React, { useMemo } from 'react';
+import unigatherMascot from '../assets/unigather-mascot.png';
 
 export default function Dashboard({
   applications = [],
@@ -74,7 +75,7 @@ export default function Dashboard({
   const pendingCommissionApps = useMemo(() => {
     return applications.filter(a => {
       const aId = String(a._id || a.id || '');
-      if (a.commissionStatus === 'Claimed' || (['Visa Approved', 'Enrolled / Closed'].includes(a.status) && a.commissionStatus !== 'Paid')) return true;
+      if (a.commissionStatus === 'Claimed' || (['Visa Received', 'Student Enrolled & Closed', 'Visa Approved', 'Enrolled / Closed'].includes(a.status) && a.commissionStatus !== 'Paid')) return true;
       if (commissions && commissions.length > 0) {
         return commissions.some(c => {
           const cAppId = typeof c.application === 'object' && c.application !== null
@@ -314,35 +315,19 @@ export default function Dashboard({
   };
 
   return (
-    <div className="workspace-page flex-1 p-8 space-y-8 bg-[#F0F2F5] animate-fade-in-up">
+    <div className="workspace-page flex-1 p-8 space-y-8 bg-[#F8FAFC] animate-fade-in-up">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-4">
-          {/* Cute Elephant SVG */}
-          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
-            {/* Back Legs */}
-            <rect x="22" y="52" width="8" height="16" rx="4" fill="#B87C0E" />
-            <rect x="42" y="52" width="8" height="16" rx="4" fill="#B87C0E" />
-            {/* Body */}
-            <circle cx="35" cy="42" r="20" fill="#D99A1C" />
-            {/* Head */}
-            <circle cx="52" cy="38" r="14" fill="#D99A1C" />
-            {/* Front Legs */}
-            <rect x="28" y="52" width="8" height="16" rx="4" fill="#D99A1C" />
-            <rect x="48" y="52" width="8" height="16" rx="4" fill="#D99A1C" />
-            {/* Ear */}
-            <circle cx="46" cy="34" r="6" fill="#FFFDF5" />
-            <circle cx="46" cy="34" r="4" fill="#E2A925" />
-            {/* Eye */}
-            <circle cx="56" cy="34" r="1.5" fill="#0F172A" />
-            {/* Trunk curling right */}
-            <path d="M 64 42 C 72 42 76 46 76 50 C 76 54 72 54 70 51" stroke="#D99A1C" strokeWidth="5" strokeLinecap="round" fill="none" />
-            {/* Tail */}
-            <path d="M 16 42 Q 10 40 12 46" stroke="#D99A1C" strokeWidth="2" strokeLinecap="round" fill="none" />
-          </svg>
+        <div className="flex items-center gap-4 sm:gap-5">
+          {/* Unigather Mascot */}
+          <img
+            src={unigatherMascot}
+            alt="Unigather Mascot"
+            className="h-24 sm:h-32 lg:h-36 w-auto object-contain shrink-0 drop-shadow-md select-none pointer-events-none"
+          />
           <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">{greeting}, {partnerName} 👋</h1>
-            <p className="text-xs text-[#64748B] font-medium">{todayFormatted}</p>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0F172A]">{greeting}, {partnerName} 👋</h1>
+            <p className="text-xs sm:text-sm text-[#64748B] font-medium">{todayFormatted}</p>
           </div>
         </div>
 
@@ -350,9 +335,9 @@ export default function Dashboard({
         {onNewApplicationClick && (
           <ActionButton
             onClick={onNewApplicationClick}
-            className="bg-[#D99A1C] hover:bg-[#C28410] text-black font-extrabold text-xs px-4 py-2.5 rounded-xl transition-all duration-150 hover:scale-[1.02] active:scale-95 shadow-md flex items-center gap-2 self-start sm:self-auto cursor-pointer"
+            className="bg-[#D99A1C] hover:bg-[#C28410] text-[#07163B] font-extrabold text-xs px-4 py-2.5 rounded-xl transition-all duration-150 active:scale-95 shadow-md shadow-amber-500/15 flex items-center gap-2 self-start sm:self-auto cursor-pointer"
           >
-            <svg className="w-4 h-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-[#07163B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
             </svg>
             <span>New Application</span>

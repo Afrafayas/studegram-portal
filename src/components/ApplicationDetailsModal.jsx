@@ -1,4 +1,4 @@
-﻿import DocumentPreview from './DocumentPreview';
+import DocumentPreview from './DocumentPreview';
 import BatchDocumentUpload from './BatchDocumentUpload';
 import { applicationFee } from '../utils/courseFee';
 import { ActionButton, ActionForm } from './ActionControls';
@@ -18,6 +18,8 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
   const [mainTab, setMainTab] = useState('details');
   const [activeTab, setActiveTab] = useState('profile');
   const [showClaimModal, setShowClaimModal] = useState(false);
+  const [localCommissionStatus, setLocalCommissionStatus] = useState(application?.commissionStatus);
+  const [localCommissionClaimed, setLocalCommissionClaimed] = useState(application?.commissionClaimed);
 
   const [localDocuments, setLocalDocuments] = useState([]);
   const [editingDocIdx, setEditingDocIdx] = useState(null);
@@ -62,6 +64,8 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
     if (application) {
       setLocalDocuments(application.documents || []);
       setAppComments(application.applicationComments || []);
+      setLocalCommissionStatus(application.commissionStatus);
+      setLocalCommissionClaimed(application.commissionClaimed);
     }
   }, [application]);
 
@@ -328,6 +332,16 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
     /\badmin\b/i.test(latestComment.authorRole || latestComment.role || latestComment.author || '')
   );
 
+  const appStatusLower = (application?.status || application?.secondaryStatus || '').toLowerCase();
+  const isEligibleForClaim = appStatusLower.includes('visa approved') || appStatusLower.includes('visa received') || appStatusLower.includes('enrolled');
+  const isCommPaid = localCommissionStatus === 'Paid';
+  const isCommClaimed = Boolean(
+    localCommissionClaimed ||
+    localCommissionStatus === 'Claimed' ||
+    localCommissionStatus === 'Approved' ||
+    isCommPaid
+  );
+
   return (
     <div
       className="w-full min-w-0 p-4 sm:p-6 lg:p-8 [overflow-wrap:anywhere]"
@@ -337,27 +351,56 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
         className="bg-white border border-slate-200 border-t-4 border-t-[#D99A1C] rounded-2xl w-full shadow-sm relative flex flex-col overflow-hidden"
       >
         {/* Top Header & close button */}
-        <div className="px-4 sm:px-6 py-5 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 bg-white">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-[#D99A1C] flex items-center justify-center font-bold"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" /></svg></div>
-            <div>
-              <h2 className="text-lg sm:text-xl font-bold text-[#0F172A] tracking-tight">
-                Application details for {application.studentName}
-              </h2>
-              <p className="text-xs leading-relaxed text-[#64748B] font-semibold mt-1">
-                Application ID: <span className="text-[#D99A1C] font-bold">{application.camsId}</span> &middot; Passport: <span className="font-bold text-[#0F172A]">{application.passportNo}</span> &middot; Level: <span className="font-bold text-indigo-600">{application.level || 'Not provided'}</span>
-              </p>
+        <div className="px-4 sm:px-6 py-5 flex items-center justify-between gap-3 sm:gap-4 border-b border-slate-100 bg-white">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+            <ActionButton
+              onClick={onClose}
+              className="shrink-0 inline-flex items-center gap-2 px-3 py-2 border border-slate-200 bg-slate-50 hover:bg-slate-100 rounded-lg text-xs font-semibold text-slate-700 transition-colors cursor-pointer"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+              </svg>
+              <span>Back</span>
+            </ActionButton>
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-[#D99A1C] flex items-center justify-center font-bold shrink-0">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                </svg>
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-lg sm:text-xl font-bold text-[#0F172A] tracking-tight truncate">
+                  Application details for {application.studentName}
+                </h2>
+                <p className="text-xs leading-relaxed text-[#64748B] font-semibold mt-1 truncate">
+                  Application ID: <span className="text-[#D99A1C] font-bold">{application.camsId}</span> &middot; Passport: <span className="font-bold text-[#0F172A]">{application.passportNo}</span> &middot; Level: <span className="font-bold text-indigo-600">{application.level || 'Not provided'}</span>
+                </p>
+              </div>
             </div>
           </div>
-          <ActionButton
-            onClick={onClose}
-            className="shrink-0 self-start inline-flex items-center gap-2 px-3 py-2 border border-slate-200 bg-slate-50 hover:bg-slate-100 rounded-lg text-xs font-semibold text-slate-700 transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-            </svg>
-            <span>Back</span>
-          </ActionButton>
+
+          {/* Right Header: Commission Claim / Status */}
+          <div className="shrink-0 flex items-center gap-2">
+            {isEligibleForClaim && !isCommClaimed && !isCommPaid ? (
+              <button
+                type="button"
+                onClick={() => setShowClaimModal(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300 hover:border-blue-400 transition-all shadow-xs cursor-pointer active:scale-95 animate-pulse"
+                title="Claim Agency Commission"
+              >
+                <span>💰 Ready to Claim</span>
+              </button>
+            ) : isCommPaid ? (
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300">
+                <span>Paid ✓</span>
+              </span>
+            ) : isCommClaimed ? (
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300">
+                <span>Claimed (Pending)</span>
+              </span>
+            ) : null}
+          </div>
         </div>
 
         {/* Brand Main Toggle Tab Bar */}
@@ -486,39 +529,64 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                           <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Requested Intake</span>
                           <span className="text-xs font-bold text-[#0F172A]">{application.intake || 'Not provided'}</span>
                         </div>
-                        <div className="col-span-2">
-                          <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Application Status</span>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-100 text-emerald-700 text-[8px] font-extrabold rounded-full uppercase">
-                              {application.status}
-                            </span>
+                        <div className="col-span-2 flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+                          <div>
+                            <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Application Status</span>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="px-2.5 py-0.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[9px] font-extrabold rounded-full uppercase">
+                                {application.status}
+                              </span>
+                            </div>
                           </div>
+
+                          {isEligibleForClaim && !isCommClaimed && !isCommPaid && (
+                            <div>
+                              <span className="block text-[9px] font-extrabold text-[#64748B] uppercase tracking-wider">Commission</span>
+                              <div className="mt-0.5">
+                                <button
+                                  type="button"
+                                  onClick={() => setShowClaimModal(true)}
+                                  className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300 hover:border-blue-400 transition-all inline-flex items-center gap-1 cursor-pointer shadow-2xs active:scale-95"
+                                  title="Claim Commission"
+                                >
+                                  Ready to Claim 💰
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
 
                     {/* Claim Commission Box */}
-                    {['Visa Approved', 'Enrolled / Closed'].includes(application.status) && (
-                      <div className="bg-gradient-to-r from-amber-50 to-amber-100 border border-amber-300 rounded-xl p-3.5 my-3 flex items-center justify-between shadow-xs">
+                    {isEligibleForClaim && (
+                      <div className="bg-gradient-to-r from-blue-50 via-amber-50 to-amber-100 border border-amber-300 rounded-xl p-3.5 my-3 flex items-center justify-between shadow-xs">
                         <div>
-                          <p className="text-xs font-bold text-amber-950">💸 Commission Claim Available</p>
-                          <p className="text-[10px] text-amber-800 font-semibold">Payment completed & visa/enrolment confirmed for {application.studentName}.</p>
+                          <p className="text-xs font-bold text-amber-950 flex items-center gap-2">
+                            <span>💸 Commission Claim Available</span>
+                            {!isCommClaimed && !isCommPaid && (
+                              <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-blue-100 text-blue-800 border border-blue-300">
+                                Ready to Claim
+                              </span>
+                            )}
+                          </p>
+                          <p className="text-[10px] text-amber-800 font-semibold mt-0.5">Payment completed & visa/enrolment confirmed for {application.studentName}.</p>
                         </div>
-                        {application.commissionStatus === 'Claimed' ? (
-                          <span className="bg-amber-600 text-white font-black text-[10px] uppercase px-3 py-1.5 rounded-lg shadow">
-                            Claimed (Pending Payout)
-                          </span>
-                        ) : application.commissionStatus === 'Paid' || application.commissionStatus === 'Approved' ? (
+                        {isCommPaid ? (
                           <span className="bg-emerald-600 text-white font-black text-[10px] uppercase px-3 py-1.5 rounded-lg shadow">
                             Commission Disbursed & Paid ✓
+                          </span>
+                        ) : isCommClaimed ? (
+                          <span className="bg-amber-600 text-white font-black text-[10px] uppercase px-3 py-1.5 rounded-lg shadow">
+                            Claimed (Pending Payout)
                           </span>
                         ) : (
                           <ActionButton
                             type="button"
                             onClick={() => setShowClaimModal(true)}
-                            className="bg-amber-600 hover:bg-amber-700 text-white font-black text-xs px-4 py-2 rounded-xl transition-all shadow cursor-pointer active:scale-95"
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-black text-xs px-4 py-2 rounded-xl transition-all shadow cursor-pointer active:scale-95 inline-flex items-center gap-1.5"
                           >
-                            Claim Commission 💰
+                            <span>Ready to Claim 💰</span>
                           </ActionButton>
                         )}
                       </div>
@@ -1099,7 +1167,10 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
         onConfirmed={() => {
           if (application) {
             application.commissionStatus = 'Claimed';
+            application.commissionClaimed = true;
           }
+          setLocalCommissionStatus('Claimed');
+          setLocalCommissionClaimed(true);
           if (onUpdateSuccess) onUpdateSuccess();
         }}
       />

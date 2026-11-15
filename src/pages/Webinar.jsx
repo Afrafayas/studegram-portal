@@ -188,7 +188,7 @@ export default function Webinar() {
   const recordedCount = webinars.filter(w => w.status === 'Recorded' || w.status === 'Completed').length;
 
   return (
-    <div className="workspace-page flex-1 p-4 sm:p-6 space-y-6 bg-[#F0F2F5] animate-fade-in-up">
+    <div className="workspace-page flex-1 p-4 sm:p-6 space-y-6 bg-[#F8FAFC] animate-fade-in-up">
       {loadError && <p role="alert" className="text-sm text-red-600">{loadError}</p>}
 
       {/* Page Header */}

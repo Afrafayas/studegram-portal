@@ -1,6 +1,27 @@
 import { ActionButton } from './ActionControls';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
+import unigatherLogo from '../assets/unigather-logo.jpg';
+
+const PAGE_TITLES = {
+  Dashboard: 'Dashboard',
+  ApplicationHistory: 'Application History',
+  Commissions: 'Commissions',
+  Universities: 'Universities',
+  SearchCourses: 'Search Courses',
+  StaffManagement: 'Team Management',
+  RoleManagement: 'Role Permissions',
+  Notice: 'Notice & Announcements',
+  Webinar: 'Webinar',
+  Scholarships: 'Scholarships',
+  UniversityDeadline: 'University Deadlines',
+  KnowledgeHub: 'Knowledge Hub',
+};
+
+const formatPageTitle = (page) => {
+  if (!page) return '';
+  return PAGE_TITLES[page] || page.replace(/([A-Z])/g, ' $1').trim();
+};
 
 export default function Navbar({ 
   activePage, 
@@ -156,12 +177,12 @@ export default function Navbar({
   };
 
   return (
-    <nav className="workspace-header w-full min-w-0 h-[60px] min-h-[60px] bg-[#0A0A0F] border-b border-white/5 px-3 sm:px-4 md:px-6 flex items-center justify-between gap-2 sticky top-0 z-40 select-none text-white">
+    <nav className="workspace-header w-full min-w-0 h-[60px] min-h-[60px] bg-[#D99A1C] border-b border-[#C28410] px-3 sm:px-4 md:px-6 flex items-center justify-between gap-2 sticky top-0 z-40 select-none text-[#07163B] shadow-sm">
       {/* Left section: Logo & Hamburger toggle */}
       <div className="flex min-w-0 items-center gap-1 sm:gap-2 md:gap-3">
         <ActionButton 
           onClick={onToggleSidebar}
-          className="md:hidden shrink-0 p-1.5 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg focus:outline-none"
+          className="md:hidden shrink-0 p-1.5 text-[#07163B] hover:bg-black/10 rounded-lg focus:outline-none"
           title="Toggle Navigation"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,7 +193,7 @@ export default function Navbar({
         {onBack && (
           <ActionButton
             onClick={onBack}
-            className="shrink-0 p-1.5 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg focus:outline-none transition-all flex items-center justify-center active:scale-95 duration-100"
+            className="shrink-0 p-1.5 text-[#07163B] hover:bg-black/10 rounded-lg focus:outline-none transition-all flex items-center justify-center active:scale-95 duration-100"
             title="Go Back"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -181,20 +202,20 @@ export default function Navbar({
           </ActionButton>
         )}
  
-        <div className="shrink-0 w-8 h-8 md:w-9 md:h-9 rounded-xl bg-gradient-to-tr from-[#D99A1C] to-[#F5B025] flex items-center justify-center font-extrabold text-black text-sm md:text-lg shadow-sm">
-          U
-        </div>
-        <div className="flex min-w-0 items-center gap-1.5">
-          <span className="shrink-0 font-extrabold text-sm sm:text-base md:text-xl tracking-tight text-white">
+        <img
+          src={unigatherLogo}
+          alt="Unigather"
+          className="shrink-0 w-11 h-11 md:w-12 md:h-12 rounded-xl object-cover shadow-sm border-0 select-none pointer-events-none"
+        />
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="shrink-0 font-extrabold text-sm sm:text-base md:text-xl tracking-tight text-[#07163B]">
             Unigather
           </span>
           {activePage && (
             <>
-              <svg className="hidden sm:block shrink-0 w-3.5 h-3.5 text-slate-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7-7" />
-              </svg>
-              <span className="hidden sm:inline truncate text-[#D99A1C] font-extrabold text-xs md:text-sm mt-0.5">
-                {activePage}
+              <span className="hidden sm:inline-block text-[#07163B]/40 font-medium text-sm select-none mx-0.5">/</span>
+              <span className="hidden sm:inline truncate text-[#07163B] font-black text-xs md:text-sm mt-0.5">
+                {formatPageTitle(activePage)}
               </span>
             </>
           )}
@@ -206,8 +227,8 @@ export default function Navbar({
         
         {/* Agency and Role details */}
         <div className="text-right hidden lg:block">
-          <p className="text-xs font-bold text-white truncate max-w-[180px]">{partnerData?.companyName || partnerData?.name || 'Agent Portal'}</p>
-          <p className="text-[10px] text-[#D99A1C] font-semibold">{userRoleDisplay}</p>
+          <p className="text-xs font-black text-[#07163B] truncate max-w-[180px]">{partnerData?.companyName || partnerData?.name || 'Agent Portal'}</p>
+          <p className="text-[10px] text-[#07163B]/80 font-bold">{userRoleDisplay}</p>
         </div>
 
         {/* Application Comments Icon & Drawer */}
@@ -217,14 +238,14 @@ export default function Navbar({
               setShowComments(!showComments);
               if (showNotifications) setShowNotifications(false);
             }}
-            className="p-2 text-slate-400 hover:text-white rounded-full hover:bg-white/5 transition-all relative focus:outline-none cursor-pointer"
+            className="p-2 text-[#07163B] hover:bg-black/10 rounded-full transition-all relative focus:outline-none cursor-pointer"
             title="Application Comments & Messages"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
             </svg>
             {unreadCommentsCount > 0 && (
-              <span className="absolute top-1 right-1 bg-blue-500 text-white text-[9px] font-extrabold px-1.5 py-0.2 rounded-full min-w-[16px] text-center shadow animate-bounce">
+              <span className="absolute top-1 right-1 bg-[#07163B] text-white text-[9px] font-extrabold px-1.5 py-0.2 rounded-full min-w-[16px] text-center shadow">
                 {unreadCommentsCount}
               </span>
             )}
@@ -237,8 +258,8 @@ export default function Navbar({
                 onClick={() => setShowComments(false)}
                 className="fixed inset-0 z-10"
               />
-              <div className="absolute right-0 top-11 w-80 sm:w-96 bg-[#0A0A0F] border border-slate-800 rounded-2xl shadow-2xl py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                <div className="px-4 pb-2.5 border-b border-slate-900 flex justify-between items-center">
+              <div className="absolute right-0 top-11 w-80 sm:w-96 bg-[#07163B] border border-[#0D2357] rounded-2xl shadow-2xl py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="px-4 pb-2.5 border-b border-[#0D2357] flex justify-between items-center">
                   <div>
                     <h4 className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
                       <span>Application Comments</span>
@@ -301,14 +322,14 @@ export default function Navbar({
               setShowNotifications(!showNotifications);
               if (showComments) setShowComments(false);
             }}
-            className="relative p-2 text-slate-400 hover:text-white rounded-full hover:bg-white/5 transition-all focus:outline-none cursor-pointer"
+            className="relative p-2 text-[#07163B] hover:bg-black/10 rounded-full transition-all focus:outline-none cursor-pointer"
             title="Notifications"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
             </svg>
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 bg-rose-500 text-white text-[9px] font-extrabold px-1.5 py-0.2 rounded-full min-w-[16px] text-center shadow animate-bounce">
+              <span className="absolute top-1 right-1 bg-rose-600 text-white text-[9px] font-extrabold px-1.5 py-0.2 rounded-full min-w-[16px] text-center shadow">
                 {unreadCount}
               </span>
             )}
@@ -321,8 +342,8 @@ export default function Navbar({
                 onClick={() => setShowNotifications(false)}
                 className="fixed inset-0 z-10"
               />
-              <div className="absolute right-0 top-11 w-80 sm:w-96 bg-[#0A0A0F] border border-slate-800 rounded-2xl shadow-2xl py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                <div className="px-4 pb-2.5 border-b border-slate-900 flex justify-between items-center">
+              <div className="absolute right-0 top-11 w-80 sm:w-96 bg-[#07163B] border border-[#0D2357] rounded-2xl shadow-2xl py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="px-4 pb-2.5 border-b border-[#0D2357] flex justify-between items-center">
                   <div>
                     <h4 className="text-xs font-black text-white uppercase tracking-wider">Notifications</h4>
                     <p className="text-[10px] text-slate-400">Application updates & system alerts</p>
@@ -385,12 +406,12 @@ export default function Navbar({
               if (showComments) setShowComments(false);
             }}
             title="Account & Profile Settings"
-            className="relative cursor-pointer group focus:outline-none flex items-center gap-2 p-1 rounded-xl hover:bg-white/5 transition-all"
+            className="relative cursor-pointer group focus:outline-none flex items-center gap-2 p-1 rounded-xl hover:bg-black/10 transition-all"
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#D99A1C] to-[#F5B025] flex items-center justify-center font-bold text-black text-xs shadow-md border-2 border-[#0A0A0F] group-hover:scale-105 transition-all">
+            <div className="w-8 h-8 rounded-full bg-[#07163B] text-white flex items-center justify-center font-bold text-xs shadow-md border-2 border-white/80 group-hover:scale-105 transition-all">
               {displayInitials}
             </div>
-            <span className="absolute bottom-1 left-7 w-2.5 h-2.5 bg-[#10B981] rounded-full ring-2 ring-[#0A0A0F]"></span>
+            <span className="absolute bottom-1 left-7 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-[#D99A1C]"></span>
           </ActionButton>
 
           {showUserMenu && (
@@ -399,8 +420,8 @@ export default function Navbar({
                 onClick={() => setShowUserMenu(false)}
                 className="fixed inset-0 z-10"
               />
-              <div className="absolute right-0 top-11 w-64 bg-[#0A0A0F] border border-slate-800 rounded-2xl shadow-2xl py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                <div className="px-4 pb-3 border-b border-slate-900">
+              <div className="absolute right-0 top-11 w-64 bg-[#07163B] border border-[#0D2357] rounded-2xl shadow-2xl py-3 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="px-4 pb-3 border-b border-[#0D2357]">
                   <p className="text-xs font-bold text-white truncate">{partnerData?.name || 'Agent User'}</p>
                   <p className="text-[10px] text-slate-400 truncate">{partnerData?.email}</p>
                   <span className="inline-block mt-1.5 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-[#D99A1C]/10 text-[#D99A1C] border border-[#D99A1C]/20">

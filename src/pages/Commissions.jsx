@@ -137,7 +137,7 @@ export default function Commissions({
   const startIndex = (list.page - 1) * list.limit;
 
   return (
-    <div className="workspace-page flex-1 p-6 space-y-6 bg-[#F0F2F5] min-h-[calc(100vh-60px)]">
+    <div className="workspace-page flex-1 p-6 space-y-6 bg-[#F8FAFC] min-h-[calc(100vh-60px)]">
       {/* Top Banner / Header */}
       <div className="workspace-panel bg-white border border-[#E2E8F0] border-t-4 border-t-[#D99A1C] p-6 rounded-2xl shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="space-y-1">
@@ -289,9 +289,17 @@ export default function Commissions({
                             </span>
                           )
                         ) : app.isVisaApprovedOrEnrolled ? (
-                          <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase bg-blue-100 text-blue-800 border border-blue-300 inline-block">
-                            Ready to Claim
-                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (canClaim) setSelectedAppForClaim(app);
+                            }}
+                            className="px-2.5 py-1 rounded-full text-[9px] font-black uppercase bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300 hover:border-blue-400 transition-all inline-flex items-center gap-1 cursor-pointer shadow-2xs active:scale-95"
+                            title="Click to claim commission"
+                          >
+                            Ready to Claim 💰
+                          </button>
                         ) : (
                           <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase bg-slate-100 text-slate-500 border border-slate-200 inline-block">
                             {app.status || 'In Progress'}

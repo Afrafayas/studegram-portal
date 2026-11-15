@@ -8,10 +8,13 @@ import ValidatedInput from './ValidatedInput';
 import { ActionButton, ActionForm } from './ActionControls';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
+import unigatherMascot from '../assets/unigather-mascot.png';
+import { resolveUniversityCourses } from '../utils/courseMatching';
 
-export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRef }) {
+export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRef, onViewHistory }) {
 
   const [stepNumber, setStepNumber] = useState(1);
+  const [submittedSummary, setSubmittedSummary] = useState(null);
   const [students, setStudents] = useState([]);
   const [universities, setUniversities] = useState([]);
   const [courses, setCourses] = useState([]);
@@ -87,7 +90,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
       (sel === 'united states' && (uCountry === 'usa' || uCountry === 'us'));
   });
 
-  const handleResetAndClose = () => {
+  const handleResetForm = () => {
     setSelectedStudent('');
     setSelectedCountry('');
     setSelectedUniversity('');
@@ -106,7 +109,13 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
     setNotes('');
     setSelectedLevel('Undergraduate (UG)');
     setSelectedIntake('');
+    setError('');
+    setSubmittedSummary(null);
     setStepNumber(1);
+  };
+
+  const handleResetAndClose = () => {
+    handleResetForm();
     onClose();
   };
 
@@ -178,7 +187,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
         uploadedAt: new Date().toISOString()
       }));
 
-      const success = await onSubmit({
+      const result = await onSubmit({
         studentId: studentId,
         universityId: selectedUniversity,
         courseId: selectedCourse,
@@ -187,7 +196,25 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
         documents: finalDocuments,
         notes: notes
       });
-      if (success) {
+      if (result) {
+        const studentObj = studentSelectionMode === 'new'
+          ? { name: newStudentName, passportNo: newStudentPassport, email: newStudentEmail }
+          : (students.find(s => (s._id || s.id) === selectedStudent) || {});
+
+        const univObj = (universities || []).find(u => (u._id || u.id) === selectedUniversity) || {};
+        const courseObj = (courses || []).find(c => (c._id || c.id) === selectedCourse) ||
+                          (filteredCourses || []).find(c => (c._id || c.id) === selectedCourse) || {};
+
+        setSubmittedSummary({
+          studentName: studentObj.name || newStudentName || 'Student',
+          passportNo: studentObj.passportNo || newStudentPassport || 'Provided',
+          universityName: univObj.name || 'Target University',
+          courseTitle: courseObj.title || 'Academic Program',
+          level: selectedLevel || 'Undergraduate (UG)',
+          intake: selectedIntake || 'Current Intake',
+          documentsCount: finalDocuments.length,
+          camsId: typeof result === 'object' && result ? (result.camsId || result.displayId || (result._id ? ('APP-' + String(result._id).slice(-4).toUpperCase()) : null)) : null
+        });
         setStepNumber(4); // Success step
       }
     } catch (err) {
@@ -198,11 +225,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
   };
 
   // Filter courses by selected university
-  const filteredCourses = courses.filter(course => {
-    if (!selectedUniversity) return false;
-    const courseUnivId = course.university?._id || course.university;
-    return courseUnivId === selectedUniversity;
-  });
+  const filteredCourses = resolveUniversityCourses(selectedUniversity, universities, courses);
 
   if (!isOpen) return null;
 
@@ -217,17 +240,34 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
         {/* Header */}
         <div className="px-4 sm:px-6 py-5 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200">
           <div>
-            <h2 className="text-lg sm:text-xl font-bold text-[#0F172A]">Create application</h2>
-            <p className="mt-1 text-xs text-slate-500 leading-relaxed">Add student information, choose a program, and upload supporting documents.</p>
+            <h2 className="text-lg sm:text-xl font-bold text-[#0F172A]">
+              {stepNumber === 4 ? 'Application Confirmation' : 'Create application'}
+            </h2>
+            <p className="mt-1 text-xs text-slate-500 leading-relaxed">
+              {stepNumber === 4
+                ? 'Your student application was submitted and logged successfully.'
+                : 'Add student information, choose a program, and upload supporting documents.'}
+            </p>
           </div>
           <ActionButton
             onClick={handleResetAndClose}
             className="shrink-0 self-start inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-            </svg>
-            Back
+            {stepNumber === 4 ? (
+              <>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Close
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Back
+              </>
+            )}
           </ActionButton>
         </div>
 
@@ -502,7 +542,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
                         {!selectedUniversity ? '-- Please Select a University First --' : '-- Choose Course --'}
                       </option>
                       {filteredCourses.map((course) => (
-                        <option key={course._id} value={course._id}>
+                        <option key={course._id || course.id} value={course._id || course.id}>
                           {course.title} ({course.degreeLevel || 'N/A'})
                         </option>
                       ))}
@@ -623,34 +663,134 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
               </ActionButton>
             </ActionForm>
           ) : (
-            /* STEP 4: Success Screen */
-            <div className="flex flex-col items-center text-center py-8 space-y-4">
-              <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="shrink-0">
-                <rect x="22" y="52" width="8" height="16" rx="4" fill="#64748B" />
-                <rect x="42" y="52" width="8" height="16" rx="4" fill="#64748B" />
-                <circle cx="35" cy="42" r="20" fill="#94A3B8" />
-                <circle cx="52" cy="38" r="14" fill="#94A3B8" />
-                <rect x="28" y="52" width="8" height="16" rx="4" fill="#94A3B8" />
-                <rect x="48" y="52" width="8" height="16" rx="4" fill="#94A3B8" />
-                <circle cx="46" cy="34" r="6" fill="#F1F5F9" />
-                <circle cx="46" cy="34" r="4" fill="#F472B6" />
-                <circle cx="56" cy="34" r="1.5" fill="#0F172A" />
-                <path d="M 64 42 C 72 42 76 46 76 50 C 76 54 72 54 70 51" stroke="#94A3B8" strokeWidth="5" strokeLinecap="round" fill="none" />
-                <path d="M 16 42 Q 10 40 12 46" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" fill="none" />
-              </svg>
-              <h3 className="text-base font-bold text-[#10B981] mt-2 flex items-center justify-center gap-1.5">
-                <span>🎉</span> Application Submitted!
-              </h3>
-              <p className="text-xs text-[#64748B] font-semibold max-w-xs leading-relaxed">
-                Your application has been logged in the Unigather system. Our handlers will verify the information.
-              </p>
-              <ActionButton
-                type="button"
-                onClick={handleResetAndClose}
-                className="bg-[#D99A1C] hover:bg-[#C28410] text-white font-bold py-2.5 px-6 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider mt-4"
-              >
-                Close
-              </ActionButton>
+            /* STEP 4: Upgraded Success Screen */
+            <div className="py-4 sm:py-6 max-w-2xl mx-auto space-y-6">
+              {/* Top Hero Celebration */}
+              <div className="flex flex-col items-center text-center space-y-3">
+                <div className="relative inline-flex items-center justify-center">
+                  <img
+                    src={unigatherMascot}
+                    alt="Unigather Mascot"
+                    className="h-36 sm:h-44 w-auto object-contain drop-shadow-md select-none pointer-events-none"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Submission Successful
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-black text-[#0F172A] tracking-tight">
+                    Application Submitted Successfully!
+                  </h3>
+                  <p className="text-xs sm:text-sm text-slate-500 font-medium max-w-md mx-auto leading-relaxed">
+                    The student file has been registered and dispatched to the Unigather processing desk.
+                  </p>
+                </div>
+              </div>
+
+              {/* Receipt / Summary Card */}
+              <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-xs space-y-4 text-left">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 gap-2 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                      Application Summary
+                    </span>
+                    {submittedSummary?.camsId && (
+                      <span className="text-xs font-mono font-bold bg-white px-2 py-0.5 rounded border border-slate-200 text-[#0F172A]">
+                        {submittedSummary.camsId}
+                      </span>
+                    )}
+                  </div>
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    Application Received
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs">
+                  <div className="bg-white p-3 rounded-xl border border-slate-200/60 shadow-2xs space-y-1">
+                    <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">Student Details</div>
+                    <div className="font-bold text-[#0F172A] text-sm truncate">
+                      {submittedSummary?.studentName || 'Student'}
+                    </div>
+                    <div className="text-slate-500 flex items-center gap-1.5 text-[11px]">
+                      <span>Passport:</span>
+                      <span className="font-semibold text-slate-700 font-mono">
+                        {submittedSummary?.passportNo || 'Provided'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-3 rounded-xl border border-slate-200/60 shadow-2xs space-y-1">
+                    <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">University & Program</div>
+                    <div className="font-bold text-[#0F172A] text-sm truncate">
+                      {submittedSummary?.universityName || 'Target University'}
+                    </div>
+                    <div className="text-slate-500 text-[11px] truncate">
+                      {submittedSummary?.courseTitle || 'Academic Program'}
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-3 rounded-xl border border-slate-200/60 shadow-2xs space-y-1">
+                    <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">Intake & Level</div>
+                    <div className="font-bold text-[#0F172A] text-sm">
+                      {submittedSummary?.intake || 'Current Intake'}
+                    </div>
+                    <div className="text-slate-500 text-[11px]">
+                      {submittedSummary?.level || 'Undergraduate (UG)'}
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-3 rounded-xl border border-slate-200/60 shadow-2xs space-y-1">
+                    <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">Uploaded Documents</div>
+                    <div className="font-bold text-[#0F172A] text-sm flex items-center gap-1.5">
+                      <svg className="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      {submittedSummary?.documentsCount || 1} Document{(submittedSummary?.documentsCount || 1) > 1 ? 's' : ''} Attached
+                    </div>
+                    <div className="text-emerald-600 font-medium text-[11px] flex items-center gap-1">
+                      <span>✓</span> Verified & Uploaded
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                {onViewHistory && (
+                  <ActionButton
+                    type="button"
+                    onClick={onViewHistory}
+                    className="w-full sm:w-auto bg-[#D99A1C] hover:bg-[#C28410] text-white font-bold py-2.5 px-5 rounded-xl text-xs transition-all duration-150 shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                    View in Application History
+                  </ActionButton>
+                )}
+
+                <ActionButton
+                  type="button"
+                  onClick={handleResetForm}
+                  className="w-full sm:w-auto bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 font-bold py-2.5 px-5 rounded-xl text-xs transition-all duration-150 shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                  Submit Another Application
+                </ActionButton>
+
+                <ActionButton
+                  type="button"
+                  onClick={handleResetAndClose}
+                  className="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-5 rounded-xl text-xs transition-all duration-150 flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  Done
+                </ActionButton>
+              </div>
             </div>
           )}
         </div>

@@ -6,6 +6,7 @@ import { ActionButton, ActionForm } from './ActionControls';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
+import { resolveUniversityCourses } from '../utils/courseMatching';
 
 export default function EditApplicationModal({ isOpen, onClose, application, onUpdateSuccess }) {
 
@@ -104,11 +105,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
     setSelectedCourse('');
   };
 
-  const filteredCourses = courses.filter(course => {
-    if (!selectedUniversity) return false;
-    const courseUnivId = course.university?._id || course.university;
-    return courseUnivId === selectedUniversity;
-  });
+  const filteredCourses = resolveUniversityCourses(selectedUniversity, universities, courses);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -326,7 +323,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
                           {selectedUniversity ? 'Select Course' : 'Select a university first'}
                         </option>
                         {filteredCourses.map(course => (
-                          <option key={course._id} value={course._id}>
+                          <option key={course._id || course.id} value={course._id || course.id}>
                             {course.title} ({course.degreeLevel || 'UG'})
                           </option>
                         ))}
