@@ -2,6 +2,8 @@ import { ActionButton, ActionForm } from '../components/ActionControls';
 import { createPortal } from 'react-dom';
 import React, { useState } from 'react';
 import API from '../api/axios';
+import unigatherLogo from '../assets/unigather-logo.jpg';
+import unigatherMascot from '../assets/unigather-mascot.png';
 
 export default function Login({ onNavigate, onLoginSuccess }) {
   const [email, setEmail] = useState('');
@@ -185,103 +187,131 @@ export default function Login({ onNavigate, onLoginSuccess }) {
   const alertConfig = getAlertConfig();
 
   return (
-    <div className="min-h-screen bg-[#F0F2F5] flex items-stretch select-none">
+    <div className="min-h-screen bg-[#F8FAFC] flex items-stretch select-none">
       
-      {/* Left side (50%): Brand detail graphic panel */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#D99A1C] text-white p-16 flex-col justify-between relative overflow-hidden">
-        {/* Transparent Icon Pattern Background with custom opacity */}
+      {/* Left side (50%): Premium Brand graphic panel */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#D99A1C] via-[#CA8A14] to-[#B07609] text-white p-8 lg:p-10 xl:p-12 flex-col justify-between relative overflow-hidden">
+        {/* Transparent Icon Pattern Background with depth */}
         <div 
-          className="absolute inset-0 bg-cover bg-center opacity-25 mix-blend-multiply"
+          className="absolute inset-0 bg-cover bg-center opacity-15 mix-blend-overlay pointer-events-none"
           style={{ backgroundImage: 'url(/assets/login_hero_pattern.png)' }}
         ></div>
-        {/* Soft layout overlay */}
-        <div className="absolute inset-0 bg-black/5"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/5 pointer-events-none"></div>
+
+        {/* Ambient radial lighting orbs */}
+        <div className="absolute -top-24 -left-24 w-96 h-96 bg-white/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-amber-950/20 rounded-full blur-3xl pointer-events-none"></div>
 
         {/* Top: Logo Brand */}
-        <div className="flex items-center gap-3 relative z-10">
-          <div className="w-10 h-10 rounded-xl bg-white text-[#D99A1C] flex items-center justify-center font-extrabold text-xl shadow-lg">
-            U
-          </div>
-          <span className="font-extrabold text-2xl tracking-wider uppercase">Unigather</span>
-        </div>
-
-        {/* Center: Hero Statement */}
-        <div className="space-y-6 max-w-md relative z-10 my-auto">
-          <h2 className="text-4xl font-extrabold tracking-tight leading-tight">
-            Empowering Student Journeys Worldwide
-          </h2>
-          <p className="text-xs text-white/80 font-medium leading-relaxed">
-            Manage student records, track university deadlines, search thousands of academic courses, and file applications in one unified dashboard.
-          </p>
-
-          {/* Cute Elephant SVG */}
-          <div className="py-2">
-            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Back Legs */}
-              <rect x="22" y="52" width="8" height="16" rx="4" fill="#64748B" />
-              <rect x="42" y="52" width="8" height="16" rx="4" fill="#64748B" />
-              {/* Body */}
-              <circle cx="35" cy="42" r="20" fill="#94A3B8" />
-              {/* Head */}
-              <circle cx="52" cy="38" r="14" fill="#94A3B8" />
-              {/* Front Legs */}
-              <rect x="28" y="52" width="8" height="16" rx="4" fill="#94A3B8" />
-              <rect x="48" y="52" width="8" height="16" rx="4" fill="#94A3B8" />
-              {/* Ear */}
-              <circle cx="46" cy="34" r="6" fill="#F1F5F9" />
-              <circle cx="46" cy="34" r="4" fill="#F472B6" />
-              {/* Eye */}
-              <circle cx="56" cy="34" r="1.5" fill="#0F172A" />
-              {/* Trunk curling right */}
-              <path d="M 64 42 C 72 42 76 46 76 50 C 76 54 72 54 70 51" stroke="#94A3B8" strokeWidth="5" strokeLinecap="round" fill="none" />
-              {/* Tail */}
-              <path d="M 16 42 Q 10 40 12 46" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" fill="none" />
-            </svg>
-          </div>
-
-          {/* 3 Feature Points with checkmarks */}
-          <div className="space-y-3.5 pt-6 text-xs font-semibold">
-            <div className="flex items-center gap-3">
-              <span className="w-5 h-5 bg-white/10 border border-white/20 rounded-full flex items-center justify-center shadow-inner">
-                <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                </svg>
-              </span>
-              <span>Manage Student Applications</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="w-5 h-5 bg-white/10 border border-white/20 rounded-full flex items-center justify-center shadow-inner">
-                <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                </svg>
-              </span>
-              <span>Search 100k+ Active Courses</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="w-5 h-5 bg-white/10 border border-white/20 rounded-full flex items-center justify-center shadow-inner">
-                <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                </svg>
-              </span>
-              <span>Track Deadlines and Schedules</span>
-            </div>
+        <div className="flex items-center gap-3.5 relative z-10 shrink-0">
+          <img
+            src={unigatherLogo}
+            alt="Unigather"
+            className="w-10 h-10 rounded-xl object-cover shadow-lg border border-white/20 select-none pointer-events-none"
+          />
+          <div className="flex items-center gap-2">
+            <span className="font-black text-2xl tracking-tight text-white drop-shadow-xs">Unigather</span>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/15 text-white/95 backdrop-blur-xs border border-white/25">
+              Agency Portal
+            </span>
           </div>
         </div>
 
-        {/* Bottom: Footer copyright */}
-        <div className="text-[10px] text-white/60 font-semibold relative z-10">
-          © 2026 Unigather Inc. All rights reserved.
+        {/* Center: Hero Statement & Mascot */}
+        <div className="space-y-4 xl:space-y-5 max-w-xl relative z-10 my-auto py-2">
+          <div className="space-y-1.5">
+            <h2 className="text-2xl xl:text-3xl font-black tracking-tight leading-tight text-white drop-shadow-xs">
+              Empowering Student Journeys Worldwide
+            </h2>
+            <p className="text-xs text-white/90 font-medium leading-relaxed">
+              Manage student records, track university deadlines, search thousands of academic courses, and file applications in one unified dashboard.
+            </p>
+          </div>
+
+          {/* Unigather Mascot - Centered & Prominent */}
+          <div className="w-full py-1 flex items-center justify-center">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-white/20 rounded-full blur-2xl transform scale-95"></div>
+              <img
+                src={unigatherMascot}
+                alt="Unigather Mascot"
+                className="h-36 sm:h-40 lg:h-44 xl:h-48 w-auto object-contain drop-shadow-2xl select-none pointer-events-none relative z-10 transition-transform duration-300 hover:scale-105"
+              />
+            </div>
+          </div>
+
+          {/* 3 Modern Feature Cards */}
+          <div className="grid grid-cols-1 gap-2">
+            <div className="flex items-center gap-3 bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/20 rounded-xl px-3.5 py-2 transition-all shadow-xs">
+              <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center text-white shrink-0 shadow-inner">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div>
+                <div className="text-xs font-bold text-white tracking-wide">Manage Student Applications</div>
+                <div className="text-[11px] text-white/80 leading-tight">Fast-track submissions and track status stages in real time</div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/20 rounded-xl px-3.5 py-2 transition-all shadow-xs">
+              <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center text-white shrink-0 shadow-inner">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <div>
+                <div className="text-xs font-bold text-white tracking-wide">Search 100k+ Active Courses</div>
+                <div className="text-[11px] text-white/80 leading-tight">Global university database with verified entry criteria</div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/20 rounded-xl px-3.5 py-2 transition-all shadow-xs">
+              <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center text-white shrink-0 shadow-inner">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <div className="text-xs font-bold text-white tracking-wide">Track Deadlines & Commissions</div>
+                <div className="text-[11px] text-white/80 leading-tight">Stay on top of intake cut-offs and claim verified commissions</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom: Footer copyright - positioned lower down with proper space */}
+        <div className="text-[11px] text-white/75 font-medium relative z-10 flex items-center justify-between pt-4 mt-auto shrink-0 border-t border-white/10">
+          <span>© 2026 Unigather Inc. All rights reserved.</span>
+          <span className="text-white/60">Global Education Admissions</span>
         </div>
       </div>
 
       {/* Right side (50%): Form card centered */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 md:p-16">
-        <div className="w-full max-w-md bg-white border border-[#E2E8F0] rounded-2xl shadow-xl p-8 md:p-10 space-y-8">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-10 lg:p-16 bg-gradient-to-b from-[#F8FAFC] via-[#F1F5F9] to-[#E2E8F0]/30 relative overflow-hidden">
+        {/* Soft background ambient lights */}
+        <div className="absolute top-0 right-0 w-80 h-80 bg-amber-100/30 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-slate-200/40 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div className="w-full max-w-md bg-white border border-slate-200/80 border-t-4 border-t-[#D99A1C] rounded-3xl shadow-[0_20px_50px_-10px_rgba(15,23,42,0.08)] p-7 sm:p-9 space-y-6 relative z-10">
           
+          {/* Mobile-only logo */}
+          <div className="lg:hidden flex items-center justify-center gap-2.5 pb-1">
+            <img src={unigatherLogo} alt="Unigather" className="w-9 h-9 rounded-xl object-cover shadow-xs border border-slate-200/60" />
+            <div className="flex flex-col text-left">
+              <span className="font-black text-lg tracking-tight text-[#07163B] leading-tight">Unigather</span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Partner Portal</span>
+            </div>
+          </div>
+
           {/* Form Header */}
-          <div className="text-left space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-[#0F172A]">Welcome back</h1>
-            <p className="text-xs text-[#64748B] font-semibold">Sign in to your account to manage applications</p>
+          <div className="text-left space-y-1.5">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-50 text-[#B87C0E] border border-amber-200/80">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#D99A1C]"></span>
+              Agency Portal Sign In
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-[#0F172A]">Welcome back</h1>
+            <p className="text-xs text-[#64748B] font-medium leading-relaxed">Sign in to your agency account to manage applications and students</p>
           </div>
 
           {/* Form fields */}
@@ -295,12 +325,12 @@ export default function Login({ onNavigate, onLoginSuccess }) {
             </div>
           )}
 
-          <ActionForm onSubmit={handleSubmit} className="space-y-5">
+          <ActionForm onSubmit={handleSubmit} className="space-y-4">
             {/* Email Input */}
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 text-left">
               <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Email Address</label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-[#64748B]">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-[#64748B]">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
@@ -308,10 +338,10 @@ export default function Login({ onNavigate, onLoginSuccess }) {
                 <input
                   type="text"
                   autoComplete="username"
-                  className={`w-full bg-slate-50 border rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
+                  className={`w-full bg-slate-50/70 hover:bg-slate-50 border rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#0F172A] placeholder-[#94A3B8] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#D99A1C]/25 transition-all ${
                     emailError
-                      ? 'border-[#EF4444] focus:ring-[#EF4444] focus:border-[#EF4444]'
-                      : 'border-slate-200 focus:ring-[#D99A1C] focus:border-[#D99A1C]'
+                      ? 'border-[#EF4444] focus:ring-[#EF4444]/20 focus:border-[#EF4444]'
+                      : 'border-slate-200 focus:border-[#D99A1C]'
                   }`}
                   placeholder="name@agency.com"
                   value={email}
@@ -328,10 +358,10 @@ export default function Login({ onNavigate, onLoginSuccess }) {
             </div>
 
             {/* Password Input */}
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 text-left">
               <label className="block text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider">Password</label>
               <div className="relative">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-[#64748B]">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-[#64748B]">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
@@ -339,10 +369,10 @@ export default function Login({ onNavigate, onLoginSuccess }) {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
-                  className={`w-full bg-slate-50 border rounded-xl pl-10 pr-10 py-2.5 text-xs text-[#0F172A] placeholder-[#64748B] focus:outline-none focus:bg-white focus:ring-1 transition-all ${
+                  className={`w-full bg-slate-50/70 hover:bg-slate-50 border rounded-xl pl-10 pr-10 py-2.5 text-xs text-[#0F172A] placeholder-[#94A3B8] focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#D99A1C]/25 transition-all ${
                     passwordError
-                      ? 'border-[#EF4444] focus:ring-[#EF4444] focus:border-[#EF4444]'
-                      : 'border-slate-200 focus:ring-[#D99A1C] focus:border-[#D99A1C]'
+                      ? 'border-[#EF4444] focus:ring-[#EF4444]/20 focus:border-[#EF4444]'
+                      : 'border-slate-200 focus:border-[#D99A1C]'
                   }`}
                   placeholder="••••••••"
                   value={password}
@@ -356,7 +386,7 @@ export default function Login({ onNavigate, onLoginSuccess }) {
                 <ActionButton
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-[#64748B] hover:text-[#0F172A] focus:outline-none"
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#64748B] hover:text-[#0F172A] focus:outline-none cursor-pointer"
                   disabled={isLoading}
                 >
                   {showPassword ? (
@@ -377,11 +407,11 @@ export default function Login({ onNavigate, onLoginSuccess }) {
             </div>
 
             {/* Remember me & Forgot password row */}
-            <div className="flex items-center justify-between text-xs select-none">
+            <div className="flex items-center justify-between text-xs select-none pt-0.5">
               <label className="flex items-center gap-2 cursor-pointer font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors">
                 <input
                   type="checkbox"
-                  className="w-4 h-4 rounded text-[#D99A1C] border-slate-300 focus:ring-[#D99A1C]"
+                  className="w-4 h-4 rounded text-[#D99A1C] border-slate-300 focus:ring-[#D99A1C] cursor-pointer"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
                   disabled={isLoading}
@@ -391,7 +421,7 @@ export default function Login({ onNavigate, onLoginSuccess }) {
               <ActionButton
                 type="button"
                 onClick={handleOpenForgotModal}
-                className="text-[#D99A1C] font-bold hover:underline cursor-pointer focus:outline-none"
+                className="text-[#D99A1C] hover:text-[#C28410] font-bold hover:underline cursor-pointer focus:outline-none"
               >
                 Forgot password?
               </ActionButton>
@@ -400,41 +430,51 @@ export default function Login({ onNavigate, onLoginSuccess }) {
             {/* Submit button with loading state */}
             <ActionButton
               type="submit"
-              className="w-full bg-gradient-to-r from-[#D99A1C] to-[#F5B025] hover:scale-[1.02] text-white font-bold py-3 rounded-xl text-xs transition-all duration-150 shadow-md uppercase tracking-wider disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
+              className="w-full bg-[#D99A1C] hover:bg-[#C28410] active:scale-[0.99] text-[#07163B] font-black py-3 rounded-xl text-xs transition-all duration-150 shadow-md shadow-amber-500/20 uppercase tracking-wider disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 cursor-pointer mt-2"
               disabled={isLoading}
             >
               {isLoading ? (
                 <>
-                  <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin h-4 w-4 text-[#07163B]" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
-                  Signing in...
+                  <span>Signing in...</span>
                 </>
               ) : (
-                'Sign In'
+                <>
+                  <span>Sign In to Dashboard</span>
+                  <svg className="w-4 h-4 text-[#07163B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </>
               )}
             </ActionButton>
           </ActionForm>
 
           {/* Bottom redirection */}
-          <div className="text-center text-xs font-semibold text-[#64748B] pt-2">
-            Don't have an account?{' '}
-            <ActionButton
-              onClick={() => onNavigate('register')}
-              className="text-[#D99A1C] font-bold hover:underline"
-              disabled={isLoading}
-            >
-              Register here
-            </ActionButton>
+          <div className="pt-2 border-t border-slate-100 text-center space-y-2">
+            <p className="text-xs text-slate-500 font-medium">
+              Don't have an agency account?{' '}
+              <ActionButton
+                onClick={() => onNavigate('register')}
+                className="text-[#D99A1C] hover:text-[#C28410] font-black hover:underline cursor-pointer"
+                disabled={isLoading}
+              >
+                Register here
+              </ActionButton>
+            </p>
             {localStorage.getItem('registration_status_token') && (
-              <button
+              <ActionButton
                 type="button"
                 onClick={() => onNavigate('registration-status')}
-                className="block mx-auto mt-3 text-sm text-amber-700 underline"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-[#D99A1C] transition-colors cursor-pointer"
               >
-                View registration status and notifications
-              </button>
+                <svg className="w-3.5 h-3.5 text-[#D99A1C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Track registration status & notifications</span>
+              </ActionButton>
             )}
           </div>
 

@@ -3,7 +3,7 @@ import { listSourceVersion } from '../utils/serverList.mjs';
 import useServerList from '../hooks/useServerList';
 import ListToolbar, { ListPagination } from '../components/ListToolbar';
 import ActionMenu from '../components/ActionMenu';
-import { mapListApplication } from '../utils/listApplication';
+import { mapListApplication, normalizeAppStatus } from '../utils/listApplication';
 import SearchableSelect from '../components/SearchableSelect';
 import { ActionButton } from '../components/ActionControls';
 import React, { useState, useEffect, useMemo } from 'react';
@@ -50,6 +50,14 @@ export default function ApplicationHistory({
   const statusFilter = list.filters.status || 'All';
   const universityFilter = list.filters.university || 'All';
   const intakeFilter = list.filters.intake || 'All';
+
+  // Scoping tabs options mapped to STATUS_STEPS workflow order
+  const statusTabOptions = useMemo(() => {
+    return [
+      { value: 'All', label: 'All' },
+      ...STATUS_STEPS.map(status => ({ value: status, label: status }))
+    ];
+  }, []);
 
   // Pagination State
   const [localPage, setLocalPage] = useState(1);
@@ -138,7 +146,7 @@ export default function ApplicationHistory({
     } else if (dashboardFilter === 'pending_commission') {
       records = records.filter(a => {
         const aId = String(a._id || a.id || '');
-        if (a.commissionStatus === 'Claimed' || (['Visa Approved', 'Enrolled / Closed'].includes(a.status) && a.commissionStatus !== 'Paid')) return true;
+        if (a.commissionStatus === 'Claimed' || (['Visa Received', 'Student Enrolled & Closed', 'Visa Approved', 'Enrolled / Closed'].includes(a.status) && a.commissionStatus !== 'Paid')) return true;
         if (commissions && commissions.length > 0) {
           return commissions.some(c => {
             const cAppId = typeof c.application === 'object' && c.application !== null
@@ -288,7 +296,7 @@ export default function ApplicationHistory({
   const enrolledCount = applications.filter(a => (a.status || a.secondaryStatus || '').toLowerCase().includes('enrolled')).length;
 
   return (
-    <div className="workspace-page flex-1 p-4 sm:p-6 space-y-6 bg-[#F0F2F5] animate-fade-in-up">
+    <div className="workspace-page flex-1 p-4 sm:p-6 space-y-6 bg-[#F8FAFC] animate-fade-in-up">
       {/* Top Header */}
       <div className="workspace-panel flex flex-wrap gap-3 justify-between items-center bg-white border border-[#E2E8F0] border-t-4 border-t-[#D99A1C] p-6 rounded-2xl shadow-xs">
         <div className="space-y-1">
@@ -358,7 +366,7 @@ export default function ApplicationHistory({
       {/* Table Directory Frame */}
       <div className="workspace-panel workspace-list-frame bg-white border border-[#E2E8F0] border-t-4 border-t-[#D99A1C] rounded-2xl shadow-xs overflow-hidden">
         {/* Scoping Tabs */}
-        <ListFilterTabs list={list} endpoint="/applications" field="status" options={[{ value: 'All', label: 'All' }, ...(list.facets.status || []).map(value => ({ value, label: value }))]} />
+        <ListFilterTabs list={list} endpoint="/applications" field="status" options={statusTabOptions} />
 
         {/* ListToolbar */}
         <ListToolbar
@@ -440,11 +448,25 @@ export default function ApplicationHistory({
                           <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold border uppercase tracking-wider ${badgeStyle}`}>
                             {currentStatus}
                           </span>
-                          {app.commissionStatus && (
+                          {canClaim ? (
+                            <div>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedAppForClaim(app);
+                                }}
+                                className="px-2 py-0.5 rounded-full text-[8px] font-black uppercase bg-blue-100 hover:bg-blue-200 text-blue-800 border border-blue-300 hover:border-blue-400 transition-all inline-flex items-center gap-1 cursor-pointer shadow-2xs active:scale-95"
+                                title="Click to claim commission"
+                              >
+                                Ready to Claim 💰
+                              </button>
+                            </div>
+                          ) : app.commissionStatus ? (
                             <span className="block text-[9px] font-black text-emerald-600">
                               💰 {app.commissionStatus === 'Paid' ? 'Commission Paid' : `Comm: ${app.commissionStatus}`}
                             </span>
-                          )}
+                          ) : null}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-400 font-medium">{app.dateAdded}</td>
