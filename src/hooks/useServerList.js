@@ -1,6 +1,7 @@
-﻿import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import API from '../api/axios';
 import { createListQuery, normalizeListResponse } from '../utils/serverList.mjs';
+
 export default function useServerList(endpoint, { initialLimit = 15, fixedFilters = {}, params = {}, reloadKey = '' } = {}) {
   const [records, setRecords] = useState([]);
   const [search, setSearchState] = useState('');
@@ -14,6 +15,26 @@ export default function useServerList(endpoint, { initialLimit = 15, fixedFilter
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [version, setVersion] = useState(0);
+
+  const prevReloadKeyRef = useRef(reloadKey);
+  const hasHydratedRef = useRef(false);
+  const [effectiveReloadKey, setEffectiveReloadKey] = useState(reloadKey);
+
+  useEffect(() => {
+    if (reloadKey !== prevReloadKeyRef.current) {
+      const wasEmpty = !prevReloadKeyRef.current || prevReloadKeyRef.current === '[]' || prevReloadKeyRef.current === '""';
+      const isNowPopulated = reloadKey && reloadKey !== '[]' && reloadKey !== '""';
+      prevReloadKeyRef.current = reloadKey;
+
+      if (wasEmpty && isNowPopulated && !hasHydratedRef.current) {
+        hasHydratedRef.current = true;
+        return;
+      }
+      hasHydratedRef.current = true;
+      setEffectiveReloadKey(reloadKey);
+    }
+  }, [reloadKey]);
+
   const filterKey = JSON.stringify({ ...filters, ...fixedFilters });
   const paramsKey = JSON.stringify(params);
   const contextKey = JSON.stringify(fixedFilters);
@@ -21,7 +42,7 @@ export default function useServerList(endpoint, { initialLimit = 15, fixedFilter
   useEffect(() => { const timer = setTimeout(() => setDebouncedSearch(search), 250); return () => clearTimeout(timer); }, [search]);
   useEffect(() => {
     const controller = new AbortController();
-    setLoading(true); setError(''); setRecords([]);
+    setLoading(true); setError('');
     if (search !== debouncedSearch) return () => controller.abort();
     const query = createListQuery({ params: JSON.parse(paramsKey), search: debouncedSearch, filters: JSON.parse(filterKey), page, limit });
     API.get(endpoint, { signal: controller.signal, params: query }).then(response => {
@@ -33,7 +54,7 @@ export default function useServerList(endpoint, { initialLimit = 15, fixedFilter
       if (!controller.signal.aborted) { setRecords([]); setTotal(0); setTotalPages(1); setError(err.response?.data?.message || err.message || 'Unable to load records.'); }
     }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
-  }, [endpoint, filterKey, paramsKey, page, limit, search, debouncedSearch, version, reloadKey]);
+  }, [endpoint, filterKey, paramsKey, page, limit, search, debouncedSearch, version, effectiveReloadKey]);
   const setSearch = useCallback(value => { setSearchState(value); setPage(1); }, []);
   const setFilter = useCallback((key, value) => { setFilters(previous => ({ ...previous, [key]: value })); setPage(1); }, []);
   const setLimit = useCallback(value => { setLimitState(Number(value)); setPage(1); }, []);
