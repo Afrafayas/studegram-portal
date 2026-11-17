@@ -21,27 +21,32 @@ API.interceptors.request.use(
     }
     if (!config.silent && !config.headers?.['x-silent-loader']) {
       const url = String(config.url || '');
-      let label = 'Processing request...';
-      if (config.loadingText) {
-        label = config.loadingText;
-      } else if (url.includes('/partners/login') || url.includes('/login')) {
-        label = 'Signing in to Agent Portal...';
-      } else if (url.includes('/partners/register') || url.includes('/register')) {
-        label = 'Creating partner account...';
-      } else if (url.includes('/applications')) {
-        label = config.method === 'get' ? 'Loading applications...' : 'Updating application...';
-      } else if (url.includes('/commissions')) {
-        label = config.method === 'get' ? 'Loading commissions...' : 'Processing commission...';
-      } else if (config.method === 'get') {
-        label = 'Loading portal data...';
-      } else if (config.method === 'post') {
-        label = 'Saving information...';
-      } else if (config.method === 'put' || config.method === 'patch') {
-        label = 'Updating records...';
-      } else if (config.method === 'delete') {
-        label = 'Removing record...';
+      const method = String(config.method || 'get').toLowerCase();
+      const isMutation = ['post', 'put', 'patch', 'delete'].includes(method);
+      const isAuth = url.includes('/login') || url.includes('/register');
+      const shouldShowGlobalLoader = isMutation || isAuth || Boolean(config.fullscreen);
+
+      if (shouldShowGlobalLoader) {
+        let label = 'Processing request...';
+        if (config.loadingText) {
+          label = config.loadingText;
+        } else if (url.includes('/partners/login') || url.includes('/login')) {
+          label = 'Signing in to Agent Portal...';
+        } else if (url.includes('/partners/register') || url.includes('/register')) {
+          label = 'Creating partner account...';
+        } else if (url.includes('/applications')) {
+          label = 'Updating application...';
+        } else if (url.includes('/commissions')) {
+          label = 'Processing commission...';
+        } else if (method === 'post') {
+          label = 'Saving information...';
+        } else if (method === 'put' || method === 'patch') {
+          label = 'Updating records...';
+        } else if (method === 'delete') {
+          label = 'Removing record...';
+        }
+        config._loaderKey = loadingManager.start(null, label);
       }
-      config._loaderKey = loadingManager.start(null, label);
     }
     return config;
   },

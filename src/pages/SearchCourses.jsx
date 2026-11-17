@@ -48,7 +48,6 @@ export default function SearchCourses({ onApplyCourse }) {
         </div>
       </div>
 
-      {loading && <UnigatherLoader variant="compact" text="Loading courses..." className="mb-2" />}
       {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
 
       {/* Table Frame */}
@@ -70,7 +69,9 @@ export default function SearchCourses({ onApplyCourse }) {
         
 
         <div className="overflow-x-auto">
-          {allCourses.length > 0 ? (
+          {loading ? (
+            <UnigatherLoader variant="inline" text="Loading courses..." />
+          ) : allCourses.length > 0 ? (
             <table className="workspace-table w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-[#E2E8F0]">

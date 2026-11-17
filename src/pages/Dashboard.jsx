@@ -6,6 +6,7 @@ import { mapListApplication } from '../utils/listApplication';
 import { ActionButton } from '../components/ActionControls';
 import React, { useMemo } from 'react';
 import unigatherMascot from '../assets/unigather-mascot.png';
+import UnigatherLoader from '../components/UnigatherLoader';
 
 export default function Dashboard({
   applications = [],
@@ -403,7 +404,13 @@ export default function Dashboard({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {recentApps.length > 0 ? (
+                  {list.loading ? (
+                    <tr>
+                      <td colSpan="4" className="px-6 py-12 text-center">
+                        <UnigatherLoader variant="inline" text="Loading recent applications..." />
+                      </td>
+                    </tr>
+                  ) : recentApps.length > 0 ? (
                     recentApps.map((student, index) => (
                       <tr tabIndex={0} onKeyDown={event => { if (event.target === event.currentTarget && event.key === "Enter") { event.preventDefault(); event.currentTarget.click(); } }} key={index} onClick={() => onViewDetails && onViewDetails(student.rawApp)} className="hover:bg-amber-50/40 transition-colors duration-150 cursor-pointer group">
                         <td className="px-6 py-3.5 flex items-center gap-3">

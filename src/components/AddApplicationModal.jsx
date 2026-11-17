@@ -6,7 +6,7 @@ import { getStudentDobError } from '../utils/studentAge.mjs';
 import SearchableSelect from './SearchableSelect';
 import ValidatedInput from './ValidatedInput';
 import { ActionButton, ActionForm } from './ActionControls';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import API from '../api/axios';
 import unigatherMascot from '../assets/unigather-mascot.png';
 import UnigatherLoader from './UnigatherLoader';
@@ -225,6 +225,12 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
     }
   };
 
+  // Selected student record for existing student preview card
+  const selectedStudentRecord = useMemo(() => {
+    if (!selectedStudent || studentSelectionMode !== 'existing') return null;
+    return (students || []).find(s => (s._id || s.id) === selectedStudent) || null;
+  }, [selectedStudent, studentSelectionMode, students]);
+
   // Filter courses by selected university
   const filteredCourses = resolveUniversityCourses(selectedUniversity, universities, courses);
 
@@ -352,6 +358,76 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
                         <p className="text-[10px] text-amber-600 font-semibold mt-1.5 flex items-center gap-1">
                           <span>💡</span> You haven't registered any students yet.
                         </p>
+                      )}
+
+                      {/* Selected Student Profile Preview Card */}
+                      {selectedStudentRecord && (
+                        <div className="mt-3.5 rounded-xl border border-amber-200/90 bg-gradient-to-br from-amber-50/60 via-white to-slate-50/50 p-3.5 shadow-xs animate-fade-in space-y-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#D99A1C] to-[#F5B025] text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
+                              {(selectedStudentRecord.name || 'S').trim().charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2">
+                                <h4 className="text-xs font-black text-[#0F172A] truncate">
+                                  {selectedStudentRecord.name || 'Student Profile'}
+                                </h4>
+                                <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-100/80 text-[#92600E] border border-amber-300/70">
+                                  Registered Student
+                                </span>
+                              </div>
+                              <p className="text-[10px] text-slate-500 font-medium truncate mt-0.5">
+                                Passport: <span className="font-bold text-slate-800 font-mono">{selectedStudentRecord.passportNo || 'Not provided'}</span>
+                              </p>
+                            </div>
+                          </div>
+
+                          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2.5 border-t border-amber-200/60 text-xs">
+                            <div className="min-w-0">
+                              <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Email Address</dt>
+                              <dd className="text-xs font-semibold text-slate-800 truncate mt-0.5" title={selectedStudentRecord.email || ''}>
+                                {selectedStudentRecord.email || '—'}
+                              </dd>
+                            </div>
+                            <div className="min-w-0">
+                              <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Phone Number</dt>
+                              <dd className="text-xs font-semibold text-slate-800 truncate mt-0.5">
+                                {selectedStudentRecord.phone || '—'}
+                              </dd>
+                            </div>
+                            <div className="min-w-0">
+                              <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Date of Birth</dt>
+                              <dd className="text-xs font-semibold text-slate-800 truncate mt-0.5">
+                                {selectedStudentRecord.dob ? (
+                                  (() => {
+                                    try {
+                                      const d = new Date(selectedStudentRecord.dob);
+                                      return !isNaN(d.getTime())
+                                        ? d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+                                        : String(selectedStudentRecord.dob).slice(0, 10);
+                                    } catch {
+                                      return String(selectedStudentRecord.dob).slice(0, 10);
+                                    }
+                                  })()
+                                ) : '—'}
+                              </dd>
+                            </div>
+                            <div className="min-w-0">
+                              <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Gender</dt>
+                              <dd className="text-xs font-semibold text-slate-800 truncate mt-0.5">
+                                {selectedStudentRecord.gender || '—'}
+                              </dd>
+                            </div>
+                            {selectedStudentRecord.address && (
+                              <div className="min-w-0 sm:col-span-2">
+                                <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Resident Address</dt>
+                                <dd className="text-xs font-semibold text-slate-800 truncate mt-0.5">
+                                  {selectedStudentRecord.address}
+                                </dd>
+                              </div>
+                            )}
+                          </dl>
+                        </div>
                       )}
                     </div>
                   ) : (
