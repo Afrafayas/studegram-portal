@@ -11,6 +11,7 @@ import { createPortal } from 'react-dom';
 import { useState, useEffect } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
+import UnigatherLoader from '../components/UnigatherLoader';
 
 export default function StaffManagement({ partnerData }) {
   const toast = useToast();
@@ -310,13 +311,7 @@ export default function StaffManagement({ partnerData }) {
         {/* Scoping Tabs */}
         <ListFilterTabs list={list} endpoint="/partners/staff" field="status" options={[{value:'All',label:'All staff'},{value:'Active',label:'Active'},{value:'Inactive',label:'Inactive'}]} />
         {list.loading ? (
-          <div className="p-12 text-center text-[#64748B] space-y-3">
-            <svg className="animate-spin h-8 w-8 text-[#D99A1C] mx-auto" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-            </svg>
-            <p className="text-xs font-semibold">Loading agency staff members...</p>
-          </div>
+          <UnigatherLoader variant="inline" text="Loading agency staff members..." />
         ) : filteredStaff.length === 0 ? (
           <div className="p-12 text-center text-[#64748B] space-y-3">
             <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
