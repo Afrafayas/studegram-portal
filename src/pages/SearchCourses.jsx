@@ -9,6 +9,7 @@ import { createPortal } from 'react-dom';
 import React, { useState } from 'react';
 import { useToast } from '../context/ToastContext';
 import { mapCourse } from '../utils/resourceData';
+import UnigatherLoader from '../components/UnigatherLoader';
 
 export default function SearchCourses({ onApplyCourse }) {
   const toast = useToast();
@@ -47,7 +48,7 @@ export default function SearchCourses({ onApplyCourse }) {
         </div>
       </div>
 
-      {loading && <p className="text-sm text-slate-500">Loading courses...</p>}
+      {loading && <UnigatherLoader variant="compact" text="Loading courses..." className="mb-2" />}
       {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
 
       {/* Table Frame */}

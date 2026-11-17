@@ -5,6 +5,7 @@ import ListToolbar, { ListPagination } from '../components/ListToolbar';
 import ActionMenu from '../components/ActionMenu';
 import { formatFee } from '../utils/courseFee';
 import { ActionButton } from '../components/ActionControls';
+import UnigatherLoader from '../components/UnigatherLoader';
 import React, { useState } from 'react';
 
 export default function Universities({ setActivePage }) {
@@ -64,12 +65,7 @@ export default function Universities({ setActivePage }) {
 
         <div className="overflow-x-auto">
           {list.loading ? (
-            <div className="flex justify-center p-12">
-              <svg className="animate-spin h-8 w-8 text-[#D99A1C]" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-            </div>
+            <UnigatherLoader variant="inline" text="Loading universities..." />
           ) : universities.length > 0 ? (
             <table className="workspace-table w-full text-left border-collapse">
               <thead>

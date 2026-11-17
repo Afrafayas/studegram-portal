@@ -10,6 +10,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import API from '../api/axios';
 import { useToast } from '../context/ToastContext';
 import ClaimCommissionConfirmModal from '../components/ClaimCommissionConfirmModal';
+import UnigatherLoader from '../components/UnigatherLoader';
 export const STATUS_STEPS = [
   'Application Received',
   'Application Under Review',
@@ -51,13 +52,89 @@ export default function ApplicationHistory({
   const universityFilter = list.filters.university || 'All';
   const intakeFilter = list.filters.intake || 'All';
 
-  // Scoping tabs options mapped to STATUS_STEPS workflow order
+  // Combined facet options
+  const universityOptions = useMemo(() => {
+    const set = new Set(list.facets.university || []);
+    (applications || []).forEach(a => {
+      const val = a.universityName || a.university?.name || (typeof a.university === 'string' ? a.university : '');
+      if (val && val !== 'N/A') set.add(val);
+    });
+    return Array.from(set).filter(Boolean);
+  }, [list.facets.university, applications]);
+
+  const intakeOptions = useMemo(() => {
+    const set = new Set(list.facets.intake || []);
+    (applications || []).forEach(a => {
+      const val = a.intake || a.intakes;
+      if (val && val !== 'N/A') set.add(val);
+    });
+    return Array.from(set).filter(Boolean);
+  }, [list.facets.intake, applications]);
+
+  const countryOptions = useMemo(() => {
+    const set = new Set(list.facets.country || []);
+    (applications || []).forEach(a => {
+      const val = a.country || a.destinationCountry || a.universityCountry;
+      if (val && val !== 'N/A') set.add(val);
+    });
+    return Array.from(set).filter(Boolean);
+  }, [list.facets.country, applications]);
+
+  // Scoping tabs options mapped to STATUS_STEPS workflow order with dynamic counts when filtered from dashboard
   const statusTabOptions = useMemo(() => {
+    if (dashboardFilter && rawDashboardApps) {
+      const matchesNonStatusFilters = (a) => {
+        if (list.filters.university && list.filters.university !== 'All') {
+          const targetUni = list.filters.university.toLowerCase().trim();
+          const u = String(a.universityName || a.university?.name || (typeof a.university === 'string' ? a.university : '')).toLowerCase().trim();
+          if (u !== targetUni) return false;
+        }
+        if (list.filters.intake && list.filters.intake !== 'All') {
+          const targetIntake = list.filters.intake.toLowerCase().trim();
+          const i = String(a.intake || a.intakes || '').toLowerCase().trim();
+          if (!i.includes(targetIntake)) return false;
+        }
+        if (list.filters.country && list.filters.country !== 'All') {
+          const targetCountry = list.filters.country.toLowerCase().trim();
+          const c = String(a.country || a.destinationCountry || a.universityCountry || '').toLowerCase().trim();
+          if (c !== targetCountry) return false;
+        }
+        if (list.search && list.search.trim()) {
+          const q = list.search.toLowerCase().trim();
+          const matchSearch = (
+            (a.studentName && a.studentName.toLowerCase().includes(q)) ||
+            (a.passportNo && a.passportNo.toLowerCase().includes(q)) ||
+            (a.camsId && a.camsId.toLowerCase().includes(q)) ||
+            (a.universityName && a.universityName.toLowerCase().includes(q)) ||
+            (a.courseName && a.courseName.toLowerCase().includes(q)) ||
+            (a.email && a.email.toLowerCase().includes(q)) ||
+            (a.phone && a.phone.toLowerCase().includes(q))
+          );
+          if (!matchSearch) return false;
+        }
+        return true;
+      };
+
+      const pool = rawDashboardApps.filter(matchesNonStatusFilters);
+      return [
+        { value: 'All', label: 'All', count: pool.length },
+        ...STATUS_STEPS.map(status => ({
+          value: status,
+          label: status,
+          count: pool.filter(a => {
+            const s = (a.status || a.secondaryStatus || '').toLowerCase().trim();
+            const target = normalizeAppStatus(status).toLowerCase().trim();
+            return s === target || normalizeAppStatus(s).toLowerCase().trim() === target;
+          }).length
+        }))
+      ];
+    }
+
     return [
       { value: 'All', label: 'All' },
       ...STATUS_STEPS.map(status => ({ value: status, label: status }))
     ];
-  }, []);
+  }, [dashboardFilter, rawDashboardApps, list.filters.university, list.filters.intake, list.filters.country, list.search]);
 
   // Pagination State
   const [localPage, setLocalPage] = useState(1);
@@ -66,17 +143,6 @@ export default function ApplicationHistory({
   useEffect(() => {
     setLocalPage(1);
   }, [dashboardFilter]);
-
-  const handleTabChange = (tab) => {
-    if (onClearDashboardFilter) onClearDashboardFilter();
-    setActiveTab(tab);
-    if (tab === 'All') {
-      list.setFilter('status', 'All');
-    } else {
-      list.setFilter('status', tab);
-    }
-    list.setPage(1);
-  };
 
   // Human-readable label for active dashboard filter
   const getFilterBadgeLabel = () => {
@@ -161,12 +227,50 @@ export default function ApplicationHistory({
     return records.map(mapListApplication);
   }, [applications, commissions, dashboardFilter]);
 
-  // Search filter applied over dashboard filter if search term exists
+  // Secondary toolbar and status filters applied over dashboard filter
   const displayedList = useMemo(() => {
     if (!dashboardFilter) {
       return list.records.map(mapListApplication);
     }
     let records = rawDashboardApps || [];
+
+    // Filter by status tab / status dropdown
+    if (list.filters.status && list.filters.status !== 'All') {
+      const targetStatus = normalizeAppStatus(list.filters.status).toLowerCase().trim();
+      records = records.filter(a => {
+        const s = (a.status || a.secondaryStatus || '').toLowerCase().trim();
+        return s === targetStatus || normalizeAppStatus(s).toLowerCase().trim() === targetStatus;
+      });
+    }
+
+    // Filter by university
+    if (list.filters.university && list.filters.university !== 'All') {
+      const targetUni = list.filters.university.toLowerCase().trim();
+      records = records.filter(a => {
+        const u = String(a.universityName || a.university?.name || (typeof a.university === 'string' ? a.university : '')).toLowerCase().trim();
+        return u === targetUni;
+      });
+    }
+
+    // Filter by intake
+    if (list.filters.intake && list.filters.intake !== 'All') {
+      const targetIntake = list.filters.intake.toLowerCase().trim();
+      records = records.filter(a => {
+        const i = String(a.intake || a.intakes || '').toLowerCase().trim();
+        return i.includes(targetIntake);
+      });
+    }
+
+    // Filter by country
+    if (list.filters.country && list.filters.country !== 'All') {
+      const targetCountry = list.filters.country.toLowerCase().trim();
+      records = records.filter(a => {
+        const c = String(a.country || a.destinationCountry || a.universityCountry || '').toLowerCase().trim();
+        return c === targetCountry;
+      });
+    }
+
+    // Search query filter
     if (list.search && list.search.trim()) {
       const q = list.search.toLowerCase().trim();
       records = records.filter(a =>
@@ -174,11 +278,14 @@ export default function ApplicationHistory({
         (a.passportNo && a.passportNo.toLowerCase().includes(q)) ||
         (a.camsId && a.camsId.toLowerCase().includes(q)) ||
         (a.universityName && a.universityName.toLowerCase().includes(q)) ||
-        (a.courseName && a.courseName.toLowerCase().includes(q))
+        (a.courseName && a.courseName.toLowerCase().includes(q)) ||
+        (a.email && a.email.toLowerCase().includes(q)) ||
+        (a.phone && a.phone.toLowerCase().includes(q))
       );
     }
+
     return records;
-  }, [dashboardFilter, rawDashboardApps, list.records, list.search]);
+  }, [dashboardFilter, rawDashboardApps, list.records, list.filters, list.search]);
 
   // Paginated records for table view
   const paginatedApps = useMemo(() => {
@@ -295,6 +402,14 @@ export default function ApplicationHistory({
   const visaCount = applications.filter(a => (a.status || a.secondaryStatus || '').toLowerCase().includes('visa')).length;
   const enrolledCount = applications.filter(a => (a.status || a.secondaryStatus || '').toLowerCase().includes('enrolled')).length;
 
+  const isToolbarFiltered = Boolean(
+    (list.search && list.search.trim()) ||
+    (list.filters.status && list.filters.status !== 'All') ||
+    (list.filters.university && list.filters.university !== 'All') ||
+    (list.filters.intake && list.filters.intake !== 'All') ||
+    (list.filters.country && list.filters.country !== 'All')
+  );
+
   return (
     <div className="workspace-page flex-1 p-4 sm:p-6 space-y-6 bg-[#F8FAFC] animate-fade-in-up">
       {/* Top Header */}
@@ -348,13 +463,14 @@ export default function ApplicationHistory({
             <div>
               <span className="font-extrabold text-amber-900">Dashboard Filter Active: </span>
               <span className="bg-white border border-amber-300 text-amber-900 px-2.5 py-0.5 rounded-full font-bold ml-1">
-                {getFilterBadgeLabel()} ({displayedList.length} application{displayedList.length === 1 ? '' : 's'})
+                {getFilterBadgeLabel()} ({isToolbarFiltered ? `${displayedList.length} of ${rawDashboardApps?.length || 0}` : (rawDashboardApps?.length || 0)} application{(rawDashboardApps?.length || 0) === 1 ? '' : 's'})
               </span>
             </div>
           </div>
           <ActionButton
             onClick={() => {
               if (onClearDashboardFilter) onClearDashboardFilter();
+              list.reset();
             }}
             className="text-amber-800 hover:text-amber-950 font-bold px-3 py-1 rounded-lg border border-amber-300 bg-white hover:bg-amber-100 transition-colors cursor-pointer inline-flex items-center gap-1 shadow-xs"
           >
@@ -374,9 +490,9 @@ export default function ApplicationHistory({
           label="applications"
           fields={[
             { key: 'status', label: 'Statuses', options: STATUS_STEPS },
-            { key: 'university', label: 'Universities' },
-            { key: 'intake', label: 'Intakes' },
-            { key: 'country', label: 'Countries' }
+            { key: 'university', label: 'Universities', options: universityOptions },
+            { key: 'intake', label: 'Intakes', options: intakeOptions },
+            { key: 'country', label: 'Countries', options: countryOptions }
           ]}
         />
 
@@ -493,6 +609,12 @@ export default function ApplicationHistory({
                     </tr>
                   );
                 })
+              ) : list.loading ? (
+                <tr>
+                  <td colSpan="6" className="px-6 py-12 text-center">
+                    <UnigatherLoader variant="inline" text="Loading applications..." />
+                  </td>
+                </tr>
               ) : (
                 <tr>
                   <td colSpan="6" className="px-6 py-12 text-center text-xs text-slate-400 font-semibold">

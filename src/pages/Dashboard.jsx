@@ -101,15 +101,8 @@ export default function Dashboard({
     });
   }, [applications]);
 
-  // Card click redirection: 1 item -> direct details view; 0 or >1 items -> ApplicationHistory with filter
+  // Card click redirection: always navigate to ApplicationHistory with the selected filter
   const handleCardClick = (filteredList, filterType) => {
-    if (filteredList && filteredList.length === 1) {
-      const singleApp = filteredList[0];
-      if (onViewDetails) {
-        onViewDetails(singleApp);
-        return;
-      }
-    }
     if (onViewHistory) {
       onViewHistory(filterType);
     }

@@ -8,6 +8,7 @@ import { parseFee, formatFee, feeCurrency } from '../utils/courseFee';
 import { ActionButton } from '../components/ActionControls';
 import React, { useState, useEffect, useMemo } from 'react';
 import ClaimCommissionConfirmModal from '../components/ClaimCommissionConfirmModal';
+import UnigatherLoader from '../components/UnigatherLoader';
 
 export default function Commissions({
   applications = [],
@@ -327,6 +328,8 @@ export default function Commissions({
                 })}
               </tbody>
             </table>
+          ) : list.loading ? (
+            <UnigatherLoader variant="inline" text="Loading commission records..." />
           ) : (
             <div className="p-12 text-center text-slate-400 font-bold text-xs">
               No commission records found matching the current filter.

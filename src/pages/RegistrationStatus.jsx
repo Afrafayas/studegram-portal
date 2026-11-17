@@ -2,6 +2,7 @@ import { getDisplayId } from '../utils/displayId';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../api/axios';
+import UnigatherLoader from '../components/UnigatherLoader';
 
 export default function RegistrationStatus({ onNavigate }) {
   const [data, setData] = useState(null);
@@ -28,7 +29,7 @@ export default function RegistrationStatus({ onNavigate }) {
   return <main className="min-h-screen bg-[#F8FAFC] p-6"><div className="max-w-2xl mx-auto bg-white border border-[#E2E8F0] border-t-4 border-t-[#D99A1C] rounded-2xl p-6 space-y-5 shadow-sm">
     <h1 className="text-2xl font-bold text-[#0F172A]">Your agency registration</h1>
     {error && <p role="alert" className="text-red-700">{error}</p>}
-    {!data && !error && <p className="text-slate-500">Loading registration…</p>}
+    {!data && !error && <UnigatherLoader variant="inline" text="Loading registration…" />}
     {data && <>
       <p className="font-semibold text-[#0F172A]">{data.companyName} · <span className="text-[#D99A1C] font-extrabold">{data.status}</span></p>
       <p className="text-sm text-slate-600">If documents are requested, reply to the request email with your files attached. Your handling staff member will attach them to your registration for review.</p>

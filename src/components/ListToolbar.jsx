@@ -1,4 +1,5 @@
-﻿import SearchableSelect from './SearchableSelect';
+import SearchableSelect from './SearchableSelect';
+import UnigatherLoader from './UnigatherLoader';
 export default function ListToolbar({ list, fields = [], label = 'records' }) {
   const active = Boolean(list.search || Object.values(list.filters).some(value => value !== '' && value !== 'All' && value != null));
   return <div className="w-full min-w-0 space-y-2">
@@ -17,7 +18,7 @@ export default function ListToolbar({ list, fields = [], label = 'records' }) {
       <button type="button" disabled={!active} onClick={list.reset} className="ml-auto h-9 shrink-0 rounded-lg border border-slate-200 px-3 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40">Reset</button>
     </div>
     {list.error && <div role="alert" className="flex items-center justify-between gap-2 text-xs text-red-700"><span>{list.error}</span><button type="button" onClick={list.refresh} className="font-bold underline">Retry</button></div>}
-    {list.loading && <p role="status" className="text-xs text-slate-500">Loading {label}...</p>}
+    {list.loading && <UnigatherLoader variant="compact" text={`Updating ${label}...`} />}
   </div>;
 }
 export function ListPagination({ list }) {

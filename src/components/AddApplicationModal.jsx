@@ -9,6 +9,7 @@ import { ActionButton, ActionForm } from './ActionControls';
 import React, { useState, useEffect } from 'react';
 import API from '../api/axios';
 import unigatherMascot from '../assets/unigather-mascot.png';
+import UnigatherLoader from './UnigatherLoader';
 import { resolveUniversityCourses } from '../utils/courseMatching';
 
 export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRef, onViewHistory }) {
@@ -134,8 +135,8 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
       return;
     }
     if (studentSelectionMode === 'new') {
-      if (!newStudentName.trim() || !newStudentEmail.trim() || !newStudentPhone.trim()) {
-        setError('Please fill in all required new student details (Name, Email, Phone).');
+      if (!newStudentName.trim() || !newStudentEmail.trim() || !newStudentPhone.trim() || !newStudentPassport.trim()) {
+        setError('Please fill in all required new student details (Name, Email, Phone, Passport Number).');
         return;
       }
     }
@@ -286,13 +287,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
           )}
 
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-12 space-y-3">
-              <svg className="animate-spin h-8 w-8 text-[#D99A1C]" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              <span className="text-xs text-[#64748B] font-semibold">Loading resources...</span>
-            </div>
+            <UnigatherLoader variant="inline" text="Loading application resources..." />
           ) : stepNumber === 1 ? (
             <ActionForm onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-1">
