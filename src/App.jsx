@@ -31,7 +31,6 @@ import StaffManagement from './pages/StaffManagement';
 import AgentRolePermissions from './pages/AgentRolePermissions';
 import API from './api/axios';
 import { useToast } from './context/ToastContext';
-import { loadingManager } from './utils/loadingManager';
 
 export default function App() {
   const toast = useToast();
@@ -57,12 +56,6 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('studegram_portal_active_page', activePage);
     setSelectedAppForDetails(null);
-    const navKey = loadingManager.start(`portal_nav_${activePage}`, `Opening ${activePage.replace(/([A-Z])/g, ' $1').trim()}...`);
-    const timer = setTimeout(() => loadingManager.stop(navKey), 180);
-    return () => {
-      clearTimeout(timer);
-      loadingManager.stop(navKey);
-    };
   }, [activePage]);
 
   useEffect(() => {

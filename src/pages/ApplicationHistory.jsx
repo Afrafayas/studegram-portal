@@ -80,6 +80,70 @@ export default function ApplicationHistory({
     return Array.from(set).filter(Boolean);
   }, [list.facets.country, applications]);
 
+  // Applications matching dashboard filter
+  const rawDashboardApps = useMemo(() => {
+    if (!dashboardFilter) return null;
+    let records = applications || [];
+    if (dashboardFilter === 'in_progress') {
+      records = records.filter(a => {
+        const s = (a.status || a.secondaryStatus || '').toLowerCase();
+        return (
+          s.includes('received') ||
+          s.includes('submitted') ||
+          s.includes('review') ||
+          s.includes('processing') ||
+          s.includes('processed') ||
+          s.includes('documents') ||
+          s.includes('pending') ||
+          s.includes('draft') ||
+          s.includes('cas') ||
+          s.includes('offer') ||
+          s.includes('fees')
+        );
+      });
+    } else if (dashboardFilter === 'closed') {
+      records = records.filter(a => {
+        const s = (a.status || a.secondaryStatus || '').toLowerCase();
+        return (
+          s.includes('closed') ||
+          s.includes('approved') ||
+          s.includes('rejected') ||
+          s.includes('withdrawn') ||
+          s.includes('enrolled')
+        );
+      });
+    } else if (dashboardFilter === 'claimed') {
+      records = records.filter(a => {
+        const aId = String(a._id || a.id || '');
+        if (a.commissionClaimed || a.commissionStatus === 'Claimed' || a.commissionStatus === 'Paid') return true;
+        if (commissions && commissions.length > 0) {
+          return commissions.some(c => {
+            const cAppId = typeof c.application === 'object' && c.application !== null
+              ? String(c.application._id || c.application.id || '')
+              : String(c.application || '');
+            return cAppId && cAppId === aId && (c.status === 'Claimed' || c.status === 'Pending Approval' || c.status === 'Paid');
+          });
+        }
+        return false;
+      });
+    } else if (dashboardFilter === 'pending_commission') {
+      records = records.filter(a => {
+        const aId = String(a._id || a.id || '');
+        if (a.commissionStatus === 'Claimed' || (['Visa Received', 'Student Enrolled & Closed', 'Visa Approved', 'Enrolled / Closed'].includes(a.status) && a.commissionStatus !== 'Paid')) return true;
+        if (commissions && commissions.length > 0) {
+          return commissions.some(c => {
+            const cAppId = typeof c.application === 'object' && c.application !== null
+              ? String(c.application._id || c.application.id || '')
+              : String(c.application || '');
+            return cAppId && cAppId === aId && (c.status === 'Claimed' || c.status === 'Pending Approval' || c.status === 'Under Review');
+          });
+        }
+        return false;
+      });
+    }
+    return records.map(mapListApplication);
+  }, [applications, commissions, dashboardFilter]);
+
   // Scoping tabs options mapped to STATUS_STEPS workflow order with dynamic counts when filtered from dashboard
   const statusTabOptions = useMemo(() => {
     if (dashboardFilter && rawDashboardApps) {
@@ -162,70 +226,6 @@ export default function ApplicationHistory({
         return dashboardFilter;
     }
   };
-
-  // Applications matching dashboard filter
-  const rawDashboardApps = useMemo(() => {
-    if (!dashboardFilter) return null;
-    let records = applications || [];
-    if (dashboardFilter === 'in_progress') {
-      records = records.filter(a => {
-        const s = (a.status || a.secondaryStatus || '').toLowerCase();
-        return (
-          s.includes('received') ||
-          s.includes('submitted') ||
-          s.includes('review') ||
-          s.includes('processing') ||
-          s.includes('processed') ||
-          s.includes('documents') ||
-          s.includes('pending') ||
-          s.includes('draft') ||
-          s.includes('cas') ||
-          s.includes('offer') ||
-          s.includes('fees')
-        );
-      });
-    } else if (dashboardFilter === 'closed') {
-      records = records.filter(a => {
-        const s = (a.status || a.secondaryStatus || '').toLowerCase();
-        return (
-          s.includes('closed') ||
-          s.includes('approved') ||
-          s.includes('rejected') ||
-          s.includes('withdrawn') ||
-          s.includes('enrolled')
-        );
-      });
-    } else if (dashboardFilter === 'claimed') {
-      records = records.filter(a => {
-        const aId = String(a._id || a.id || '');
-        if (a.commissionClaimed || a.commissionStatus === 'Claimed' || a.commissionStatus === 'Paid') return true;
-        if (commissions && commissions.length > 0) {
-          return commissions.some(c => {
-            const cAppId = typeof c.application === 'object' && c.application !== null
-              ? String(c.application._id || c.application.id || '')
-              : String(c.application || '');
-            return cAppId && cAppId === aId && (c.status === 'Claimed' || c.status === 'Pending Approval' || c.status === 'Paid');
-          });
-        }
-        return false;
-      });
-    } else if (dashboardFilter === 'pending_commission') {
-      records = records.filter(a => {
-        const aId = String(a._id || a.id || '');
-        if (a.commissionStatus === 'Claimed' || (['Visa Received', 'Student Enrolled & Closed', 'Visa Approved', 'Enrolled / Closed'].includes(a.status) && a.commissionStatus !== 'Paid')) return true;
-        if (commissions && commissions.length > 0) {
-          return commissions.some(c => {
-            const cAppId = typeof c.application === 'object' && c.application !== null
-              ? String(c.application._id || c.application.id || '')
-              : String(c.application || '');
-            return cAppId && cAppId === aId && (c.status === 'Claimed' || c.status === 'Pending Approval' || c.status === 'Under Review');
-          });
-        }
-        return false;
-      });
-    }
-    return records.map(mapListApplication);
-  }, [applications, commissions, dashboardFilter]);
 
   // Secondary toolbar and status filters applied over dashboard filter
   const displayedList = useMemo(() => {
