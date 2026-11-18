@@ -96,6 +96,14 @@ export default function App() {
   const [selectedAppForEdit, setSelectedAppForEdit] = useState(null);
   const [selectedNoticeId, setSelectedNoticeId] = useState(null);
 
+  useEffect(() => {
+    if (selectedAppForDetails) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      const mainEl = document.querySelector('.workspace-main');
+      if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [selectedAppForDetails]);
+
   const [applications, setApplications] = useState([]);
   const [commissions, setCommissions] = useState([]);
   const [dashboardFilter, setDashboardFilter] = useState(null);
