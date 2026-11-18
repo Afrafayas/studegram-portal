@@ -69,6 +69,15 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
     }
   }, [application]);
 
+  // Ensure view starts from the very top when an application details modal is opened
+  useEffect(() => {
+    if (isOpen) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      const mainEl = document.querySelector('.workspace-main');
+      if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [isOpen, application?.id || application?._id]);
+
   // Refresh on opening, selecting the same application, and header comment polling.
   useEffect(() => {
     const appId = application?.id || application?._id;
@@ -351,7 +360,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
         className="bg-white border border-slate-200 border-t-4 border-t-[#D99A1C] rounded-2xl w-full shadow-sm relative flex flex-col overflow-hidden"
       >
         {/* Top Header & close button */}
-        <div className="px-4 sm:px-6 py-5 flex items-center justify-between gap-3 sm:gap-4 border-b border-slate-100 bg-white">
+        <div className="px-6 sm:px-8 py-5 flex items-center justify-between gap-3 sm:gap-4 border-b border-slate-100 bg-white">
           <div className="flex items-center gap-3 sm:gap-4 min-w-0">
             <ActionButton
               onClick={onClose}
@@ -404,7 +413,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
         </div>
 
         {/* Brand Main Toggle Tab Bar */}
-        <div className="flex flex-wrap bg-slate-50 border-b border-slate-200/80 px-4 sm:px-6 py-2 gap-2">
+        <div className="flex flex-wrap bg-slate-50 border-b border-slate-200/80 px-6 sm:px-8 py-2.5 gap-2">
           <ActionButton
             onClick={() => setMainTab('details')}
             className={`flex items-center gap-2 py-2 px-4 rounded-xl text-xs font-bold transition-all ${mainTab === 'details'
@@ -428,9 +437,9 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
 
         {/* Modal Main Content Container */}
         {mainTab === 'details' ? (
-          <div className="grid grid-cols-1 xl:grid-cols-[minmax(240px,0.7fr)_minmax(0,2fr)] bg-slate-50/50">
+          <div className="grid grid-cols-1 lg:grid-cols-[290px_1fr] bg-slate-50/30">
             {/* Left Column: Progress Timeline Stepper */}
-            <div className="p-4 sm:p-6 border-b xl:border-b-0 xl:border-r border-slate-200 bg-white">
+            <div className="p-5 sm:p-6 border-b lg:border-b-0 lg:border-r border-slate-200 bg-white shrink-0">
               <h3 className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider mb-5">
                 Application Progress Timeline
               </h3>
@@ -480,9 +489,9 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
             </div>
 
             {/* Right Column: Tabbed Details Section */}
-            <div className="flex-grow flex flex-col min-w-0">
+            <div className="flex-grow flex flex-col min-w-0 bg-slate-50/20">
               {/* Sub-Tabs Bar */}
-              <div className="flex flex-wrap bg-white border-b border-slate-100 px-4 sm:px-6">
+              <div className="flex flex-wrap bg-white border-b border-slate-200/80 px-6 sm:px-8">
                 {[
                   { id: 'profile', label: 'Student Profile' },
                   { id: 'documents', label: 'Uploaded Documents' }
@@ -501,13 +510,13 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
               </div>
 
               {/* Tab Panels */}
-              <div className="flex-1 p-4 sm:p-6">
+              <div className="flex-1 p-6 sm:p-8 space-y-6">
 
                 {/* Tab 1: Profile View */}
                 {activeTab === 'profile' && (
                   <div className="space-y-6">
-                    <div className="bg-gradient-to-r from-indigo-50/50 to-cyan-50/50 border border-indigo-100/50 rounded-xl p-4.5 space-y-3">
-                      <h4 className="text-[10px] font-extrabold text-[#D99A1C] uppercase tracking-wider flex items-center gap-1.5">
+                    <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-4 shadow-2xs">
+                      <h4 className="text-[10px] font-extrabold text-[#D99A1C] uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-100 pb-2">
                         <span className="flex items-center gap-1.5"><svg className="w-3.5 h-3.5 text-[#D99A1C]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l9-5-9-5-9 5 9 5z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" /></svg> Application Choice</span>
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -560,7 +569,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
 
                     {/* Claim Commission Box */}
                     {isEligibleForClaim && (
-                      <div className="bg-gradient-to-r from-blue-50 via-amber-50 to-amber-100 border border-amber-300 rounded-xl p-3.5 my-3 flex items-center justify-between shadow-xs">
+                      <div className="bg-gradient-to-r from-blue-50 via-amber-50 to-amber-100 border border-amber-300 rounded-2xl p-4 flex items-center justify-between shadow-2xs">
                         <div>
                           <p className="text-xs font-bold text-amber-950 flex items-center gap-2">
                             <span>💸 Commission Claim Available</span>
@@ -592,7 +601,7 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                       </div>
                     )}
 
-                    <div className="space-y-4">
+                    <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-4 shadow-2xs">
                       <h4 className="text-[10px] font-extrabold text-[#64748B] uppercase tracking-wider border-b border-slate-100 pb-2">
                         Student Personal Profile
                       </h4>
@@ -635,19 +644,8 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                     </div>
 
                     {/* Application General COMMENTS Section (Student Profile Tab) */}
-                    <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4.5 space-y-3 mt-6 text-left shadow-xs">
-                      {/* Standalone unreplied banner disabled; highlight the comment itself instead.
-                      {application.hasUnrepliedMessage && application.lastRepliedBy === 'Admin' && (
-                        <div className="bg-[#1e3a8a] text-white border border-[#1d4ed8] rounded-xl p-3 shadow-md flex items-center justify-between mb-2 animate-pulse">
-                          <div className="flex items-center gap-2">
-                            <span className="w-2.5 h-2.5 bg-blue-400 rounded-full"></span>
-                            <span className="text-xs font-bold">💬 Unreplied Message from Admin (Awaiting Your Reply)</span>
-                          </div>
-                          <span className="text-[9px] bg-[#1d4ed8] text-white font-black uppercase px-2 py-0.5 rounded border border-blue-400">Dark Blue Highlight</span>
-                        </div>
-                      )} */}
-
-                      <div className="flex items-center justify-between">
+                    <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-4 shadow-2xs text-left">
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                         <h4 className="text-[10px] font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                           <svg className="w-3.5 h-3.5 text-[#D99A1C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
@@ -696,13 +694,13 @@ export default function ApplicationDetailsModal({ isOpen, onClose, application, 
                       </div>
 
                       {/* Add Comment Input Form */}
-                      <ActionForm onSubmit={handleAddAppComment} className="flex gap-2 pt-1 border-t border-slate-200/60">
+                      <ActionForm onSubmit={handleAddAppComment} className="flex gap-2 pt-2 border-t border-slate-100">
                         <input
                           type="text"
                           value={newAppComment}
                           onChange={(e) => setNewAppComment(e.target.value)}
                           placeholder="Add a new comment for this application..."
-                          className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#D99A1C]"
+                          className="flex-1 bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#D99A1C]"
                         />
                         <ActionButton
                           type="submit"

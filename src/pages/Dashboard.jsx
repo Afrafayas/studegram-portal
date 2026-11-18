@@ -350,7 +350,7 @@ export default function Dashboard({
             onKeyDown={(e) => { if (e.key === 'Enter') stat.onClick?.(); }}
             className="bg-white border border-[#E2E8F0] rounded-2xl p-5 shadow-xs hover:shadow-md hover:border-amber-400 transition-all duration-200 flex flex-col justify-between group cursor-pointer select-none"
           >
-            <div className="flex items-center gap-3">
+            {/* <div className="flex items-center gap-3">
               <div className={`w-11 h-11 ${stat.bgColor} rounded-full flex items-center justify-center shrink-0`}>
                 {stat.icon}
               </div>
@@ -358,6 +358,19 @@ export default function Dashboard({
                 <span className="text-[28px] font-black tracking-tight text-[#0F172A] block leading-tight">{stat.value}</span>
                 <span className="text-xs text-[#64748B] font-bold block truncate group-hover:text-amber-600 transition-colors">{stat.label}</span>
               </div>
+            </div> */}
+            <div className="flex flex-col justify-between h-full">
+              <div className="flex items-center justify-between">
+                <span className="text-[28px] font-black tracking-tight text-[#0F172A] leading-tight">
+                  {stat.value}
+                </span>
+                <div className={`w-10 h-10 ${stat.bgColor} rounded-xl flex items-center justify-center shrink-0`}>
+                  {stat.icon}
+                </div>
+              </div>
+              <span className="text-xs text-[#64748B] font-bold block leading-tight mt-2.5 group-hover:text-amber-600 transition-colors">
+                {stat.label}
+              </span>
             </div>
             {stat.extra && (
               <div className="mt-2.5 pt-2 border-t border-slate-100">
