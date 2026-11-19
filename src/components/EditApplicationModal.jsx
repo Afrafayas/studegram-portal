@@ -22,6 +22,7 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
   const [selectedCourse, setSelectedCourse] = useState('');
   const [selectedLevel, setSelectedLevel] = useState('Undergraduate (UG)');
   const [notes, setNotes] = useState('');
+  const [backendCountries, setBackendCountries] = useState([]);
 
   // Student fields
   const [studentName, setStudentName] = useState('');
@@ -43,12 +44,14 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
       setError('');
 
       Promise.all([
-        API.get('/universities').then(res => res.data),
-        API.get('/courses').then(res => res.data)
+        API.get('/universities').then(res => res.data).catch(() => ({ data: [] })),
+        API.get('/courses').then(res => res.data).catch(() => ({ data: [] })),
+        API.get('/countries').then(res => res.data).catch(() => ({ data: [] }))
       ])
-        .then(([uniRes, courseRes]) => {
+        .then(([uniRes, courseRes, countryRes]) => {
           setUniversities(uniRes.data || []);
           setCourses(courseRes.data || []);
+          setBackendCountries(countryRes.data || []);
 
           // Prepopulate application fields
           const uniId = application.university?._id || application.university || '';
@@ -80,8 +83,8 @@ export default function EditApplicationModal({ isOpen, onClose, application, onU
 
   const availableCountries = Array.from(
     new Set([
+      ...(backendCountries || []).map(c => (typeof c === 'object' ? (c.name || c.title || '') : c).trim()).filter(Boolean),
       ...universities.map(u => (u.country || '').trim()).filter(Boolean),
-
     ])
   ).sort();
 
