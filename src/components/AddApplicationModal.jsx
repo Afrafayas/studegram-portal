@@ -47,6 +47,7 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
   const [notes, setNotes] = useState('');
   const [selectedLevel, setSelectedLevel] = useState('Undergraduate (UG)');
   const [selectedIntake, setSelectedIntake] = useState('');
+  const [backendCountries, setBackendCountries] = useState([]);
 
   useEffect(() => {
     if (isOpen) {
@@ -54,16 +55,18 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
       setError('');
 
       Promise.all([
-        API.get('/students').then(res => res.data),
-        API.get('/universities').then(res => res.data),
-        API.get('/courses').then(res => res.data),
-        API.get('/intakes').then(res => res.data)
+        API.get('/students').then(res => res.data).catch(() => ({ data: [] })),
+        API.get('/universities').then(res => res.data).catch(() => ({ data: [] })),
+        API.get('/courses').then(res => res.data).catch(() => ({ data: [] })),
+        API.get('/intakes').then(res => res.data).catch(() => ({ data: [] })),
+        API.get('/countries').then(res => res.data).catch(() => ({ data: [] }))
       ])
-      .then(([studentsRes, universitiesRes, coursesRes, intakesRes]) => {
+      .then(([studentsRes, universitiesRes, coursesRes, intakesRes, countriesRes]) => {
         setStudents(studentsRes.data || []);
         setUniversities(universitiesRes.data || []);
         setCourses(coursesRes.data || []);
         setIntakes(intakesRes.data || []);
+        setBackendCountries(countriesRes.data || []);
       })
       .catch(err => {
         console.error('Error loading application options:', err);
@@ -77,8 +80,8 @@ export default function AddApplicationModal({ isOpen, onClose, onSubmit, closeRe
 
   const availableCountries = Array.from(
     new Set([
+      ...(backendCountries || []).map(c => (typeof c === 'object' ? (c.name || c.title || '') : c).trim()).filter(Boolean),
       ...universities.map(u => (u.country || '').trim()).filter(Boolean),
-
     ])
   ).sort();
 
