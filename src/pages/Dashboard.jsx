@@ -14,6 +14,7 @@ export default function Dashboard({
   partnerName = 'Partner',
   onViewDetails,
   onViewHistory,
+  onViewCommissions,
   onNavigateDeadlines,
   onNewApplicationClick
 }) {
@@ -102,10 +103,24 @@ export default function Dashboard({
     });
   }, [applications]);
 
-  // Card click redirection: always navigate to ApplicationHistory with the selected filter
-  const handleCardClick = (filteredList, filterType) => {
-    if (onViewHistory) {
-      onViewHistory(filterType);
+  // Card click redirection rules:
+  // Count === 1 -> Redirect directly to single record's detail modal/page
+  // Count === 0 or > 1 -> Redirect to list page with the corresponding filter active
+  const handleCardClick = (filteredList, filterType, isCommission = false) => {
+    if (filteredList && filteredList.length === 1) {
+      if (onViewDetails) {
+        onViewDetails(filteredList[0]);
+        return;
+      }
+    }
+    if (isCommission) {
+      if (onViewCommissions) {
+        onViewCommissions(filterType);
+      }
+    } else {
+      if (onViewHistory) {
+        onViewHistory(filterType);
+      }
     }
   };
 
@@ -139,7 +154,7 @@ export default function Dashboard({
       value: commissionClaimedCount.toString(),
       color: 'text-emerald-600',
       bgColor: 'bg-emerald-50',
-      onClick: () => handleCardClick(claimedApps, 'claimed'),
+      onClick: () => handleCardClick(claimedApps, 'Claimed', true),
       extra: (
         <div className="mt-1 flex items-center gap-1 text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 w-fit">
           <span>Earned: ₹{earnedCommissionAmount.toLocaleString()}</span>
@@ -156,7 +171,7 @@ export default function Dashboard({
       value: commissionPendingCount.toString(),
       color: 'text-amber-600',
       bgColor: 'bg-amber-50',
-      onClick: () => handleCardClick(pendingCommissionApps, 'pending_commission'),
+      onClick: () => handleCardClick(pendingCommissionApps, 'Pending', true),
       extra: (
         <div className="mt-1 flex items-center gap-1 text-[10px] font-black text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 w-fit">
           <span>Awaiting Payout</span>

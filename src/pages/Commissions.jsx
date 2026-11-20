@@ -15,7 +15,9 @@ export default function Commissions({
   commissions = [],
   partnerData,
   onRefresh,
-  onViewDetails
+  onViewDetails,
+  dashboardFilter,
+  onClearDashboardFilter
 }) {
   const isOwner = !partnerData?.isStaff || partnerData?.role === 'AgencyAdmin';
   const userPermissions = Array.isArray(partnerData?.permissions) ? partnerData.permissions : [];
@@ -23,6 +25,13 @@ export default function Commissions({
 
   const list = useServerList('/commissions', { initialLimit: 10, params: { view: 'registry' }, reloadKey: listSourceVersion([...applications, ...commissions]) });
   const [selectedAppForClaim, setSelectedAppForClaim] = useState(null);
+
+  useEffect(() => {
+    if (dashboardFilter) {
+      list.setFilter('commissionTab', dashboardFilter);
+      onClearDashboardFilter?.();
+    }
+  }, [dashboardFilter]);
 
   // Combine application data strictly matching each individual application ID
   const combinedStudentCommissions = useMemo(() => {
@@ -113,7 +122,7 @@ export default function Commissions({
   // 2. Total Commission (only count amounts set by admin for each application)
   const setEnrolledCommissions = enrolledStudents.filter(item => item.isSet);
   const totalCommissionAmount = setEnrolledCommissions.reduce((sum, item) => sum + item.payableAmount, 0);
-  const totalCommissionCases = enrolledStudents.length;
+  const totalCommissionCases = combinedStudentCommissions.length;
 
   // 3. Commissions Claimed
   const claimedStudents = useMemo(() => {
@@ -170,7 +179,18 @@ export default function Commissions({
       {/* Student List with All Details */}
       <div className="workspace-panel workspace-list-frame bg-white border border-[#E2E8F0] border-t-4 border-t-[#D99A1C] rounded-2xl shadow-xs overflow-hidden">
         {/* Scoping Tabs */}
-        <ListFilterTabs list={list} endpoint="/commissions" params={{view:'registry'}} field="commissionStatusDisplay" options={[{value:'All',label:'All commissions'},{value:'Eligible',label:'Eligible'},{value:'Claimed',label:'Claimed'},{value:'Paid',label:'Paid'},{value:'Not Eligible',label:'Not eligible'}]} />
+        <ListFilterTabs 
+          list={list} 
+          endpoint="/commissions" 
+          params={{ view: 'registry' }} 
+          field="commissionTab" 
+          options={[
+            { value: 'Enrolled', label: 'Total enrolled student', count: totalEnrolledCount },
+            { value: 'All', label: 'Total commission', count: totalCommissionCases },
+            { value: 'Claimed', label: 'Commission claimed', count: claimedCount },
+            { value: 'Pending', label: 'Commission pending', count: pendingCount }
+          ]} 
+        />
         <ListToolbar list={list} label="commissions" fields={[{key:'commissionStatusDisplay',label:'Commission Statuses'},{key:'universityPaymentStatus',label:'University Payments'},{key:'university',label:'Universities'},{key:'country',label:'Countries'}]} />
 
 
