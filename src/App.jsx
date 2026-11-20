@@ -107,6 +107,7 @@ export default function App() {
   const [applications, setApplications] = useState([]);
   const [commissions, setCommissions] = useState([]);
   const [dashboardFilter, setDashboardFilter] = useState(null);
+  const [commissionDashboardFilter, setCommissionDashboardFilter] = useState(null);
 
   const fetchCommissions = async () => {
     const token = localStorage.getItem('partner_token') || localStorage.getItem('token');
@@ -261,6 +262,12 @@ export default function App() {
               setDashboardFilter(filterType || null);
               setActivePage('ApplicationHistory');
             }}
+            onViewCommissions={(filterTab) => {
+              closeApplicationForms();
+              setSelectedAppForDetails(null);
+              setCommissionDashboardFilter(filterTab || null);
+              setActivePage('Commissions');
+            }}
             onNavigateDeadlines={() => setActivePage('UniversityDeadline')}
             onNewApplicationClick={handleOpenNewApplicationModal}
           />
@@ -289,6 +296,8 @@ export default function App() {
             applications={applications}
             commissions={commissions}
             partnerData={partnerData}
+            dashboardFilter={commissionDashboardFilter}
+            onClearDashboardFilter={() => setCommissionDashboardFilter(null)}
             onRefresh={() => {
               fetchApplications();
               fetchCommissions();
